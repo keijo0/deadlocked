@@ -25,6 +25,7 @@ pub struct Data {
     pub friendlies: Vec<PlayerData>,
     pub local_player: PlayerData,
     pub entities: Vec<EntityInfo>,
+    pub spectators: Vec<String>,
     pub bomb: BombData,
     pub map_name: String,
     pub view_matrix: Mat4,
