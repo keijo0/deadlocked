@@ -28,14 +28,15 @@ impl App {
         let text = format!("Spectators:\n  {names}");
 
         let padding = 10.0;
-        let pos = pos2(data.window_size.x - padding, padding);
+        let pos = pos2(padding, padding);
 
-        self.text(
+        self.text_sized(
             painter,
             text,
             pos,
-            Align2::RIGHT_TOP,
+            Align2::LEFT_TOP,
             Some(self.config.accent_color),
+            self.config.hud.font_size * 1.5,
         );
     }
 
