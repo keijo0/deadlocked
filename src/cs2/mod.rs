@@ -51,6 +51,7 @@ pub struct CS2 {
     weapon: Weapon,
     planted_c4: Option<PlantedC4>,
     last_cache: Instant,
+    bhop_space_pressed: bool,
 }
 
 impl Game for CS2 {
@@ -271,6 +272,7 @@ impl CS2 {
             weapon: Weapon::default(),
             planted_c4: None,
             last_cache: Instant::now(),
+            bhop_space_pressed: false,
         }
     }
 

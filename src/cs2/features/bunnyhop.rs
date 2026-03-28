@@ -6,11 +6,12 @@ use crate::{
 
 impl CS2 {
     pub fn bunnyhop(&mut self, config: &Config, mouse: &mut Mouse) {
-        if !config.misc.bunnyhop {
-            return;
-        }
-
-        if !self.input.is_key_pressed(config.misc.bunnyhop_hotkey) {
+        // If bhop is disabled or hotkey is not held, ensure space is released and bail out.
+        if !config.misc.bunnyhop || !self.input.is_key_pressed(config.misc.bunnyhop_hotkey) {
+            if self.bhop_space_pressed {
+                mouse.space_release();
+                self.bhop_space_pressed = false;
+            }
             return;
         }
 
@@ -18,10 +19,15 @@ impl CS2 {
             return;
         };
 
-        if !local_player.is_in_air(self) {
+        let want_pressed = !local_player.is_in_air(self);
+
+        // Only write to /dev/uinput when the desired state changes.
+        if want_pressed && !self.bhop_space_pressed {
             mouse.space_press();
-        } else {
+            self.bhop_space_pressed = true;
+        } else if !want_pressed && self.bhop_space_pressed {
             mouse.space_release();
+            self.bhop_space_pressed = false;
         }
     }
 }
