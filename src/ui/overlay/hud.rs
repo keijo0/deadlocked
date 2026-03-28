@@ -19,6 +19,26 @@ impl App {
         }
     }
 
+    pub fn draw_spectator_list(&self, painter: &Painter, data: &Data) {
+        if !self.config.hud.spectator_list || data.spectators.is_empty() {
+            return;
+        }
+
+        let names = data.spectators.join("\n  ");
+        let text = format!("Spectators:\n  {names}");
+
+        let padding = 10.0;
+        let pos = pos2(data.window_size.x - padding, padding);
+
+        self.text(
+            painter,
+            text,
+            pos,
+            Align2::RIGHT_TOP,
+            Some(self.config.accent_color),
+        );
+    }
+
     pub fn draw_bomb_timer(&self, painter: &Painter, data: &Data) {
         if !self.config.hud.bomb_timer || !data.bomb.planted {
             return;

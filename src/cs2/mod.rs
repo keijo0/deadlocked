@@ -154,6 +154,17 @@ impl Game for CS2 {
             return;
         }
 
+        let local_pawn = local_player.pawn;
+        data.spectators.clear();
+        for i in 1..=64 {
+            if let Some(player) = Player::index(self, i)
+                && let Some(target) = player.spectator_target(self)
+                && target.pawn == local_pawn
+            {
+                data.spectators.push(player.name(self));
+            }
+        }
+
         for player in &self.players {
             let player_data = PlayerData {
                 steam_id: player.steam_id(self),

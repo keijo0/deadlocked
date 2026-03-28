@@ -97,6 +97,13 @@ impl App {
             }
 
             if ui
+                .checkbox(&mut self.config.hud.spectator_list, "Spectator List")
+                .changed()
+            {
+                self.send_config();
+            }
+
+            if ui
                 .checkbox(&mut self.config.hud.fov_circle, "FOV Circle")
                 .changed()
             {
