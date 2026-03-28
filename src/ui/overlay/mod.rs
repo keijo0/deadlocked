@@ -56,6 +56,7 @@ impl App {
 
         self.draw_bomb_timer(&painter, data);
         self.draw_fov_circle(&painter, data);
+        self.draw_fov_arrows(&painter, data);
         self.draw_sniper_crosshair(&painter, data);
         self.draw_spectator_list(&painter, data);
         self.draw_keybind_list(&painter, data);
