@@ -303,9 +303,28 @@ impl App {
         align: Align2,
         color: Option<Color32>,
     ) {
+        self.text_sized(
+            painter,
+            text,
+            position,
+            align,
+            color,
+            self.config.hud.font_size,
+        );
+    }
+
+    fn text_sized(
+        &self,
+        painter: &Painter,
+        text: impl AsRef<str>,
+        position: Pos2,
+        align: Align2,
+        color: Option<Color32>,
+        font_size: f32,
+    ) {
         use egui::FontId;
 
-        let font = FontId::proportional(self.config.hud.font_size);
+        let font = FontId::proportional(font_size);
         let color = match color {
             Some(color) => color,
             None => self.config.hud.text_color,
