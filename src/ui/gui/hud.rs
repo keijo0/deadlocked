@@ -123,6 +123,13 @@ impl App {
             {
                 self.send_config();
             }
+
+            if ui
+                .checkbox(&mut self.config.hud.fov_arrows, "FOV Arrows")
+                .changed()
+            {
+                self.send_config();
+            }
         });
     }
 

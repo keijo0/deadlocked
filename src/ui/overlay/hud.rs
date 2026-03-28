@@ -1,4 +1,4 @@
-use egui::{Align2, Color32, Painter, Stroke, pos2};
+use egui::{Align2, Color32, Painter, Shape, Stroke, pos2};
 
 use crate::{
     config::KeyMode, cs2::entity::weapon_class::WeaponClass, data::Data, math::world_to_screen,
@@ -198,5 +198,112 @@ impl App {
             ],
             Stroke::new(self.config.hud.line_width, self.config.hud.crosshair_color),
         );
+    }
+
+    pub fn draw_fov_arrows(&self, painter: &Painter, data: &Data) {
+        if !self.config.hud.fov_arrows
+            || !data.in_game
+            || !data.esp_active
+            || !self.config.player.enabled
+        {
+            return;
+        }
+
+        let center_x = data.window_size.x / 2.0;
+        let center_y = data.window_size.y / 2.0;
+        // Distance from screen edge where arrow centers are placed
+        const MARGIN: f32 = 50.0;
+        const ARROW_SIZE: f32 = 10.0;
+
+        let half_w = data.window_size.x / 2.0 - MARGIN;
+        let half_h = data.window_size.y / 2.0 - MARGIN;
+
+        let vm = &data.view_matrix;
+
+        for player in &data.players {
+            if self.config.player.visible_only && !player.visible {
+                continue;
+            }
+
+            // Only draw arrows for players that are off-screen
+            if world_to_screen(&player.position, data).is_some() {
+                continue;
+            }
+
+            let pos = player.position;
+            let clip_x = vm.x_axis.x * pos.x
+                + vm.x_axis.y * pos.y
+                + vm.x_axis.z * pos.z
+                + vm.x_axis.w;
+            let clip_y = vm.y_axis.x * pos.x
+                + vm.y_axis.y * pos.y
+                + vm.y_axis.z * pos.z
+                + vm.y_axis.w;
+            let w = vm.w_axis.x * pos.x
+                + vm.w_axis.y * pos.y
+                + vm.w_axis.z * pos.z
+                + vm.w_axis.w;
+
+            if w.abs() < 0.0001 {
+                continue;
+            }
+
+            // Compute screen-space direction from center toward the enemy.
+            // Screen x maps from clip_x/w; screen y is inverted (clip_y/w → downward).
+            // When w < 0 (enemy behind camera) negate to flip to the correct side.
+            let sign = if w > 0.0 { 1.0_f32 } else { -1.0_f32 };
+            let dir_x = sign * (clip_x / w);
+            let dir_y = sign * -(clip_y / w);
+
+            let len = (dir_x * dir_x + dir_y * dir_y).sqrt();
+            if len < 0.001 {
+                continue;
+            }
+            let dir_x = dir_x / len;
+            let dir_y = dir_y / len;
+
+            // Intersect the direction ray with the MARGIN-inset rectangle.
+            // t is always positive: half_dim / |dir_component|.
+            let edge_t = |dir_component: f32, half_dim: f32| -> f32 {
+                if dir_component.abs() > 0.001 {
+                    half_dim / dir_component.abs()
+                } else {
+                    f32::MAX
+                }
+            };
+
+            let t = edge_t(dir_x, half_w).min(edge_t(dir_y, half_h));
+            let arrow_x = center_x + dir_x * t;
+            let arrow_y = center_y + dir_y * t;
+
+            let color = if player.visible {
+                self.config.player.box_visible_color
+            } else {
+                self.config.player.box_invisible_color
+            };
+
+            // Perpendicular direction for the arrow wings
+            let perp_x = -dir_y;
+            let perp_y = dir_x;
+
+            let tip = pos2(
+                arrow_x + dir_x * ARROW_SIZE,
+                arrow_y + dir_y * ARROW_SIZE,
+            );
+            let base_left = pos2(
+                arrow_x - dir_x * ARROW_SIZE * 0.5 + perp_x * ARROW_SIZE * 0.7,
+                arrow_y - dir_y * ARROW_SIZE * 0.5 + perp_y * ARROW_SIZE * 0.7,
+            );
+            let base_right = pos2(
+                arrow_x - dir_x * ARROW_SIZE * 0.5 - perp_x * ARROW_SIZE * 0.7,
+                arrow_y - dir_y * ARROW_SIZE * 0.5 - perp_y * ARROW_SIZE * 0.7,
+            );
+
+            painter.add(Shape::convex_polygon(
+                vec![tip, base_left, base_right],
+                color,
+                Stroke::new(self.config.hud.line_width, Color32::BLACK),
+            ));
+        }
     }
 }
