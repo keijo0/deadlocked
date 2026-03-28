@@ -131,6 +131,10 @@ impl Mouse {
     pub fn move_rel(&mut self, coords: &Vec2) {
         let coords = IVec2::new(coords.x as i32, coords.y as i32);
 
+        if coords == IVec2::ZERO {
+            return;
+        }
+
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         let time = Timeval {
             seconds: now.as_secs(),
@@ -159,8 +163,6 @@ impl Mouse {
         };
 
         self.file.write_all(&x.bytes()).unwrap();
-        self.file.write_all(&syn.bytes()).unwrap();
-
         self.file.write_all(&y.bytes()).unwrap();
         self.file.write_all(&syn.bytes()).unwrap();
     }
