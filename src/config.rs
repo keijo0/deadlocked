@@ -342,6 +342,8 @@ pub struct UnsafeConfig {
     pub no_smoke: bool,
     pub change_smoke_color: bool,
     pub smoke_color: Color32,
+    pub bunnyhop: bool,
+    pub bunnyhop_hotkey: KeyCode,
 }
 
 impl Default for UnsafeConfig {
@@ -354,6 +356,8 @@ impl Default for UnsafeConfig {
             no_smoke: false,
             change_smoke_color: false,
             smoke_color: Color32::RED,
+            bunnyhop: false,
+            bunnyhop_hotkey: KeyCode::V,
         }
     }
 }

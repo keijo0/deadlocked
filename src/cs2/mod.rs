@@ -120,6 +120,8 @@ impl Game for CS2 {
         self.find_target(config);
 
         self.aimbot(config, mouse);
+
+        self.bunnyhop(config, mouse);
     }
 
     fn data(&self, config: &Config, data: &mut Data) {

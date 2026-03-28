@@ -2,7 +2,7 @@ use egui::{DragValue, Ui};
 
 use crate::ui::{
     app::App,
-    gui::helpers::{collapsing_open, color_picker},
+    gui::helpers::{collapsing_open, color_picker, keybind},
 };
 
 impl App {
@@ -44,6 +44,24 @@ impl App {
             }
 
             if color_picker(ui, "Smoke Color", &mut self.config.misc.smoke_color) {
+                self.send_config();
+            }
+        });
+
+        collapsing_open(ui, "Automation", |ui| {
+            if ui
+                .checkbox(&mut self.config.misc.bunnyhop, "Bunnyhop")
+                .changed()
+            {
+                self.send_config();
+            }
+
+            if keybind(
+                ui,
+                "bunnyhop_hotkey",
+                "Bunnyhop Hotkey",
+                &mut self.config.misc.bunnyhop_hotkey,
+            ) {
                 self.send_config();
             }
         });

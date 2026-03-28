@@ -91,6 +91,7 @@ const SYN_REPORT: u16 = 0x00;
 const AXIS_X: u16 = 0x00;
 const AXIS_Y: u16 = 0x01;
 const BTN_LEFT: u16 = 0x110;
+const KEY_SPACE: u16 = 57;
 
 pub struct Mouse {
     file: File,
@@ -118,6 +119,7 @@ impl Mouse {
             ui_set_relbit(fd, AXIS_Y as u64).map_err(|e| e.to_string())?;
 
             ui_set_keybit(fd, BTN_LEFT as u64).map_err(|e| e.to_string())?;
+            ui_set_keybit(fd, KEY_SPACE as u64).map_err(|e| e.to_string())?;
 
             ui_dev_setup(fd, &DEVICE_SETUP).map_err(|e| e.to_string())?;
             ui_dev_create(fd).map_err(|e| e.to_string())?;
@@ -164,14 +166,22 @@ impl Mouse {
     }
 
     pub fn left_press(&mut self) {
-        self.key(1);
+        self.keyboard_key(BTN_LEFT, 1);
     }
 
     pub fn left_release(&mut self) {
-        self.key(0);
+        self.keyboard_key(BTN_LEFT, 0);
     }
 
-    fn key(&mut self, pressed: i32) {
+    pub fn space_press(&mut self) {
+        self.keyboard_key(KEY_SPACE, 1);
+    }
+
+    pub fn space_release(&mut self) {
+        self.keyboard_key(KEY_SPACE, 0);
+    }
+
+    fn keyboard_key(&mut self, code: u16, pressed: i32) {
         let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
         let time = Timeval {
             seconds: now.as_secs(),
@@ -181,7 +191,7 @@ impl Mouse {
         let press = InputEvent {
             time,
             event_type: EV_KEY,
-            code: BTN_LEFT,
+            code,
             value: pressed,
         };
 
