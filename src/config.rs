@@ -17,8 +17,8 @@ use crate::{
     ui::color::Colors,
 };
 
-const REFRESH_RATE: u64 = 120;
-pub const LOOP_DURATION: Duration = Duration::from_millis(1000 / REFRESH_RATE);
+// 15.625ms per iteration = 64 Hz (1000ms / 15.625ms)
+pub const LOOP_DURATION: Duration = Duration::from_micros(15_625);
 pub const SLEEP_DURATION: Duration = Duration::from_secs(5);
 pub const DEFAULT_CONFIG_NAME: &str = "deadlocked.toml";
 
@@ -342,6 +342,8 @@ pub struct UnsafeConfig {
     pub no_smoke: bool,
     pub change_smoke_color: bool,
     pub smoke_color: Color32,
+    pub bunnyhop: bool,
+    pub bunnyhop_hotkey: KeyCode,
 }
 
 impl Default for UnsafeConfig {
@@ -354,6 +356,8 @@ impl Default for UnsafeConfig {
             no_smoke: false,
             change_smoke_color: false,
             smoke_color: Color32::RED,
+            bunnyhop: false,
+            bunnyhop_hotkey: KeyCode::V,
         }
     }
 }
