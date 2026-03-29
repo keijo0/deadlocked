@@ -127,7 +127,6 @@ impl CS2 {
         offsets.controller.steam_id = client.get("CBasePlayerController", "m_steamID")?;
         offsets.controller.name = client.get("CBasePlayerController", "m_iszPlayerName")?;
         offsets.controller.pawn = client.get("CBasePlayerController", "m_hPawn")?;
-        offsets.controller.desired_fov = client.get("CBasePlayerController", "m_iDesiredFOV")?;
         offsets.controller.owner_entity = client.get("C_BaseEntity", "m_hOwnerEntity")?;
         offsets.controller.color = client.get("CCSPlayerController", "m_iCompTeammateColor")?;
         offsets.controller.action_tracking_services =

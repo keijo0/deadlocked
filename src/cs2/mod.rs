@@ -99,7 +99,6 @@ impl Game for CS2 {
 
         self.esp_toggle(config);
 
-        self.fov(config);
         self.rcs(config, mouse);
         self.triggerbot(config);
 
