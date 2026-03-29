@@ -7,7 +7,8 @@ use crate::{
         app::App,
         drag_range::DragRange,
         gui::helpers::{
-            checkbox, checkbox_hover, collapsing_open, combo_box, drag, keybind, scroll,
+            checkbox, checkbox_hover, collapsing_open, combo_box, drag, keybind, keybind_list,
+            scroll,
         },
     },
 };
@@ -39,11 +40,11 @@ impl App {
 
     fn aimbot_left(&mut self, ui: &mut Ui) {
         collapsing_open(ui, "Aimbot", |ui| {
-            if keybind(
+            if keybind_list(
                 ui,
-                "aimbot_hotkey",
-                "Hotkey",
-                &mut self.config.aim.aimbot_hotkey,
+                "aimbot_hotkeys",
+                "Hotkeys",
+                &mut self.config.aim.aimbot_hotkeys,
             ) {
                 self.send_config();
             }

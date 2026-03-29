@@ -18,7 +18,7 @@ pub struct Aimbot {
 
 impl CS2 {
     pub fn aimbot(&mut self, config: &Config, mouse: &mut Mouse) {
-        let hotkey = config.aim.aimbot_hotkey;
+        let hotkeys = config.aim.aimbot_hotkeys.as_slice();
         let config = self.aimbot_config(config);
 
         if !config.enabled {
@@ -27,12 +27,12 @@ impl CS2 {
 
         match config.mode {
             KeyMode::Hold => {
-                if !self.input.is_key_pressed(hotkey) {
+                if !hotkeys.iter().any(|k| self.input.is_key_pressed(*k)) {
                     return;
                 }
             }
             KeyMode::Toggle => {
-                if self.input.key_just_pressed(hotkey) {
+                if hotkeys.iter().any(|k| self.input.key_just_pressed(*k)) {
                     self.aim.active = !self.aim.active;
                 }
                 if !self.aim.active {
