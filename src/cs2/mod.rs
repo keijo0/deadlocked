@@ -110,7 +110,6 @@ impl Game for CS2 {
         }
 
         self.no_flash(config);
-        self.fov_changer(config);
 
         self.esp_toggle(config);
 

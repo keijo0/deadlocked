@@ -121,7 +121,7 @@ impl App {
             }
 
             if ui
-                .checkbox(&mut self.config.player.weapon_icon, "Weapon Icon")
+                .checkbox(&mut self.config.player.weapon_icon, "Weapon Name")
                 .changed()
             {
                 self.send_config();

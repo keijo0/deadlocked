@@ -93,33 +93,6 @@ impl App {
         });
     }
 
-    fn unsafe_right(&mut self, ui: &mut Ui) {
-        collapsing_open(ui, "FOV Changer", |ui| {
-            if ui
-                .checkbox(&mut self.config.misc.fov_changer, "FOV Changer")
-                .changed()
-            {
-                self.send_config();
-            }
-
-            ui.horizontal(|ui| {
-                if ui
-                    .add(
-                        DragValue::new(&mut self.config.misc.desired_fov)
-                            .speed(0.1)
-                            .range(1..=179),
-                    )
-                    .changed()
-                {
-                    self.send_config();
-                }
-                ui.label("Desired FOV");
-
-                if ui.button("Reset").clicked() {
-                    self.config.misc.desired_fov = crate::constants::cs2::DEFAULT_FOV;
-                    self.send_config();
-                }
-            });
-        });
+    fn unsafe_right(&mut self, _ui: &mut Ui) {
     }
 }
