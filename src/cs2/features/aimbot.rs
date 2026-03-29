@@ -80,13 +80,13 @@ impl CS2 {
             let mut smallest_angle = glam::Vec2::ZERO;
 
             if config.backtrack {
-                let target_steam_id = target.steam_id(self);
+                let target_pawn = target.pawn;
                 let max_ticks = config.backtrack_ticks as usize;
 
                 // Collect bone positions from history into a local Vec to avoid borrow conflicts
                 let hist_positions: Vec<glam::Vec3> = {
                     let mut positions = Vec::new();
-                    if let Some(history) = self.target.backtrack_history.get(&target_steam_id) {
+                    if let Some(history) = self.target.backtrack_history.get(&target_pawn) {
                         for record in history.iter().take(max_ticks) {
                             for bone in &config.bones {
                                 if let Some(&pos) = record.bones.get(bone) {

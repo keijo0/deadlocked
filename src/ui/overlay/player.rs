@@ -27,7 +27,7 @@ impl App {
         self.player_box(painter, player, data, sound_alpha);
         self.skeleton(painter, player, data, sound_alpha);
         if self.config.player.show_backtrack {
-            self.backtrack_trail(painter, player.steam_id, data);
+            self.backtrack_trail(painter, player.pawn, data);
         }
     }
 

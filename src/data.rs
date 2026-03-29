@@ -51,6 +51,7 @@ pub struct Data {
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PlayerData {
     pub steam_id: u64,
+    pub pawn: u64,
     pub health: i32,
     pub armor: i32,
     pub position: Vec3,
