@@ -39,7 +39,7 @@ impl App {
             text,
             pos,
             Align2::LEFT_TOP,
-            Some(self.config.accent_color),
+            Some(self.config.hud.spectator_list_color),
             self.config.hud.font_size * 2.0,
         );
     }

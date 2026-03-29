@@ -63,17 +63,5 @@ impl App {
                 self.send_config();
             }
         });
-
-        collapsing_open(ui, "Sound ESP", |ui| {
-            if drag(
-                ui,
-                "Fadeout Start (s)",
-                DragValue::new(&mut self.config.player.sound.fadeout_start)
-                    .range(0.0..=10.0)
-                    .speed(0.01),
-            ) {
-                self.send_config();
-            }
-        });
     }
 }

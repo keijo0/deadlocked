@@ -26,6 +26,14 @@ impl App {
                     if color_picker(ui, "Crosshair Color", &mut self.config.hud.crosshair_color) {
                         self.send_config();
                     }
+
+                    if color_picker(
+                        ui,
+                        "Spectator List Color",
+                        &mut self.config.hud.spectator_list_color,
+                    ) {
+                        self.send_config();
+                    }
                 });
             });
     }
