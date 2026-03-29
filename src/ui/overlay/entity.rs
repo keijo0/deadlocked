@@ -33,13 +33,13 @@ impl App {
             EntityInfo::Smoke(smoke) => self.smoke(painter, data, smoke),
             EntityInfo::Molotov(molotov) => self.molotov(painter, data, molotov),
             EntityInfo::Flashbang(info) => {
-                self.draw_grenade(painter, data, info, self.config.hud.flash_trail_color)
+                self.draw_grenade(painter, data, info, Color32::WHITE)
             }
             EntityInfo::HeGrenade(info) => {
-                self.draw_grenade(painter, data, info, self.config.hud.he_trail_color)
+                self.draw_grenade(painter, data, info, Color32::DARK_GRAY)
             }
             EntityInfo::Decoy(info) => {
-                self.draw_grenade(painter, data, info, self.config.hud.decoy_trail_color)
+                self.draw_grenade(painter, data, info, Color32::PURPLE)
             }
         };
     }
@@ -119,7 +119,7 @@ impl App {
             painter,
             data,
             &smoke.grenade(),
-            self.config.hud.smoke_trail_color,
+            Color32::LIGHT_GRAY,
         );
     }
 
@@ -132,14 +132,14 @@ impl App {
                 painter,
                 data,
                 &molotov.grenade(),
-                self.config.hud.incendiary_trail_color,
+                Color32::ORANGE,
             );
         } else {
             self.draw_grenade(
                 painter,
                 data,
                 &molotov.grenade(),
-                self.config.hud.molotov_trail_color,
+                Color32::RED,
             );
         }
     }

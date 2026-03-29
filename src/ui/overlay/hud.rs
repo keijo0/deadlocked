@@ -209,7 +209,7 @@ impl App {
     }
 
     pub fn draw_fov_arrows(&self, painter: &Painter, data: &Data) {
-        if !self.config.hud.fov_arrows
+        if self.config.hud.fov_arrow_size <= 0.0
             || !data.in_game
             || !data.esp_active
             || !self.config.player.enabled
@@ -221,12 +221,20 @@ impl App {
         let center_y = data.window_size.y / 2.0;
         // Distance from screen edge where arrow centers are placed
         const MARGIN: f32 = 50.0;
-        const ARROW_SIZE: f32 = 15.0;
+        let arrow_size = self.config.hud.fov_arrow_size;
 
         let half_w = data.window_size.x / 2.0 - MARGIN;
         let half_h = data.window_size.y / 2.0 - MARGIN;
 
         let vm = &data.view_matrix;
+
+        let base_color = self.config.hud.fov_arrow_color;
+        let arrow_color = Color32::from_rgba_unmultiplied(
+            base_color.r(),
+            base_color.g(),
+            base_color.b(),
+            self.config.hud.fov_arrow_opacity,
+        );
 
         for player in &data.players {
             if self.config.player.visible_only && !player.visible {
@@ -284,32 +292,26 @@ impl App {
             let arrow_x = center_x + dir_x * t;
             let arrow_y = center_y + dir_y * t;
 
-            let color = if player.visible {
-                self.config.player.box_visible_color
-            } else {
-                self.config.player.box_invisible_color
-            };
-
             // Perpendicular direction for the arrow wings
             let perp_x = -dir_y;
             let perp_y = dir_x;
 
             let tip = pos2(
-                arrow_x + dir_x * ARROW_SIZE,
-                arrow_y + dir_y * ARROW_SIZE,
+                arrow_x + dir_x * arrow_size,
+                arrow_y + dir_y * arrow_size,
             );
             let base_left = pos2(
-                arrow_x - dir_x * ARROW_SIZE * 0.5 + perp_x * ARROW_SIZE * 0.7,
-                arrow_y - dir_y * ARROW_SIZE * 0.5 + perp_y * ARROW_SIZE * 0.7,
+                arrow_x - dir_x * arrow_size * 0.5 + perp_x * arrow_size * 0.7,
+                arrow_y - dir_y * arrow_size * 0.5 + perp_y * arrow_size * 0.7,
             );
             let base_right = pos2(
-                arrow_x - dir_x * ARROW_SIZE * 0.5 - perp_x * ARROW_SIZE * 0.7,
-                arrow_y - dir_y * ARROW_SIZE * 0.5 - perp_y * ARROW_SIZE * 0.7,
+                arrow_x - dir_x * arrow_size * 0.5 - perp_x * arrow_size * 0.7,
+                arrow_y - dir_y * arrow_size * 0.5 - perp_y * arrow_size * 0.7,
             );
 
             painter.add(Shape::convex_polygon(
                 vec![tip, base_left, base_right],
-                color,
+                arrow_color,
                 Stroke::new(self.config.hud.line_width, Color32::BLACK),
             ));
         }

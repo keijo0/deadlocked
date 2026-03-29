@@ -27,63 +27,6 @@ impl App {
                         self.send_config();
                     }
                 });
-
-                ui.collapsing("Grenade Trails", |ui| {
-                    if ui
-                        .checkbox(&mut self.config.hud.grenade_trails, "Grenade Trails")
-                        .changed()
-                    {
-                        self.send_config();
-                    }
-
-                    if color_picker(
-                        ui,
-                        "Smoke Trail Color",
-                        &mut self.config.hud.smoke_trail_color,
-                    ) {
-                        self.send_config();
-                    }
-
-                    if color_picker(
-                        ui,
-                        "Molotov Trail Color",
-                        &mut self.config.hud.molotov_trail_color,
-                    ) {
-                        self.send_config();
-                    }
-
-                    if color_picker(
-                        ui,
-                        "Incendiary Trail Color",
-                        &mut self.config.hud.incendiary_trail_color,
-                    ) {
-                        self.send_config();
-                    }
-
-                    if color_picker(
-                        ui,
-                        "Flash Trail Color",
-                        &mut self.config.hud.flash_trail_color,
-                    ) {
-                        self.send_config();
-                    }
-
-                    if color_picker(
-                        ui,
-                        "HE Grenade Trail Color",
-                        &mut self.config.hud.he_trail_color,
-                    ) {
-                        self.send_config();
-                    }
-
-                    if color_picker(
-                        ui,
-                        "Decoy Trail Color",
-                        &mut self.config.hud.decoy_trail_color,
-                    ) {
-                        self.send_config();
-                    }
-                });
             });
     }
 
@@ -125,11 +68,46 @@ impl App {
             }
 
             if ui
-                .checkbox(&mut self.config.hud.fov_arrows, "FOV Arrows")
+                .checkbox(&mut self.config.hud.grenade_trails, "Grenade Trails")
                 .changed()
             {
                 self.send_config();
             }
+
+            ui.collapsing("FOV Arrows", |ui| {
+                ui.horizontal(|ui| {
+                    if ui
+                        .add(
+                            DragValue::new(&mut self.config.hud.fov_arrow_size)
+                                .range(0.0..=50.0)
+                                .speed(0.1)
+                                .max_decimals(1),
+                        )
+                        .changed()
+                    {
+                        self.send_config();
+                    }
+                    ui.label("Size");
+                });
+
+                if color_picker(ui, "Color", &mut self.config.hud.fov_arrow_color) {
+                    self.send_config();
+                }
+
+                ui.horizontal(|ui| {
+                    if ui
+                        .add(
+                            DragValue::new(&mut self.config.hud.fov_arrow_opacity)
+                                .range(0..=255)
+                                .speed(1.0),
+                        )
+                        .changed()
+                    {
+                        self.send_config();
+                    }
+                    ui.label("Opacity");
+                });
+            });
         });
     }
 
