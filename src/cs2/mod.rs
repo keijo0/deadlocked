@@ -97,20 +97,6 @@ impl Game for CS2 {
             self.last_cache = Instant::now();
         }
 
-        for entity in &self.entities {
-            if let Entity::Smoke(smoke) = entity {
-                if config.misc.no_smoke {
-                    smoke.disable(self);
-                }
-
-                if config.misc.change_smoke_color {
-                    smoke.color(self, &config.misc.smoke_color);
-                }
-            }
-        }
-
-        self.no_flash(config);
-
         self.esp_toggle(config);
 
         self.rcs(config, mouse);

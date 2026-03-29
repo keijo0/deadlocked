@@ -62,7 +62,6 @@ pub struct PawnOffsets {
     pub spotted_state: u64,       // SpottedState (m_entitySpottedState)
     pub crosshair_entity: u64,    // EntityIndex (m_iIDEntIndex)
     pub is_scoped: u64,           // bool (m_bIsScoped)
-    pub flash_alpha: u64,         // f32 (m_flFlashMaxAlpha)
     pub flash_duration: u64,      // f32 (m_flFlashDuration)
     pub deathmatch_immunity: u64, // bool (m_bGunGameImmunity)
     pub camera_services: u64,     // Pointer -> CameraServices (m_pCameraServices)
@@ -81,12 +80,6 @@ pub struct GameSceneNodeOffsets {
 #[derive(Debug, Default)]
 pub struct SkeletonInstanceOffsets {
     pub skeleton_instance: u64, // CSkeletonInstance (m_skeletonInstance)
-}
-
-#[derive(Debug, Default)]
-pub struct SmokeOffsets {
-    pub did_smoke_effect: u64, // bool (m_bDidSmokeEffect)
-    pub smoke_color: u64,      // Vec3 (m_vSmokeColor)
 }
 
 #[derive(Debug, Default)]
@@ -165,7 +158,6 @@ pub struct Offsets {
     pub pawn: PawnOffsets,
     pub game_scene_node: GameSceneNodeOffsets,
     pub skeleton: SkeletonInstanceOffsets,
-    pub smoke: SmokeOffsets,
     pub molotov: MolotovOffsets,
     pub inferno: InfernoOffsets,
     pub spotted_state: SpottedStateOffsets,

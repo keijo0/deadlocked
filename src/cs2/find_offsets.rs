@@ -150,7 +150,6 @@ impl CS2 {
         offsets.pawn.spotted_state = client.get("C_CSPlayerPawn", "m_entitySpottedState")?;
         offsets.pawn.crosshair_entity = client.get("C_CSPlayerPawn", "m_iIDEntIndex")?;
         offsets.pawn.is_scoped = client.get("C_CSPlayerPawn", "m_bIsScoped")?;
-        offsets.pawn.flash_alpha = client.get("C_CSPlayerPawnBase", "m_flFlashMaxAlpha")?;
         offsets.pawn.flash_duration = client.get("C_CSPlayerPawnBase", "m_flFlashDuration")?;
         offsets.pawn.deathmatch_immunity = client.get("C_CSPlayerPawn", "m_bGunGameImmunity")?;
 
@@ -165,10 +164,6 @@ impl CS2 {
 
         offsets.skeleton.skeleton_instance =
             client.get("CBodyComponentSkeletonInstance", "m_skeletonInstance")?;
-
-        offsets.smoke.did_smoke_effect =
-            client.get("C_SmokeGrenadeProjectile", "m_bDidSmokeEffect")?;
-        offsets.smoke.smoke_color = client.get("C_SmokeGrenadeProjectile", "m_vSmokeColor")?;
 
         offsets.molotov.is_incendiary = client.get("C_MolotovProjectile", "m_bIsIncGrenade")?;
 
