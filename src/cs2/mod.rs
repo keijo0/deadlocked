@@ -231,10 +231,13 @@ impl Game for CS2 {
         } else {
             false
         };
-        data.triggerbot_active = if self.triggerbot_config(config).mode == KeyMode::Toggle {
-            self.trigger.active
-        } else {
-            false
+        data.triggerbot_active = {
+            let triggerbot_config = self.triggerbot_config(config);
+            triggerbot_config.enabled
+                && match triggerbot_config.mode {
+                    KeyMode::Toggle => self.trigger.active,
+                    KeyMode::Hold => self.input.is_key_pressed(config.aim.triggerbot_hotkey),
+                }
         };
         data.esp_active = self.esp_enabled(config);
 
