@@ -39,5 +39,3 @@ overflow-checks = false
 [profile.release]
 lto = true
 
-[features]
-read-only = []
