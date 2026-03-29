@@ -239,7 +239,7 @@ fn prep_ctx(ctx: &mut egui::Context, accent_color: egui::Color32) {
         .families
         .get_mut(&egui::FontFamily::Proportional)
         .unwrap()
-        .insert(0, String::from("fira_sans"));
+        .insert(0, String::from("Quicksand"));
     font_definitions
         .families
         .get_mut(&egui::FontFamily::Monospace)
