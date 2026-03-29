@@ -21,7 +21,7 @@ pub enum Tab {
     Player,
     Hud,
     Grenades,
-    Unsafe,
+    Misc,
     Config,
 }
 
@@ -50,7 +50,7 @@ impl App {
                 ui.selectable_value(&mut self.current_tab, Tab::Player, "Player");
                 ui.selectable_value(&mut self.current_tab, Tab::Hud, "Hud");
                 ui.selectable_value(&mut self.current_tab, Tab::Grenades, "Grenades");
-                ui.selectable_value(&mut self.current_tab, Tab::Unsafe, "Unsafe");
+                ui.selectable_value(&mut self.current_tab, Tab::Misc, "Misc");
                 ui.selectable_value(&mut self.current_tab, Tab::Config, "Config");
 
                 ui.with_layout(egui::Layout::bottom_up(Align::Min), |ui| {
@@ -74,7 +74,7 @@ impl App {
             Tab::Player => self.player_settings(ui),
             Tab::Hud => self.hud_settings(ui),
             Tab::Grenades => self.grenade_settings(ui),
-            Tab::Unsafe => self.unsafe_settings(ui),
+            Tab::Misc => self.misc_settings(ui),
             Tab::Config => self.config_settings(ui),
         });
     }
