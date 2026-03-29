@@ -83,6 +83,13 @@ impl App {
             }
 
             ui.collapsing("FOV Arrows", |ui| {
+                if ui
+                    .checkbox(&mut self.config.hud.fov_arrows, "Enabled")
+                    .changed()
+                {
+                    self.send_config();
+                }
+
                 ui.horizontal(|ui| {
                     if ui
                         .add(

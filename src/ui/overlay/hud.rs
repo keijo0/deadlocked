@@ -209,7 +209,8 @@ impl App {
     }
 
     pub fn draw_fov_arrows(&self, painter: &Painter, data: &Data) {
-        if self.config.hud.fov_arrow_size <= 0.0
+        if !self.config.hud.fov_arrows
+            || self.config.hud.fov_arrow_size <= 0.0
             || !data.in_game
             || !data.esp_active
             || !self.config.player.enabled
