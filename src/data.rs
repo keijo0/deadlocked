@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::time::Instant;
 
 use glam::{Mat4, Vec2, Vec3};
@@ -44,6 +44,8 @@ pub struct Data {
     pub aimbot_active: bool,
     pub triggerbot_active: bool,
     pub esp_active: bool,
+    #[serde(skip)]
+    pub backtrack_history: HashMap<u64, VecDeque<BacktrackRecord>>,
 }
 
 #[derive(Debug, Clone, Default, Serialize)]

@@ -233,6 +233,7 @@ pub struct PlayerConfig {
     pub weapon_icon: bool,
     pub tags: bool,
     pub visible_only: bool,
+    pub show_backtrack: bool,
     pub sound: SoundConfig,
 }
 
@@ -255,6 +256,7 @@ impl Default for PlayerConfig {
             weapon_icon: true,
             tags: true,
             visible_only: false,
+            show_backtrack: false,
             sound: SoundConfig::default(),
         }
     }
