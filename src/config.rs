@@ -81,6 +81,8 @@ pub struct AimbotConfig {
     pub smooth: f32,
     pub bones: Vec<Bones>,
     pub targeting_mode: TargetingMode,
+    pub backtrack: bool,
+    pub backtrack_ticks: u32,
 }
 
 impl Default for AimbotConfig {
@@ -106,6 +108,8 @@ impl Default for AimbotConfig {
                 Bones::Hip,
             ],
             targeting_mode: TargetingMode::Fov,
+            backtrack: false,
+            backtrack_ticks: 12,
         }
     }
 }

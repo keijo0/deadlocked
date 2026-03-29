@@ -1,3 +1,5 @@
+use std::collections::{HashMap, VecDeque};
+
 use glam::Vec2;
 use strum::IntoEnumIterator;
 
@@ -9,6 +11,7 @@ use crate::{
         bones::Bones,
         entity::{player::Player, weapon_class::WeaponClass},
     },
+    data::BacktrackRecord,
     math::angles_to_fov,
 };
 
@@ -20,11 +23,14 @@ pub struct Target {
     pub bone_index: u64,
     pub local_pawn_index: u64,
     pub previous_aim_punch: Vec2,
+    pub backtrack_history: HashMap<u64, VecDeque<BacktrackRecord>>,
 }
 
 impl Target {
     pub fn reset(&mut self) {
+        let history = std::mem::take(&mut self.backtrack_history);
         *self = Target::default();
+        self.backtrack_history = history;
     }
 }
 

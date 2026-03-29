@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::time::{Duration, Instant};
 
 use glam::{IVec2, Mat4, Vec2, Vec3};
@@ -16,7 +17,7 @@ use crate::{
         offsets::Offsets,
         target::Target,
     },
-    data::{Data, PlayerData},
+    data::{Data, PlayerData, BacktrackRecord},
     game::Game,
     math::{angles_from_vector, vec2_clamp},
     os::{mouse::Mouse, process::Process},
@@ -119,6 +120,7 @@ impl Game for CS2 {
         self.triggerbot_shoot(mouse);
 
         self.find_target(config);
+        self.update_backtrack(config);
 
         self.aimbot(config, mouse);
 
@@ -362,6 +364,36 @@ impl CS2 {
             1.0
         } else {
             5.0 - (distance / 125.0)
+        }
+    }
+
+    fn update_backtrack(&mut self, config: &Config) {
+        let aimbot_config = self.aimbot_config(config);
+        if !aimbot_config.backtrack {
+            return;
+        }
+        let max_ticks = aimbot_config.backtrack_ticks as usize;
+        let now = Instant::now();
+
+        let mut records: Vec<(u64, BacktrackRecord)> = Vec::with_capacity(self.players.len());
+        for player in &self.players {
+            let steam_id = player.steam_id(self);
+            let record = BacktrackRecord {
+                position: player.position(self),
+                head: player.bone_position(self, Bones::Head.u64()),
+                bones: player.all_bones(self),
+                time: now,
+            };
+            records.push((steam_id, record));
+        }
+
+        let current_ids: HashSet<u64> = records.iter().map(|(id, _)| *id).collect();
+        self.target.backtrack_history.retain(|id, _| current_ids.contains(id));
+
+        for (steam_id, record) in records {
+            let history = self.target.backtrack_history.entry(steam_id).or_default();
+            history.push_front(record);
+            history.truncate(max_ticks);
         }
     }
 
