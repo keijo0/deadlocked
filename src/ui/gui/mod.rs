@@ -13,7 +13,7 @@ mod grenade;
 mod helpers;
 mod hud;
 mod player;
-mod r#unsafe;
+mod misc;
 
 #[derive(PartialEq)]
 pub enum Tab {
