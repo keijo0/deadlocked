@@ -325,8 +325,8 @@ impl App {
                 if ui
                     .add(
                         DragValue::new(&mut self.weapon_config().rcs.smooth)
-                            .range(0.0..=1.0)
-                            .speed(0.02),
+                            .range(0.0..=100.0)
+                            .speed(1.0),
                     )
                     .on_hover_text("Lower values mean more direct recoil control")
                     .changed()
