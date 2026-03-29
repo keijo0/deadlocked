@@ -95,6 +95,34 @@ pub fn keybind(ui: &mut Ui, id: &str, label: &str, keycode: &mut KeyCode) -> boo
     .changed()
 }
 
+pub fn keybind_list(ui: &mut Ui, id: &str, label: &str, keycodes: &mut Vec<KeyCode>) -> bool {
+    let mut changed = false;
+    ui.group(|ui| {
+        ui.label(label);
+        let mut to_remove: Option<usize> = None;
+        for (i, keycode) in keycodes.iter_mut().enumerate() {
+            ui.horizontal(|ui| {
+                let entry_id = format!("{}_{}", id, i);
+                if ui.add(Keybind::new(keycode, entry_id)).changed() {
+                    changed = true;
+                }
+                if ui.small_button("✖").clicked() {
+                    to_remove = Some(i);
+                }
+            });
+        }
+        if let Some(index) = to_remove {
+            keycodes.remove(index);
+            changed = true;
+        }
+        if keycodes.len() < 5 && ui.small_button("+ Add").clicked() {
+            keycodes.push(KeyCode::Mouse5);
+            changed = true;
+        }
+    });
+    changed
+}
+
 pub struct Keybind<'gui> {
     keycode: &'gui mut KeyCode,
     id: egui::Id,

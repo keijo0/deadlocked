@@ -179,7 +179,7 @@ impl Default for TriggerbotConfig {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AimConfig {
-    pub aimbot_hotkey: KeyCode,
+    pub aimbot_hotkeys: Vec<KeyCode>,
     pub triggerbot_hotkey: KeyCode,
     pub global: WeaponConfig,
     pub weapons: HashMap<Weapon, WeaponConfig>,
@@ -193,7 +193,7 @@ impl Default for AimConfig {
         }
 
         Self {
-            aimbot_hotkey: KeyCode::Mouse5,
+            aimbot_hotkeys: vec![KeyCode::Mouse5],
             triggerbot_hotkey: KeyCode::Mouse4,
             global: WeaponConfig::enabled(true),
             weapons,

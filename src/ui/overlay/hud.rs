@@ -104,9 +104,17 @@ impl App {
         }
 
         let position = pos2(10.0, data.window_size.y / 2.0);
+        let hotkeys_str = self
+            .config
+            .aim
+            .aimbot_hotkeys
+            .iter()
+            .map(|k| format!("{:?}", k))
+            .collect::<Vec<_>>()
+            .join(", ");
         self.text(
             painter,
-            format!("Aimbot: {:?}", self.config.aim.aimbot_hotkey),
+            format!("Aimbot: {}", hotkeys_str),
             position,
             Align2::LEFT_TOP,
             None,
