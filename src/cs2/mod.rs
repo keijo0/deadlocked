@@ -226,10 +226,17 @@ impl Game for CS2 {
         data.is_ffa = self.is_ffa();
         data.is_custom_mode = self.is_custom_game_mode();
         data.map_name = self.current_map();
-        data.aimbot_active = if self.aimbot_config(config).mode == KeyMode::Toggle {
-            self.aim.active
-        } else {
-            false
+        data.aimbot_active = {
+            let aimbot_config = self.aimbot_config(config);
+            aimbot_config.enabled
+                && match aimbot_config.mode {
+                    KeyMode::Toggle => self.aim.active,
+                    KeyMode::Hold => config
+                        .aim
+                        .aimbot_hotkeys
+                        .iter()
+                        .any(|k| self.input.is_key_pressed(*k)),
+                }
         };
         data.triggerbot_active = {
             let triggerbot_config = self.triggerbot_config(config);

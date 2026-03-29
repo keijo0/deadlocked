@@ -1,8 +1,7 @@
 use egui::{Align2, Color32, Painter, Shape, Stroke, pos2};
 
 use crate::{
-    config::KeyMode, cs2::entity::weapon_class::WeaponClass, data::Data, math::world_to_screen,
-    ui::app::App,
+    cs2::entity::weapon_class::WeaponClass, data::Data, math::world_to_screen, ui::app::App,
 };
 
 impl App {
@@ -85,12 +84,6 @@ impl App {
         }
 
         let weapon_config = self.aimbot_config(&data.weapon);
-
-        if !weapon_config.enabled || (weapon_config.mode == KeyMode::Toggle && !data.aimbot_active)
-        {
-            return;
-        }
-
         let aim_fov = weapon_config.fov;
 
         if weapon_config.distance_adjusted_fov {
@@ -123,10 +116,18 @@ impl App {
             Align2::LEFT_TOP,
             None,
         );
+        let aim_fov = self.aimbot_config(&data.weapon).fov;
+        self.text(
+            painter,
+            format!("FOV: {:.1}", aim_fov),
+            position + egui::vec2(0.0, self.config.hud.font_size),
+            Align2::LEFT_TOP,
+            None,
+        );
         self.text(
             painter,
             format!("RCS: {:?}", self.config.aim.triggerbot_hotkey),
-            position + egui::vec2(0.0, self.config.hud.font_size),
+            position + egui::vec2(0.0, self.config.hud.font_size * 2.0),
             Align2::LEFT_TOP,
             None,
         );
