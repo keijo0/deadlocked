@@ -221,36 +221,49 @@ impl App {
             offset += font_size;
         }
 
-        if self.config.player.tags && player.has_defuser {
-            painter.text(
-                pos2(tr.x + ew, tr.y + offset),
-                Align2::LEFT_TOP,
-                "\u{e00f}",
-                icon_font.clone(),
-                text_color,
-            );
-            offset += font_size;
-        }
+        if self.config.player.tags {
+            if player.has_defuser {
+                painter.text(
+                    pos2(tr.x + ew, tr.y + offset),
+                    Align2::LEFT_TOP,
+                    "\u{e00f}",
+                    icon_font.clone(),
+                    text_color,
+                );
+                offset += font_size;
+            }
 
-        if self.config.player.tags && player.has_helmet {
-            painter.text(
-                pos2(tr.x + ew, tr.y + offset),
-                Align2::LEFT_TOP,
-                "\u{e017}",
-                icon_font.clone(),
-                text_color,
-            );
-            offset += font_size;
-        }
+            if player.has_helmet {
+                painter.text(
+                    pos2(tr.x + ew, tr.y + offset),
+                    Align2::LEFT_TOP,
+                    "\u{e017}",
+                    icon_font.clone(),
+                    text_color,
+                );
+                offset += font_size;
+            }
 
-        if self.config.player.tags && player.has_bomb {
-            painter.text(
-                pos2(tr.x + ew, tr.y + offset),
-                Align2::LEFT_TOP,
-                "\u{e01e}",
-                icon_font.clone(),
-                text_color,
-            );
+            if player.has_bomb {
+                painter.text(
+                    pos2(tr.x + ew, tr.y + offset),
+                    Align2::LEFT_TOP,
+                    "\u{e01e}",
+                    icon_font.clone(),
+                    text_color,
+                );
+                offset += font_size;
+            }
+
+            if !player.has_defuser && !player.has_helmet && !player.has_bomb {
+                self.text(
+                    painter,
+                    "No Tags",
+                    pos2(tr.x + ew, tr.y + offset),
+                    Align2::LEFT_TOP,
+                    Some(text_color),
+                );
+            }
         }
 
         if self.config.player.weapon_icon {
