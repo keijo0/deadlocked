@@ -78,14 +78,64 @@ impl CS2 {
         let target_angle = {
             let mut smallest_fov = 360.0;
             let mut smallest_angle = glam::Vec2::ZERO;
-            for bone in &config.bones {
-                let bone_pos = target.bone_position(self, bone.u64());
-                let angle =
-                    self.angle_to_target(&local_player, &bone_pos, &self.target.previous_aim_punch);
-                let fov = angles_to_fov(&local_player.view_angles(self), &angle);
-                if fov < smallest_fov {
-                    smallest_fov = fov;
-                    smallest_angle = angle;
+
+            if config.backtrack {
+                let target_steam_id = target.steam_id(self);
+                let max_ticks = config.backtrack_ticks as usize;
+
+                // Collect bone positions from history into a local Vec to avoid borrow conflicts
+                let hist_positions: Vec<glam::Vec3> = {
+                    let mut positions = Vec::new();
+                    if let Some(history) = self.target.backtrack_history.get(&target_steam_id) {
+                        for record in history.iter().take(max_ticks) {
+                            for bone in &config.bones {
+                                if let Some(&pos) = record.bones.get(bone) {
+                                    positions.push(pos);
+                                }
+                            }
+                        }
+                    }
+                    positions
+                };
+
+                if !hist_positions.is_empty() {
+                    for bone_pos in &hist_positions {
+                        let angle = self.angle_to_target(
+                            &local_player,
+                            bone_pos,
+                            &self.target.previous_aim_punch,
+                        );
+                        let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                        if fov < smallest_fov {
+                            smallest_fov = fov;
+                            smallest_angle = angle;
+                        }
+                    }
+                } else {
+                    for bone in &config.bones {
+                        let bone_pos = target.bone_position(self, bone.u64());
+                        let angle = self.angle_to_target(
+                            &local_player,
+                            &bone_pos,
+                            &self.target.previous_aim_punch,
+                        );
+                        let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                        if fov < smallest_fov {
+                            smallest_fov = fov;
+                            smallest_angle = angle;
+                        }
+                    }
+                }
+            } else {
+                for bone in &config.bones {
+                    let bone_pos = target.bone_position(self, bone.u64());
+                    let angle =
+                        self.angle_to_target(&local_player, &bone_pos, &self.target.previous_aim_punch);
+                    let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                    if fov < smallest_fov {
+                        smallest_fov = fov;
+                        smallest_angle = angle;
+                    }
                 }
             }
 
