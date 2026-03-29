@@ -58,7 +58,7 @@ impl CS2 {
             (aim_punch.y - self.recoil.previous.y) / sensitivity * 100.0,
             -(aim_punch.x - self.recoil.previous.x) / sensitivity * 100.0,
         ) + self.recoil.unaccounted;
-        let mouse_angle = mouse_angle / (config.smooth + 1.0).clamp(1.0, 2.0);
+        let mouse_angle = mouse_angle / (config.smooth + 1.0).max(1.0);
 
         self.recoil.unaccounted = Vec2::ZERO;
 

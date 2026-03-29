@@ -20,12 +20,16 @@ impl App {
     }
 
     pub fn draw_spectator_list(&self, painter: &Painter, data: &Data) {
-        if !self.config.hud.spectator_list || data.spectators.is_empty() {
+        if !self.config.hud.spectator_list {
             return;
         }
 
-        let names = data.spectators.join("\n  ");
-        let text = format!("Spectators:\n  {names}");
+        let text = if data.spectators.is_empty() {
+            "Spectators:".to_string()
+        } else {
+            let names = data.spectators.join("\n  ");
+            format!("Spectators:\n  {names}")
+        };
 
         let padding = 10.0;
         let pos = pos2(padding, padding);
