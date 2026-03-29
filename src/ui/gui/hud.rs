@@ -93,20 +93,6 @@ impl App {
                 if color_picker(ui, "Color", &mut self.config.hud.fov_arrow_color) {
                     self.send_config();
                 }
-
-                ui.horizontal(|ui| {
-                    if ui
-                        .add(
-                            DragValue::new(&mut self.config.hud.fov_arrow_opacity)
-                                .range(0..=255)
-                                .speed(1.0),
-                        )
-                        .changed()
-                    {
-                        self.send_config();
-                    }
-                    ui.label("Opacity");
-                });
             });
         });
     }

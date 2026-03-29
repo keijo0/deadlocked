@@ -228,13 +228,7 @@ impl App {
 
         let vm = &data.view_matrix;
 
-        let base_color = self.config.hud.fov_arrow_color;
-        let arrow_color = Color32::from_rgba_unmultiplied(
-            base_color.r(),
-            base_color.g(),
-            base_color.b(),
-            self.config.hud.fov_arrow_opacity,
-        );
+        let arrow_color = self.config.hud.fov_arrow_color;
 
         for player in &data.players {
             if self.config.player.visible_only && !player.visible {
@@ -312,7 +306,7 @@ impl App {
             painter.add(Shape::convex_polygon(
                 vec![tip, base_left, base_right],
                 arrow_color,
-                Stroke::new(self.config.hud.line_width, Color32::BLACK),
+                Stroke::NONE,
             ));
         }
     }
