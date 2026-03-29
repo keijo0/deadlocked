@@ -99,6 +99,7 @@ impl Game for CS2 {
 
         self.esp_toggle(config);
 
+        self.fov(config);
         self.rcs(config, mouse);
         self.triggerbot(config);
 
@@ -362,15 +363,12 @@ impl CS2 {
             return;
         }
         let max_ticks = aimbot_config.backtrack_ticks as usize;
-        let now = Instant::now();
 
         let mut records: Vec<(u64, BacktrackRecord)> = Vec::with_capacity(self.players.len());
         for player in &self.players {
             let record = BacktrackRecord {
-                position: player.position(self),
                 head: player.bone_position(self, Bones::Head.u64()),
                 bones: player.all_bones(self),
-                time: now,
             };
             records.push((player.pawn, record));
         }

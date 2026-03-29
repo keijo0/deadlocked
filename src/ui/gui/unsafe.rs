@@ -63,5 +63,17 @@ impl App {
                 self.send_config();
             }
         });
+
+        collapsing_open(ui, "Visual", |ui| {
+            if drag(
+                ui,
+                "FOV Override (0 = disabled)",
+                DragValue::new(&mut self.config.misc.desired_fov)
+                    .range(0..=130)
+                    .speed(1),
+            ) {
+                self.send_config();
+            }
+        });
     }
 }

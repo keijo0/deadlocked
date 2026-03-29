@@ -343,6 +343,7 @@ impl Default for HudConfig {
 pub struct UnsafeConfig {
     pub bunnyhop: bool,
     pub bunnyhop_hotkey: KeyCode,
+    pub desired_fov: u32,
 }
 
 impl Default for UnsafeConfig {
@@ -350,6 +351,7 @@ impl Default for UnsafeConfig {
         Self {
             bunnyhop: false,
             bunnyhop_hotkey: KeyCode::V,
+            desired_fov: 0,
         }
     }
 }
