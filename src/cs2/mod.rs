@@ -170,6 +170,7 @@ impl Game for CS2 {
         for player in &self.players {
             let player_data = PlayerData {
                 steam_id: player.steam_id(self),
+                pawn: player.pawn,
                 health: player.health(self),
                 armor: player.armor(self),
                 position: player.position(self),
@@ -195,6 +196,7 @@ impl Game for CS2 {
 
         data.local_player = PlayerData {
             steam_id: local_player.steam_id(self),
+            pawn: local_player.pawn,
             health: local_player.health(self),
             armor: local_player.armor(self),
             position: local_player.position(self),
@@ -379,14 +381,13 @@ impl CS2 {
 
         let mut records: Vec<(u64, BacktrackRecord)> = Vec::with_capacity(self.players.len());
         for player in &self.players {
-            let steam_id = player.steam_id(self);
             let record = BacktrackRecord {
                 position: player.position(self),
                 head: player.bone_position(self, Bones::Head.u64()),
                 bones: player.all_bones(self),
                 time: now,
             };
-            records.push((steam_id, record));
+            records.push((player.pawn, record));
         }
 
         let current_ids: HashSet<u64> = records.iter().map(|(id, _)| *id).collect();
