@@ -506,22 +506,6 @@ impl Player {
             None
         }
     }
-
-    pub fn set_fov(&self, cs2: &CS2, value: u32) {
-        let camera_service = cs2
-            .process
-            .read::<u64>(self.pawn + cs2.offsets.pawn.camera_services);
-        if camera_service == 0 {
-            return;
-        }
-        let current: u32 = cs2
-            .process
-            .read(camera_service + cs2.offsets.camera_services.fov);
-        if current != 0 && current != value {
-            cs2.process
-                .write(self.controller + cs2.offsets.controller.desired_fov, value);
-        }
-    }
 }
 
 impl CS2 {

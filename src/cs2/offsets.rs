@@ -37,7 +37,6 @@ pub struct PlayerControllerOffsets {
     pub steam_id: u64,                 // u64 (m_steamID)
     pub name: u64,                     // Pointer -> String (m_iszPlayerName)
     pub pawn: u64,                     // Handle -> Pawn (m_hPawn)
-    pub desired_fov: u64,              // u32 (m_iDesiredFOV)
     pub owner_entity: u64,             // i32 (h_pOwnerEntity)
     pub color: u64,                    // i32 (m_iCompTeammateColor)
     pub action_tracking_services: u64, // Pointer -> ActionTrackingServices (m_pActionTrackingServices)

@@ -7,8 +7,20 @@ The following features from the upstream project have been dropped because they 
 - **No Flash** — overwrote the player pawn's flash alpha value in memory
 - **No Smoke** — overwrote the smoke grenade's effect flag in memory
 - **Change Smoke Color** — overwrote the smoke grenade's color value in memory
+- **FOV Override** — overwrote `m_iDesiredFOV` on the local player's controller
 
 All other functionality (ESP, aimbot, triggerbot, bunnyhop, etc.) is retained.
+
+## Features that write to the input device (`/dev/uinput`)
+
+These features inject synthetic mouse/keyboard events and do **not** touch game memory:
+
+| Feature | What is written |
+|---|---|
+| **Aimbot** | Relative mouse movement |
+| **RCS (Recoil Control System)** | Relative mouse movement |
+| **Triggerbot** | Left mouse button press/release |
+| **Bunnyhop** | Space bar press/release |
 
 ## Setup
 

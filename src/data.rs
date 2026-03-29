@@ -1,5 +1,4 @@
 use std::collections::{HashMap, VecDeque};
-use std::time::Instant;
 
 use glam::{Mat4, Vec2, Vec3};
 use serde::Serialize;
@@ -18,10 +17,8 @@ pub enum SoundType {
 
 #[derive(Debug, Clone)]
 pub struct BacktrackRecord {
-    pub position: Vec3,
     pub head: Vec3,
     pub bones: HashMap<Bones, Vec3>,
-    pub time: Instant,
 }
 
 #[derive(Debug, Default, Serialize)]
