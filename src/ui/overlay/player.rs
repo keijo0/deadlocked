@@ -161,16 +161,28 @@ impl App {
             }
         }
 
-        // health bar
+        // health bar / health text
+        let health_x = bl.x - self.config.hud.line_width * 2.0;
+        let box_height = bl.y - tl.y;
+        let bar_top_y = bl.y - (box_height * player.health as f32 / 100.0);
+
         if self.config.player.health_bar {
-            let x = bl.x - self.config.hud.line_width * 2.0;
-            let delta = bl.y - tl.y;
             painter.line(
                 vec![
-                    pos2(x, bl.y),
-                    pos2(x, bl.y - (delta * player.health as f32 / 100.0)),
+                    pos2(health_x, bl.y),
+                    pos2(health_x, bar_top_y),
                 ],
                 Stroke::new(self.config.hud.line_width, Self::alpha(health_color, alpha)),
+            );
+        }
+
+        if self.config.player.health_text {
+            self.text(
+                painter,
+                player.health.to_string(),
+                pos2(health_x, bar_top_y),
+                Align2::CENTER_BOTTOM,
+                Some(Self::alpha(health_color, alpha)),
             );
         }
 
@@ -242,12 +254,12 @@ impl App {
         }
 
         if self.config.player.weapon_icon {
-            painter.text(
+            self.text(
+                painter,
+                player.weapon.to_string(),
                 pos2(bl.x + half_width, bl.y),
                 Align2::CENTER_TOP,
-                player.weapon.to_icon(),
-                icon_font.clone(),
-                text_color,
+                Some(text_color),
             );
         }
     }

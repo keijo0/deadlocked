@@ -107,6 +107,13 @@ impl App {
             }
 
             if ui
+                .checkbox(&mut self.config.player.health_text, "Health Text")
+                .changed()
+            {
+                self.send_config();
+            }
+
+            if ui
                 .checkbox(&mut self.config.player.armor_bar, "Armor Bar")
                 .changed()
             {
@@ -121,7 +128,7 @@ impl App {
             }
 
             if ui
-                .checkbox(&mut self.config.player.weapon_icon, "Weapon Icon")
+                .checkbox(&mut self.config.player.weapon_icon, "Weapon Name")
                 .changed()
             {
                 self.send_config();

@@ -129,11 +129,7 @@ impl App {
     }
 
     fn get_current_fov(&self) -> f32 {
-        (if self.config.misc.fov_changer {
-            self.config.misc.desired_fov
-        } else {
-            crate::constants::cs2::DEFAULT_FOV
-        }) as f32
+        crate::constants::cs2::DEFAULT_FOV as f32
     }
 
     fn calculate_fov_radius(&self, data: &Data, target_fov: f32) -> f32 {

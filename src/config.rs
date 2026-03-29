@@ -228,6 +228,7 @@ pub struct PlayerConfig {
     pub skeleton_color: Color32,
     pub head_circle: bool,
     pub health_bar: bool,
+    pub health_text: bool,
     pub armor_bar: bool,
     pub player_name: bool,
     pub weapon_icon: bool,
@@ -251,6 +252,7 @@ impl Default for PlayerConfig {
             skeleton_color: Color32::WHITE,
             head_circle: true,
             health_bar: true,
+            health_text: true,
             armor_bar: true,
             player_name: true,
             weapon_icon: true,
@@ -347,8 +349,6 @@ impl Default for HudConfig {
 pub struct UnsafeConfig {
     pub no_flash: bool,
     pub max_flash_alpha: f32,
-    pub fov_changer: bool,
-    pub desired_fov: u32,
     pub no_smoke: bool,
     pub change_smoke_color: bool,
     pub smoke_color: Color32,
@@ -361,8 +361,6 @@ impl Default for UnsafeConfig {
         Self {
             no_flash: false,
             max_flash_alpha: 127.0,
-            fov_changer: false,
-            desired_fov: 90,
             no_smoke: false,
             change_smoke_color: false,
             smoke_color: Color32::RED,
