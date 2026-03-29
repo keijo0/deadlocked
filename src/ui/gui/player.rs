@@ -37,6 +37,22 @@ impl App {
                 if color_picker(ui, "Skeleton", &mut self.config.player.skeleton_color) {
                     self.send_config();
                 }
+
+                if color_picker(
+                    ui,
+                    "Armor Bar",
+                    &mut self.config.player.armor_bar_color,
+                ) {
+                    self.send_config();
+                }
+
+                if color_picker(
+                    ui,
+                    "Backtrack Trail",
+                    &mut self.config.player.backtrack_color,
+                ) {
+                    self.send_config();
+                }
             });
         });
     }

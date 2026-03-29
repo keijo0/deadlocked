@@ -192,7 +192,7 @@ impl App {
                 ],
                 Stroke::new(
                     self.config.hud.line_width,
-                    Self::alpha(Color32::BLUE, alpha),
+                    Self::alpha(self.config.player.armor_bar_color, alpha),
                 ),
             );
         }
@@ -298,7 +298,6 @@ impl App {
 
     fn backtrack_trail(&self, painter: &Painter, player_id: u64, data: &Data) {
         const MAX_BACKTRACK_POINTS: usize = 12;
-        const BACKTRACK_ALPHA: u8 = 128;
 
         let Some(history) = data.backtrack_history.get(&player_id) else {
             return;
@@ -307,10 +306,8 @@ impl App {
         let count = history.len().min(MAX_BACKTRACK_POINTS);
         let records: Vec<_> = history.iter().take(count).collect();
 
-        let stroke = Stroke::new(
-            self.config.hud.line_width,
-            Color32::from_rgba_unmultiplied(255, 0, 0, BACKTRACK_ALPHA),
-        );
+        let base_color = self.config.player.backtrack_color;
+        let stroke = Stroke::new(self.config.hud.line_width, base_color);
         for window in records.windows(2) {
             let Some(pos_a) = world_to_screen(&window[0].head, data) else {
                 continue;
@@ -323,8 +320,12 @@ impl App {
 
         for (i, record) in records.iter().enumerate() {
             let fade = 1.0 - (i as f32 / count as f32);
-            let color =
-                Color32::from_rgba_unmultiplied(255, 0, 0, (fade * BACKTRACK_ALPHA as f32) as u8);
+            let color = Color32::from_rgba_unmultiplied(
+                base_color.r(),
+                base_color.g(),
+                base_color.b(),
+                (fade * base_color.a() as f32) as u8,
+            );
             if let Some(head_screen) = world_to_screen(&record.head, data) {
                 painter.circle_filled(head_screen, 3.0, color);
             }

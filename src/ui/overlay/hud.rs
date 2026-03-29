@@ -94,11 +94,11 @@ impl App {
         let aim_fov = weapon_config.fov;
 
         if weapon_config.distance_adjusted_fov {
-            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 125.0, Color32::GREEN);
-            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 250.0, Color32::YELLOW);
-            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 500.0, Color32::RED);
+            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 125.0, self.config.hud.fov_circle_close_color);
+            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 250.0, self.config.hud.fov_circle_mid_color);
+            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 500.0, self.config.hud.fov_circle_far_color);
         } else {
-            self.draw_simple_fov_circle(painter, data, aim_fov, Color32::WHITE);
+            self.draw_simple_fov_circle(painter, data, aim_fov, self.config.hud.fov_circle_color);
         }
     }
 

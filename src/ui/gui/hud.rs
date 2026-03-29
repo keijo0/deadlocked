@@ -26,6 +26,38 @@ impl App {
                     if color_picker(ui, "Crosshair Color", &mut self.config.hud.crosshair_color) {
                         self.send_config();
                     }
+
+                    if color_picker(
+                        ui,
+                        "FOV Circle (close)",
+                        &mut self.config.hud.fov_circle_close_color,
+                    ) {
+                        self.send_config();
+                    }
+
+                    if color_picker(
+                        ui,
+                        "FOV Circle (mid)",
+                        &mut self.config.hud.fov_circle_mid_color,
+                    ) {
+                        self.send_config();
+                    }
+
+                    if color_picker(
+                        ui,
+                        "FOV Circle (far)",
+                        &mut self.config.hud.fov_circle_far_color,
+                    ) {
+                        self.send_config();
+                    }
+
+                    if color_picker(
+                        ui,
+                        "FOV Circle",
+                        &mut self.config.hud.fov_circle_color,
+                    ) {
+                        self.send_config();
+                    }
                 });
 
                 ui.collapsing("Grenade Trails", |ui| {
@@ -33,6 +65,14 @@ impl App {
                         .checkbox(&mut self.config.hud.grenade_trails, "Grenade Trails")
                         .changed()
                     {
+                        self.send_config();
+                    }
+
+                    if color_picker(
+                        ui,
+                        "Inferno Color",
+                        &mut self.config.hud.inferno_color,
+                    ) {
                         self.send_config();
                     }
 

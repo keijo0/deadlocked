@@ -103,7 +103,7 @@ impl App {
 
         let shape = Shape::convex_polygon(
             hull,
-            Color32::from_rgba_unmultiplied(255, 0, 0, 127),
+            self.config.hud.inferno_color,
             Stroke::NONE,
         );
         painter.add(shape);
