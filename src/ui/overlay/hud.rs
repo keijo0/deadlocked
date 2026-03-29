@@ -194,15 +194,15 @@ impl App {
 
         painter.line(
             vec![
-                pos2(data.window_size.x / 2.0, data.window_size.y / 2.0 - 50.0),
-                pos2(data.window_size.x / 2.0, data.window_size.y / 2.0 + 50.0),
+                pos2(data.window_size.x / 2.0, data.window_size.y / 2.0 - 8.0),
+                pos2(data.window_size.x / 2.0, data.window_size.y / 2.0 + 8.0),
             ],
             Stroke::new(self.config.hud.line_width, self.config.hud.crosshair_color),
         );
         painter.line(
             vec![
-                pos2(data.window_size.x / 2.0 - 50.0, data.window_size.y / 2.0),
-                pos2(data.window_size.x / 2.0 + 50.0, data.window_size.y / 2.0),
+                pos2(data.window_size.x / 2.0 - 10.0, data.window_size.y / 2.0),
+                pos2(data.window_size.x / 2.0 + 10.0, data.window_size.y / 2.0),
             ],
             Stroke::new(self.config.hud.line_width, self.config.hud.crosshair_color),
         );
