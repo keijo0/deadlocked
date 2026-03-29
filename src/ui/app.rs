@@ -27,7 +27,7 @@ use crate::{
     },
 };
 
-const FRAME_RATE: u64 = 120;
+const FRAME_RATE: u64 = 200;
 const FRAME_DURATION: Duration = Duration::from_micros(1_000_000 / FRAME_RATE);
 
 pub struct App {

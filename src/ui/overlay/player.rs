@@ -181,7 +181,7 @@ impl App {
                 painter,
                 player.health.to_string(),
                 pos2(health_x, bar_top_y),
-                Align2::CENTER_BOTTOM,
+                Align2::RIGHT_TOP,
                 Some(Self::alpha(health_color, alpha)),
             );
         }

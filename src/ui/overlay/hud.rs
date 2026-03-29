@@ -36,7 +36,7 @@ impl App {
             pos,
             Align2::LEFT_TOP,
             Some(self.config.accent_color),
-            self.config.hud.font_size * 1.5,
+            self.config.hud.font_size * 2.0,
         );
     }
 
@@ -71,7 +71,7 @@ impl App {
                 pos2(0.0, data.window_size.y),
                 pos2(data.window_size.x * fraction, data.window_size.y),
             ],
-            Stroke::new(self.config.hud.line_width * 3.0, color),
+            Stroke::new(self.config.hud.line_width * 2.0, color),
         );
     }
 
@@ -217,7 +217,7 @@ impl App {
         let center_y = data.window_size.y / 2.0;
         // Distance from screen edge where arrow centers are placed
         const MARGIN: f32 = 50.0;
-        const ARROW_SIZE: f32 = 10.0;
+        const ARROW_SIZE: f32 = 15.0;
 
         let half_w = data.window_size.x / 2.0 - MARGIN;
         let half_h = data.window_size.y / 2.0 - MARGIN;
