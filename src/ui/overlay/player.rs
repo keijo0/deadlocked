@@ -176,16 +176,6 @@ impl App {
             );
         }
 
-        if self.config.player.health_text {
-            self.text(
-                painter,
-                player.health.to_string(),
-                pos2(health_x, bar_top_y),
-                Align2::RIGHT_TOP,
-                Some(Self::alpha(health_color, alpha)),
-            );
-        }
-
         if self.config.player.armor_bar && player.armor > 0 {
             let x = bl.x
                 - self.config.hud.line_width
@@ -221,13 +211,13 @@ impl App {
             offset += font_size;
         }
 
-        if self.config.player.tags {
-            painter.text(
+        if self.config.player.health_text {
+            self.text(
+                painter,
+                player.health.to_string(),
                 pos2(tr.x + ew, tr.y + offset),
                 Align2::LEFT_TOP,
-                player.weapon.to_icon(),
-                icon_font.clone(),
-                text_color,
+                Some(Self::alpha(health_color, alpha)),
             );
         }
 
@@ -238,6 +228,16 @@ impl App {
                 pos2(bl.x + half_width, bl.y),
                 Align2::CENTER_TOP,
                 Some(text_color),
+            );
+        }
+
+        if self.config.player.tags {
+            painter.text(
+                pos2(bl.x + half_width, bl.y + font_size),
+                Align2::CENTER_TOP,
+                player.weapon.to_icon(),
+                icon_font.clone(),
+                text_color,
             );
         }
     }
