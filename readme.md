@@ -1,10 +1,49 @@
+#DONT USE THIS FORK
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # deadlocked
 
 <a href="https://matrix.to/#/%23open-source-cs2-hacking:matrix.org">
   <img src="https://img.shields.io/matrix/open-source-cs2-hacking%3Amatrix.org?style=for-the-badge&logo=matrix&label=Matrix" alt="Matrix invite" />
 </a>
 <a href="https://discord.gg/eXjG4Ar9Sx">
-  <img src="https://img.shields.io/discord/1333541580249890949?style=for-the-badge&logo=discord&logoColor=white&label=Discord" alt="Discord invite" />
+  <img src="https://img.shields.io/discord/13335a1580249890949?style=for-the-badge&logo=discord&logoColor=white&label=Discord" alt="Discord invite" />
 </a>
 
 simple cs2 aimbot and esp, for linux only.
