@@ -20,7 +20,7 @@ These features inject synthetic mouse/keyboard events and do **not** touch game 
 | **Aimbot** | Relative mouse movement |
 | **RCS (Recoil Control System)** | Relative mouse movement |
 | **Triggerbot** | Left mouse button press/release |
-| **Bunnyhop** | Space bar press/release |
+| **Bunnyhop (SEMI BROKEN ATM)** | Space bar press/release |
 
 ## Setup
 
