@@ -83,6 +83,8 @@ pub struct AimbotConfig {
     pub targeting_mode: TargetingMode,
     pub backtrack: bool,
     pub backtrack_ticks: u32,
+    pub auto_wall: bool,
+    pub min_damage: f32,
 }
 
 impl Default for AimbotConfig {
@@ -110,6 +112,8 @@ impl Default for AimbotConfig {
             targeting_mode: TargetingMode::Fov,
             backtrack: false,
             backtrack_ticks: 12,
+            auto_wall: false,
+            min_damage: 100.0,
         }
     }
 }

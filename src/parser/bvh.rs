@@ -1,6 +1,7 @@
 use std::{
     fs::File,
     io::{BufWriter, Read as _},
+    sync::Arc,
 };
 
 use glam::Vec3;
@@ -77,11 +78,12 @@ pub struct Triangle {
     pub v0: Vec3,
     pub v1: Vec3,
     pub v2: Vec3,
+    pub material: Arc<str>,
 }
 
 impl Triangle {
-    pub fn new(v0: Vec3, v1: Vec3, v2: Vec3) -> Self {
-        Self { v0, v1, v2 }
+    pub fn new(v0: Vec3, v1: Vec3, v2: Vec3, material: Arc<str>) -> Self {
+        Self { v0, v1, v2, material }
     }
 
     pub fn aabb(&self) -> Aabb {
@@ -269,9 +271,19 @@ impl Bvh {
         let inv_dir = 1.0 / dir_norm;
 
         if let Some(root) = self.root {
-            !self.segment_intersect_node(root, start, dir_norm, inv_dir, distance)
+            self.segment_intersect_node(root, start, dir_norm, inv_dir, distance)
+                .is_empty()
         } else {
             true
+        }
+    }
+
+    pub fn raycast(&self, origin: Vec3, direction: Vec3, max_t: f32) -> Vec<(f32, &Triangle)> {
+        let inv_dir = 1.0 / direction;
+        if let Some(root) = self.root {
+            self.segment_intersect_node(root, origin, direction, inv_dir, max_t)
+        } else {
+            Vec::new()
         }
     }
 
@@ -282,28 +294,33 @@ impl Bvh {
         direction: Vec3,
         inv_dir: Vec3,
         max_t: f32,
-    ) -> bool {
+    ) -> Vec<(f32, &Triangle)> {
         let node = &self.nodes[node_idx];
 
         if !node.aabb().ray_intersect(origin, inv_dir, max_t) {
-            return false;
+            return Vec::new();
         }
 
         match node {
             BvhNode::Leaf { primitives, .. } => {
+                let mut hits = Vec::new();
                 for &idx in primitives {
                     if let Some((t, _, _)) = self.triangles[idx].ray_intersect(origin, direction)
                         && t >= 0.0
                         && t <= max_t
                     {
-                        return true;
+                        hits.push((t, &self.triangles[idx]));
                     }
                 }
-                false
+                hits
             }
             BvhNode::Branch { left, right, .. } => {
-                self.segment_intersect_node(*left, origin, direction, inv_dir, max_t)
-                    || self.segment_intersect_node(*right, origin, direction, inv_dir, max_t)
+                let mut hits =
+                    self.segment_intersect_node(*left, origin, direction, inv_dir, max_t);
+                hits.extend(self.segment_intersect_node(
+                    *right, origin, direction, inv_dir, max_t,
+                ));
+                hits
             }
         }
     }

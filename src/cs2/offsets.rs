@@ -133,6 +133,15 @@ pub struct WeaponOffsets {
 }
 
 #[derive(Debug, Default)]
+pub struct WeaponVDataOffsets {
+    pub damage: u64,                // i32 (m_nDamage)
+    pub headshot_multiplier: u64,   // f32 (m_flHeadshotMultiplier)
+    pub armor_ratio: u64,           // f32 (m_flArmorRatio)
+    pub penetration: u64,           // f32 (m_flPenetration)
+    pub range_modifier: u64,        // f32 (m_flRangeModifier)
+}
+
+#[derive(Debug, Default)]
 pub struct PlantedC4Offsets {
     pub is_ticking: u64,       // bool (m_bBombTicking)
     pub blow_time: u64,        // f32 (m_flC4Blow)
@@ -166,6 +175,7 @@ pub struct Offsets {
     pub weapon_services: WeaponServicesOffsets,
     pub observer_services: ObserverServicesOffsets,
     pub weapon: WeaponOffsets,
+    pub weapon_vdata: WeaponVDataOffsets,
     pub planted_c4: PlantedC4Offsets,
     pub entity_identity: EntityIdentityOffsets,
 }

@@ -154,6 +154,28 @@ impl App {
             ) {
                 self.send_config();
             }
+
+            if checkbox_hover(
+                ui,
+                "Auto Wall",
+                "Aim at enemies through walls when the bullet can deal enough damage",
+                &mut self.weapon_config().aimbot.auto_wall,
+            ) {
+                self.send_config();
+            }
+
+            if self.weapon_config().aimbot.auto_wall {
+                if drag(
+                    ui,
+                    "Min Damage",
+                    DragValue::new(&mut self.weapon_config().aimbot.min_damage)
+                        .range(1.0..=500.0)
+                        .speed(1.0)
+                        .max_decimals(0),
+                ) {
+                    self.send_config();
+                }
+            }
         });
 
         ui.collapsing("Bones", |ui| {

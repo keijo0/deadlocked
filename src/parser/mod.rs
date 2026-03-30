@@ -4,6 +4,7 @@ use std::{
     io::{BufReader, Read, Write as _},
     path::{Path, PathBuf},
     process::Command,
+    sync::Arc,
 };
 
 use bytemuck::AnyBitPattern;
@@ -225,6 +226,7 @@ fn parse_map(map: &str, maps_dir: &Path, force_reparse: bool) {
         if !material.starts_with('$') {
             continue;
         }
+        let material: Arc<str> = Arc::from(material.as_str());
 
         let Some(vertex_element) = elements.get("DmeVertexData_bind") else {
             continue;
@@ -258,14 +260,14 @@ fn parse_map(map: &str, maps_dir: &Path, force_reparse: bool) {
                 let v1 = vertices[face[0] as usize];
                 let v2 = vertices[face[1] as usize];
                 let v3 = vertices[face[2] as usize];
-                let triangle = Triangle::new(v1, v2, v3);
+                let triangle = Triangle::new(v1, v2, v3, material.clone());
                 map_bvh.insert(triangle);
             } else {
                 for i in 1..face.len() - 1 {
                     let v1 = vertices[face[0] as usize];
                     let v2 = vertices[face[i] as usize];
                     let v3 = vertices[face[i + 1] as usize];
-                    let triangle = Triangle::new(v1, v2, v3);
+                    let triangle = Triangle::new(v1, v2, v3, material.clone());
                     map_bvh.insert(triangle);
                 }
             }

@@ -67,7 +67,9 @@ impl CS2 {
             return;
         }
 
-        if config.visibility_check && !target.visible(self, &local_player) {
+        // When auto_wall is enabled, skip the direct visibility check — the
+        // bullet penetration calculation below handles that instead.
+        if config.visibility_check && !config.auto_wall && !target.visible(self, &local_player) {
             return;
         }
 
@@ -75,7 +77,41 @@ impl CS2 {
             return;
         }
 
-        let target_angle = {
+        let target_angle = if config.auto_wall {
+            // Auto-wall mode: pick the bone that deals the most damage
+            let mut best_damage = 0.0_f32;
+            let mut best_angle = glam::Vec2::ZERO;
+
+            for bone in &config.bones {
+                let bone_pos = target.bone_position(self, bone.u64());
+                let origin = local_player.eye_position(self);
+                let displacement = bone_pos - origin;
+                let direction = displacement.normalize();
+                let distance = displacement.length();
+                let damage = self.handle_bullet_penetration(
+                    origin,
+                    direction,
+                    distance,
+                    target,
+                    bone.u64(),
+                    true,
+                );
+
+                let health = target.health(self) as f32;
+                if damage > best_damage && (damage >= config.min_damage || damage >= health) {
+                    best_damage = damage;
+                    best_angle = self.angle_to_target(
+                        &local_player,
+                        &bone_pos,
+                        &self.target.previous_aim_punch,
+                    );
+                }
+            }
+            if best_damage == 0.0 {
+                return;
+            }
+            best_angle
+        } else {
             let mut smallest_fov = 360.0;
             let mut smallest_angle = glam::Vec2::ZERO;
 
@@ -129,8 +165,11 @@ impl CS2 {
             } else {
                 for bone in &config.bones {
                     let bone_pos = target.bone_position(self, bone.u64());
-                    let angle =
-                        self.angle_to_target(&local_player, &bone_pos, &self.target.previous_aim_punch);
+                    let angle = self.angle_to_target(
+                        &local_player,
+                        &bone_pos,
+                        &self.target.previous_aim_punch,
+                    );
                     let fov = angles_to_fov(&local_player.view_angles(self), &angle);
                     if fov < smallest_fov {
                         smallest_fov = fov;

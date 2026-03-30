@@ -77,6 +77,15 @@ pub enum Weapon {
     C4,
 }
 
+#[derive(Debug, Default)]
+pub struct WeaponVData {
+    pub damage: i32,
+    pub headshot_multiplier: f32,
+    pub armor_ratio: f32,
+    pub penetration: f32,
+    pub range_modifier: f32,
+}
+
 impl Weapon {
     pub fn from_handle(handle: u64, cs2: &CS2) -> Self {
         if handle > u64::MAX - 50000 {
@@ -89,6 +98,21 @@ impl Weapon {
                 + cs2.offsets.weapon.item_definition_index,
         );
         Self::from_index(weapon_index)
+    }
+
+    pub fn vdata(handle: u64, cs2: &CS2) -> WeaponVData {
+        let vdata_ptr: u64 = cs2.process.read(handle + 0x500);
+        WeaponVData {
+            damage: cs2.process.read(vdata_ptr + cs2.offsets.weapon_vdata.damage),
+            headshot_multiplier: cs2
+                .process
+                .read(vdata_ptr + cs2.offsets.weapon_vdata.headshot_multiplier),
+            armor_ratio: cs2.process.read(vdata_ptr + cs2.offsets.weapon_vdata.armor_ratio),
+            penetration: cs2.process.read(vdata_ptr + cs2.offsets.weapon_vdata.penetration),
+            range_modifier: cs2
+                .process
+                .read(vdata_ptr + cs2.offsets.weapon_vdata.range_modifier),
+        }
     }
 
     pub fn from_index(index: u16) -> Self {

@@ -197,6 +197,14 @@ impl CS2 {
         offsets.weapon.item_definition_index =
             client.get("C_EconItemView", "m_iItemDefinitionIndex")?;
 
+        offsets.weapon_vdata.damage = client.get("CCSWeaponBaseVData", "m_nDamage")?;
+        offsets.weapon_vdata.headshot_multiplier =
+            client.get("CCSWeaponBaseVData", "m_flHeadshotMultiplier")?;
+        offsets.weapon_vdata.armor_ratio = client.get("CCSWeaponBaseVData", "m_flArmorRatio")?;
+        offsets.weapon_vdata.penetration = client.get("CCSWeaponBaseVData", "m_flPenetration")?;
+        offsets.weapon_vdata.range_modifier =
+            client.get("CCSWeaponBaseVData", "m_flRangeModifier")?;
+
         offsets.planted_c4.is_ticking = client.get("C_PlantedC4", "m_bBombTicking")?;
         offsets.planted_c4.blow_time = client.get("C_PlantedC4", "m_flC4Blow")?;
         offsets.planted_c4.being_defused = client.get("C_PlantedC4", "m_bBeingDefused")?;

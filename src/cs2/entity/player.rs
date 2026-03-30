@@ -1,4 +1,4 @@
-use super::weapon::Weapon;
+use super::weapon::{Weapon, WeaponVData};
 use std::collections::HashMap;
 
 use glam::{Vec2, Vec3, vec2};
@@ -186,6 +186,11 @@ impl Player {
         // BasePlayerWeapon/EconEntity
         let current_weapon: u64 = cs2.process.read(self.pawn + cs2.offsets.pawn.weapon);
         Weapon::from_handle(current_weapon, cs2)
+    }
+
+    pub fn weapon_vdata(&self, cs2: &CS2) -> WeaponVData {
+        let current_weapon: u64 = cs2.process.read(self.pawn + cs2.offsets.pawn.weapon);
+        Weapon::vdata(current_weapon, cs2)
     }
 
     pub fn all_weapons(&self, cs2: &CS2) -> Vec<Weapon> {
