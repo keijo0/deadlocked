@@ -82,10 +82,6 @@ impl App {
                 self.send_config();
             }
 
-            if checkbox(ui, "Head Circle", &mut self.config.player.head_circle) {
-                self.send_config();
-            }
-
             if checkbox_hover(
                 ui,
                 "Visible Only",

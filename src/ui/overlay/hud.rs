@@ -78,23 +78,6 @@ impl App {
         );
     }
 
-    pub fn draw_fov_circle(&self, painter: &Painter, data: &Data) {
-        if !self.config.hud.fov_circle || !data.in_game {
-            return;
-        }
-
-        let weapon_config = self.aimbot_config(&data.weapon);
-        let aim_fov = weapon_config.fov;
-
-        if weapon_config.distance_adjusted_fov {
-            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 125.0, Color32::GREEN);
-            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 250.0, Color32::YELLOW);
-            self.draw_distance_scaled_fov_circle(painter, data, aim_fov, 500.0, Color32::RED);
-        } else {
-            self.draw_simple_fov_circle(painter, data, aim_fov, Color32::WHITE);
-        }
-    }
-
     pub fn draw_keybind_list(&self, painter: &Painter, data: &Data) {
         if !self.config.hud.keybind_list {
             return;
@@ -130,59 +113,6 @@ impl App {
             Align2::LEFT_TOP,
             None,
         );
-    }
-
-    fn get_current_fov(&self) -> f32 {
-        crate::constants::cs2::DEFAULT_FOV as f32
-    }
-
-    fn calculate_fov_radius(&self, data: &Data, target_fov: f32) -> f32 {
-        let current_fov = self.get_current_fov();
-        let screen_width = data.window_size.x;
-
-        let current_fov_tan = (current_fov.to_radians() / 2.0).tan();
-        if current_fov_tan == 0.0 {
-            return 0.0;
-        }
-
-        let target_fov_tan = (target_fov.to_radians() / 2.0).tan();
-        (target_fov_tan / current_fov_tan) * (screen_width / 2.0)
-    }
-
-    fn draw_fov_circle_impl(&self, painter: &Painter, data: &Data, radius: f32, color: Color32) {
-        let center = pos2(data.window_size.x / 2.0, data.window_size.y / 2.0);
-        let stroke = Stroke::new(self.config.hud.line_width, color);
-        painter.circle_stroke(center, radius, stroke);
-    }
-
-    fn get_distance_fov_scale(&self, distance: f32) -> f32 {
-        (5.0 - (distance / 125.0)).max(1.0)
-    }
-
-    fn draw_simple_fov_circle(
-        &self,
-        painter: &Painter,
-        data: &Data,
-        target_fov: f32,
-        color: Color32,
-    ) {
-        let radius = self.calculate_fov_radius(data, target_fov);
-        self.draw_fov_circle_impl(painter, data, radius, color);
-    }
-
-    fn draw_distance_scaled_fov_circle(
-        &self,
-        painter: &Painter,
-        data: &Data,
-        base_aim_fov: f32,
-        distance: f32,
-        color: Color32,
-    ) {
-        let scale = self.get_distance_fov_scale(distance);
-        let target_fov = base_aim_fov * scale;
-
-        let radius = self.calculate_fov_radius(data, target_fov);
-        self.draw_fov_circle_impl(painter, data, radius, color);
     }
 
     pub fn draw_sniper_crosshair(&self, painter: &Painter, data: &Data) {

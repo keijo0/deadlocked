@@ -269,28 +269,6 @@ impl App {
 
             painter.line(vec![a, b], stroke);
         }
-
-        // head circle
-        if !self.config.player.head_circle {
-            return;
-        }
-        let Some(neck) = player.bones.get(&Bones::Neck) else {
-            return;
-        };
-        let Some(spine) = player.bones.get(&Bones::Spine3) else {
-            return;
-        };
-
-        let Some(neck) = world_to_screen(neck, data) else {
-            return;
-        };
-        let Some(spine) = world_to_screen(spine, data) else {
-            return;
-        };
-
-        let height = spine.y - neck.y;
-        let pos = pos2(neck.x - (spine.x - neck.x) / 2.0, neck.y - height / 2.0);
-        painter.circle_stroke(pos, height / 2.0, stroke);
     }
 
     pub fn update_player_sounds(&mut self) {

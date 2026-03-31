@@ -226,7 +226,6 @@ pub struct PlayerConfig {
     pub box_invisible_color: Color32,
     pub draw_skeleton: DrawMode,
     pub skeleton_color: Color32,
-    pub head_circle: bool,
     pub health_bar: bool,
     pub health_text: bool,
     pub armor_bar: bool,
@@ -249,7 +248,6 @@ impl Default for PlayerConfig {
             box_invisible_color: Color32::RED,
             draw_skeleton: DrawMode::Health,
             skeleton_color: Color32::WHITE,
-            head_circle: true,
             health_bar: true,
             health_text: true,
             armor_bar: true,
@@ -293,7 +291,6 @@ impl Default for SoundConfig {
 pub struct HudConfig {
     pub bomb_timer: bool,
     pub spectator_list: bool,
-    pub fov_circle: bool,
     pub sniper_crosshair: bool,
     pub crosshair_color: Color32,
     pub dropped_weapons: bool,
@@ -316,7 +313,6 @@ impl Default for HudConfig {
         Self {
             bomb_timer: true,
             spectator_list: false,
-            fov_circle: false,
             sniper_crosshair: true,
             crosshair_color: Color32::WHITE,
             dropped_weapons: true,

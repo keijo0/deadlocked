@@ -55,13 +55,6 @@ impl App {
             }
 
             if ui
-                .checkbox(&mut self.config.hud.fov_circle, "FOV Circle")
-                .changed()
-            {
-                self.send_config();
-            }
-
-            if ui
                 .checkbox(&mut self.config.hud.sniper_crosshair, "Sniper Crosshair")
                 .changed()
             {
