@@ -11,16 +11,17 @@ The following features from the upstream project have been dropped because they 
 
 All other functionality (ESP, aimbot, triggerbot, bunnyhop, etc.) is retained.
 
-## Features that write to the input device (`/dev/uinput`)
+## Features that write to the input device (`/dev/uinput` or `xdotool`)
 
 These features inject synthetic mouse/keyboard events and do **not** touch game memory:
 
-| Feature | What is written |
-|---|---|
-| **Aimbot** | Relative mouse movement |
-| **RCS (Recoil Control System)** | Relative mouse movement |
-| **Triggerbot** | Left mouse button press/release |
-| **Bunnyhop (SEMI BROKEN ATM)** | Space bar press/release |
+| Feature | Mechanism | What is written |
+|---|---|---|
+| **Aimbot** | `/dev/uinput` | Relative mouse movement |
+| **RCS (Recoil Control System)** | `/dev/uinput` | Relative mouse movement |
+| **Triggerbot** | `/dev/uinput` | Left mouse button press/release |
+| **Bunnyhop (SEMI BROKEN ATM)** | `/dev/uinput` | Space bar press/release |
+| **Anti-AFK** | `xdotool` subprocess | Small relative mouse movement |
 
 ## Setup
 
