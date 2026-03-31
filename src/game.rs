@@ -151,6 +151,8 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
         let interval_min = cfg.interval_min.max(1.0) as u64;
         let interval_max = cfg.interval_max.max(cfg.interval_min).max(1.0) as u64;
         let walk_bot = cfg.walk_bot;
+        let walk_duration_min_ms = (cfg.walk_duration_min.max(0.05) * 1000.0) as u64;
+        let walk_duration_max_ms = (cfg.walk_duration_max.max(cfg.walk_duration_min).max(0.05) * 1000.0) as u64;
         drop(cfg);
 
         if last_action.elapsed() >= Duration::from_secs(interval_min) {
@@ -170,8 +172,8 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
             if walk_bot {
                 const WASD: [&str; 4] = ["w", "a", "s", "d"];
                 let key = WASD[lcg_rand(&mut rng_state, 4) as usize];
-                // hold duration: 300-800 ms
-                let hold_ms = 300 + lcg_rand(&mut rng_state, 501);
+                let hold_range = (walk_duration_max_ms - walk_duration_min_ms + 1).max(1);
+                let hold_ms = walk_duration_min_ms + lcg_rand(&mut rng_state, hold_range);
 
                 match std::process::Command::new("xdotool")
                     .args(["keydown", "--clearmodifiers", key])

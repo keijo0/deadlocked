@@ -47,6 +47,15 @@ impl App {
 
         self.antiafk_settings(ui);
 
+        collapsing_open(ui, "Server Picker", |ui| {
+            ui.label("Block or unblock game server relays to control matchmaking.");
+            if ui.button("Open Server Picker X").clicked() {
+                let _ = std::process::Command::new("xdg-open")
+                    .arg("https://github.com/FN-FAL113/server-picker-x/releases")
+                    .status();
+            }
+        });
+
         collapsing_open(ui, "HUD", |ui| {
             if checkbox(
                 ui,

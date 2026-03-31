@@ -32,6 +32,26 @@ impl App {
             ) {
                 self.send_config();
             }
+
+            if drag(
+                ui,
+                "Walk Duration Min (s)",
+                DragValue::new(&mut self.config.misc.antiafk.walk_duration_min)
+                    .range(0.05..=5.0)
+                    .speed(0.05),
+            ) {
+                self.send_config();
+            }
+
+            if drag(
+                ui,
+                "Walk Duration Max (s)",
+                DragValue::new(&mut self.config.misc.antiafk.walk_duration_max)
+                    .range(0.05..=5.0)
+                    .speed(0.05),
+            ) {
+                self.send_config();
+            }
         });
     }
 }
