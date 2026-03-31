@@ -2,7 +2,7 @@ use egui::{DragValue, Ui};
 
 use crate::ui::{
     app::App,
-    gui::helpers::{checkbox, checkbox_hover, collapsing_open, drag, keybind},
+    gui::helpers::{checkbox, collapsing_open, drag, keybind},
 };
 
 impl App {
@@ -43,16 +43,9 @@ impl App {
             ) {
                 self.send_config();
             }
-
-            if checkbox_hover(
-                ui,
-                "Show Backtrack",
-                "Visualise stored backtrack positions on the overlay",
-                &mut self.config.player.show_backtrack,
-            ) {
-                self.send_config();
-            }
         });
+
+        self.antiafk_settings(ui);
 
         collapsing_open(ui, "HUD", |ui| {
             if checkbox(

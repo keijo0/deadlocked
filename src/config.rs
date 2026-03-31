@@ -234,7 +234,6 @@ pub struct PlayerConfig {
     pub weapon_icon: bool,
     pub tags: bool,
     pub visible_only: bool,
-    pub show_backtrack: bool,
     pub sound: SoundConfig,
 }
 
@@ -258,7 +257,6 @@ impl Default for PlayerConfig {
             weapon_icon: true,
             tags: true,
             visible_only: false,
-            show_backtrack: false,
             sound: SoundConfig::default(),
         }
     }
@@ -340,9 +338,28 @@ impl Default for HudConfig {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
+pub struct AntiAfk {
+    pub enabled: bool,
+    pub interval_min: f32,
+    pub interval_max: f32,
+}
+
+impl Default for AntiAfk {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            interval_min: 5.0,
+            interval_max: 10.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct UnsafeConfig {
     pub bunnyhop: bool,
     pub bunnyhop_hotkey: KeyCode,
+    pub antiafk: AntiAfk,
 }
 
 impl Default for UnsafeConfig {
@@ -350,6 +367,7 @@ impl Default for UnsafeConfig {
         Self {
             bunnyhop: false,
             bunnyhop_hotkey: KeyCode::V,
+            antiafk: AntiAfk::default(),
         }
     }
 }

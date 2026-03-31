@@ -8,6 +8,7 @@ use crate::{
 };
 
 pub mod aimbot;
+mod antiafk;
 mod config;
 mod grenade;
 mod helpers;
