@@ -119,10 +119,8 @@ impl App {
         let half_height = bottom.y - top.y;
         let width = half_height / 2.0;
         let half_width = width / 2.0;
-        // quarter width
-        let qw = half_width - 2.0;
-        // eigth width
-        let ew = qw / 2.0;
+        // corner arm: equal length in both axes, proportional to box width
+        let arm = (half_width / 2.0).max(4.0);
 
         let tl = pos2(top.x - half_width, top.y);
         let tr = pos2(top.x + half_width, top.y);
@@ -130,31 +128,36 @@ impl App {
         let br = pos2(bottom.x + half_width, bottom.y);
 
         if self.config.player.draw_box != DrawMode::None {
-            if self.config.player.box_mode == BoxMode::Gap {
-                painter.line(
-                    vec![pos2(tl.x + ew, tl.y), tl, pos2(tl.x, tl.y + qw)],
-                    stroke,
-                );
-                painter.line(
-                    vec![pos2(tr.x - ew, tl.y), tr, pos2(tr.x, tr.y + qw)],
-                    stroke,
-                );
-                painter.line(
-                    vec![pos2(bl.x + ew, bl.y), bl, pos2(bl.x, bl.y - qw)],
-                    stroke,
-                );
-                painter.line(
-                    vec![pos2(br.x - ew, bl.y), br, pos2(br.x, br.y - qw)],
-                    stroke,
-                );
+            let outline_stroke = if self.config.hud.text_outline {
+                Some(Stroke::new(
+                    self.config.hud.line_width + 2.0,
+                    Color32::from_rgba_unmultiplied(0, 0, 0, color.a()),
+                ))
             } else {
-                painter.rect(
-                    egui::Rect::from_min_max(tl, br),
-                    0,
-                    Color32::TRANSPARENT,
-                    stroke,
-                    egui::StrokeKind::Middle,
-                );
+                None
+            };
+
+            if self.config.player.box_mode == BoxMode::Gap {
+                let corners: [Vec<egui::Pos2>; 4] = [
+                    vec![pos2(tl.x + arm, tl.y), tl, pos2(tl.x, tl.y + arm)],
+                    vec![pos2(tr.x - arm, tr.y), tr, pos2(tr.x, tr.y + arm)],
+                    vec![pos2(bl.x + arm, bl.y), bl, pos2(bl.x, bl.y - arm)],
+                    vec![pos2(br.x - arm, br.y), br, pos2(br.x, br.y - arm)],
+                ];
+                if let Some(os) = outline_stroke {
+                    for corner in &corners {
+                        painter.line(corner.clone(), os);
+                    }
+                }
+                for corner in corners {
+                    painter.line(corner, stroke);
+                }
+            } else {
+                let rect = egui::Rect::from_min_max(tl, br);
+                if let Some(os) = outline_stroke {
+                    painter.rect(rect, 0, Color32::TRANSPARENT, os, egui::StrokeKind::Middle);
+                }
+                painter.rect(rect, 0, Color32::TRANSPARENT, stroke, egui::StrokeKind::Middle);
             }
         }
 
@@ -201,7 +204,7 @@ impl App {
             self.text(
                 painter,
                 &player.name,
-                pos2(tr.x + ew, tr.y + offset),
+                pos2(tr.x + arm, tr.y + offset),
                 Align2::LEFT_TOP,
                 Some(text_color),
             );
@@ -212,7 +215,7 @@ impl App {
             self.text(
                 painter,
                 player.health.to_string(),
-                pos2(tr.x + ew, tr.y + offset),
+                pos2(tr.x + arm, tr.y + offset),
                 Align2::LEFT_TOP,
                 Some(Self::alpha(health_color, alpha)),
             );

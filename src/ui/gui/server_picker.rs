@@ -182,35 +182,29 @@ impl App {
                 self.server_regions[i].blocked = false;
             }
             if let Some(continent) = to_block_continent {
-                let ips_to_block: Vec<Vec<String>> = self
+                let indices: Vec<usize> = self
                     .server_regions
                     .iter()
-                    .filter(|r| r.continent == continent && !r.blocked)
-                    .map(|r| r.relay_ips.clone())
+                    .enumerate()
+                    .filter(|(_, r)| r.continent == continent && !r.blocked)
+                    .map(|(i, _)| i)
                     .collect();
-                for ips in &ips_to_block {
-                    block_region(ips);
-                }
-                for region in &mut self.server_regions {
-                    if region.continent == continent && !region.blocked {
-                        region.blocked = true;
-                    }
+                for i in &indices {
+                    block_region(&self.server_regions[*i].relay_ips.clone());
+                    self.server_regions[*i].blocked = true;
                 }
             }
             if let Some(continent) = to_unblock_continent {
-                let ips_to_unblock: Vec<Vec<String>> = self
+                let indices: Vec<usize> = self
                     .server_regions
                     .iter()
-                    .filter(|r| r.continent == continent && r.blocked)
-                    .map(|r| r.relay_ips.clone())
+                    .enumerate()
+                    .filter(|(_, r)| r.continent == continent && r.blocked)
+                    .map(|(i, _)| i)
                     .collect();
-                for ips in &ips_to_unblock {
-                    unblock_region(ips);
-                }
-                for region in &mut self.server_regions {
-                    if region.continent == continent && region.blocked {
-                        region.blocked = false;
-                    }
+                for i in &indices {
+                    unblock_region(&self.server_regions[*i].relay_ips.clone());
+                    self.server_regions[*i].blocked = false;
                 }
             }
         });
