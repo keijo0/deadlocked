@@ -17,7 +17,6 @@ pub mod cs2 {
     pub const TEAM_CT: u8 = 3;
 
     pub const WEAPON_UNKNOWN: &str = "unknown";
-    pub const DEFAULT_FOV: u32 = 90;
 
     pub const SOUND_ESP_FOOTSTEP_DIAMETER_DEFAULT: f32 = 2000.0;
     pub const SOUND_ESP_GUNSHOT_DIAMETER_DEFAULT: f32 = 3000.0;
