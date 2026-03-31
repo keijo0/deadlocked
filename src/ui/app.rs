@@ -19,6 +19,7 @@ use crate::{
     cs2::entity::weapon::Weapon,
     data::{Data, SoundType},
     message::{GameStatus, Message},
+    server_picker::{ServerRegion, new_fetch_result},
     ui::{
         grenades::{Grenade, GrenadeList, read_grenades},
         gui::{Tab, aimbot::AimbotTab},
@@ -55,6 +56,12 @@ pub struct App {
     pub current_tab: Tab,
     pub aimbot_tab: AimbotTab,
     pub aimbot_weapon: Weapon,
+
+    // Server Picker
+    pub server_regions: Vec<ServerRegion>,
+    pub server_picker_loading: bool,
+    pub server_picker_error: Option<String>,
+    pub server_picker_result: crate::server_picker::FetchResult,
 }
 
 impl App {
@@ -90,6 +97,11 @@ impl App {
             current_tab: Tab::Aimbot,
             aimbot_tab: AimbotTab::Global,
             aimbot_weapon: Weapon::Ak47,
+
+            server_regions: Vec::new(),
+            server_picker_loading: false,
+            server_picker_error: None,
+            server_picker_result: new_fetch_result(),
         };
         ret.send_config();
         ret

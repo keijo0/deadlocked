@@ -15,6 +15,7 @@ mod helpers;
 mod hud;
 mod player;
 mod misc;
+mod server_picker;
 
 #[derive(PartialEq)]
 pub enum Tab {

@@ -17,6 +17,7 @@ mod math;
 mod message;
 mod os;
 mod parser;
+mod server_picker;
 mod ui;
 
 #[cfg(not(target_os = "linux"))]
