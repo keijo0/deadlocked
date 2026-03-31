@@ -113,6 +113,27 @@ impl App {
             Align2::LEFT_TOP,
             None,
         );
+
+        let blocked: Vec<&str> = self
+            .server_regions
+            .iter()
+            .filter(|r| r.blocked)
+            .map(|r| r.description.as_str())
+            .collect();
+        if !blocked.is_empty() {
+            let blocked_str = if blocked.len() == self.server_regions.len() {
+                "all".to_string()
+            } else {
+                blocked.join(", ")
+            };
+            self.text(
+                painter,
+                format!("Blocked: {}", blocked_str),
+                position + egui::vec2(0.0, self.config.hud.font_size * 3.0),
+                Align2::LEFT_TOP,
+                None,
+            );
+        }
     }
 
     pub fn draw_sniper_crosshair(&self, painter: &Painter, data: &Data) {

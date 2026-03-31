@@ -61,6 +61,17 @@ impl App {
                         region.blocked = false;
                     }
                 }
+
+                if !self.server_regions.is_empty()
+                    && ui.button("Block All").clicked()
+                {
+                    for region in &mut self.server_regions {
+                        if !region.blocked {
+                            block_region(&region.relay_ips);
+                            region.blocked = true;
+                        }
+                    }
+                }
             });
 
             if let Some(err) = &self.server_picker_error {
