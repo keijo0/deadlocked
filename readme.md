@@ -11,6 +11,15 @@ The following features from the upstream project have been dropped because they 
 
 All other functionality (ESP, aimbot, triggerbot, bunnyhop, etc.) is retained.
 
+## Memory safety guarantee
+
+The game process memory handle is wrapped in a private `ReadOnlyMem` newtype
+(`src/os/process.rs`) that exposes **only** `read_at`.  Because the inner
+`File` is private and `OpenOptions` is never called with `.write(true)` for the
+process handle, it is a **compile-time error** to call any write operation on
+the game process memory.  The only syscall used against the game process is
+`process_vm_readv` (Linux read-only cross-process memory API).
+
 ## Features that write to the input device (`/dev/uinput` or `xdotool`)
 
 These features inject synthetic mouse/keyboard events and do **not** touch game memory:

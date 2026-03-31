@@ -29,6 +29,10 @@ impl Continent {
     }
 }
 
+/// Maps a Steam relay datacenter code (IATA airport/city code) to its continent.
+/// The input `name` is expected to be a lowercase 3-letter airport/city code as
+/// reported by the Steam server picker (e.g. `"iad"`, `"lhr"`, `"sgp"`).
+/// Returns `Continent::Unknown` for any code not in the mapping table.
 fn continent_from_name(name: &str) -> Continent {
     match name.to_lowercase().as_str() {
         // North America

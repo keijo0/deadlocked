@@ -13,10 +13,25 @@ use utils::log;
 
 use crate::constants::{cs2, elf};
 
+/// A file handle that exposes only read operations, providing a compile-time
+/// guarantee that the game process memory is never written to.
+#[derive(Debug)]
+struct ReadOnlyMem(File);
+
+impl ReadOnlyMem {
+    fn open(path: &str) -> std::io::Result<Self> {
+        OpenOptions::new().read(true).open(path).map(Self)
+    }
+
+    fn read_at(&self, buf: &mut [u8], offset: u64) -> std::io::Result<usize> {
+        self.0.read_at(buf, offset)
+    }
+}
+
 #[derive(Debug)]
 pub struct Process {
     pub pid: i32,
-    file: File,
+    file: ReadOnlyMem,
     path: PathBuf,
     pub min: u64,
     pub max: u64,
@@ -32,19 +47,16 @@ impl Process {
             return Self {
                 pid,
                 path: PathBuf::from(format!("/proc/{pid}")),
-                file: OpenOptions::new().read(true).open("/dev/null").unwrap(),
+                file: ReadOnlyMem::open("/dev/null").unwrap(),
                 min: u64::MAX,
                 max: u64::MIN,
             };
         }
 
-        let file = OpenOptions::new()
-            .read(true)
-            .open(format!("/proc/{pid}/mem"))
-            .unwrap_or_else(|e| {
-                log::error!("failed to open /proc/{pid}/mem: {e}");
-                OpenOptions::new().read(true).open("/dev/null").unwrap()
-            });
+        let file = ReadOnlyMem::open(&format!("/proc/{pid}/mem")).unwrap_or_else(|e| {
+            log::error!("failed to open /proc/{pid}/mem: {e}");
+            ReadOnlyMem::open("/dev/null").unwrap()
+        });
         let mut ret = Self {
             pid,
             path: PathBuf::from(format!("/proc/{pid}")),

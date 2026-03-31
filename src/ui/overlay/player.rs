@@ -119,8 +119,8 @@ impl App {
         let half_height = bottom.y - top.y;
         let width = half_height / 2.0;
         let half_width = width / 2.0;
-        // corner arm: equal length in both axes, proportional to box width
-        let arm = (half_width / 2.0).max(4.0);
+        // corner corner_size length: equal in both axes, proportional to box width
+        let corner_size = (half_width / 2.0).max(4.0);
 
         let tl = pos2(top.x - half_width, top.y);
         let tr = pos2(top.x + half_width, top.y);
@@ -139,10 +139,10 @@ impl App {
 
             if self.config.player.box_mode == BoxMode::Gap {
                 let corners: [Vec<egui::Pos2>; 4] = [
-                    vec![pos2(tl.x + arm, tl.y), tl, pos2(tl.x, tl.y + arm)],
-                    vec![pos2(tr.x - arm, tr.y), tr, pos2(tr.x, tr.y + arm)],
-                    vec![pos2(bl.x + arm, bl.y), bl, pos2(bl.x, bl.y - arm)],
-                    vec![pos2(br.x - arm, br.y), br, pos2(br.x, br.y - arm)],
+                    vec![pos2(tl.x + corner_size, tl.y), tl, pos2(tl.x, tl.y + corner_size)],
+                    vec![pos2(tr.x - corner_size, tr.y), tr, pos2(tr.x, tr.y + corner_size)],
+                    vec![pos2(bl.x + corner_size, bl.y), bl, pos2(bl.x, bl.y - corner_size)],
+                    vec![pos2(br.x - corner_size, br.y), br, pos2(br.x, br.y - corner_size)],
                 ];
                 if let Some(os) = outline_stroke {
                     for corner in &corners {
@@ -204,7 +204,7 @@ impl App {
             self.text(
                 painter,
                 &player.name,
-                pos2(tr.x + arm, tr.y + offset),
+                pos2(tr.x + corner_size, tr.y + offset),
                 Align2::LEFT_TOP,
                 Some(text_color),
             );
@@ -215,7 +215,7 @@ impl App {
             self.text(
                 painter,
                 player.health.to_string(),
-                pos2(tr.x + arm, tr.y + offset),
+                pos2(tr.x + corner_size, tr.y + offset),
                 Align2::LEFT_TOP,
                 Some(Self::alpha(health_color, alpha)),
             );
