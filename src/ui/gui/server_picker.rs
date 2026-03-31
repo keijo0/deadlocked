@@ -1,7 +1,7 @@
 use egui::{Color32, Grid, RichText, ScrollArea, Ui};
 
 use crate::{
-    server_picker::{block_region, fetch_servers_async, unblock_region},
+    server_picker::{Continent, block_region, fetch_servers_async, unblock_region},
     ui::{app::App, color::Colors, gui::helpers::collapsing_open},
 };
 
@@ -93,9 +93,11 @@ impl App {
 
             ui.add_space(4.0);
 
-            // Collect per-row actions before rendering to avoid borrow conflicts.
+            // Collect per-row and per-continent actions before rendering to avoid borrow conflicts.
             let mut to_block: Option<usize> = None;
             let mut to_unblock: Option<usize> = None;
+            let mut to_block_continent: Option<Continent> = None;
+            let mut to_unblock_continent: Option<Continent> = None;
 
             ScrollArea::vertical()
                 .id_salt("server_picker_scroll")
@@ -112,7 +114,40 @@ impl App {
                             ui.label(RichText::new("").strong());
                             ui.end_row();
 
+                            let mut prev_continent: Option<Continent> = None;
+
                             for (i, region) in self.server_regions.iter().enumerate() {
+                                // Emit a continent header row when the continent changes.
+                                if prev_continent != Some(region.continent) {
+                                    prev_continent = Some(region.continent);
+                                    ui.label(
+                                        RichText::new(region.continent.as_str())
+                                            .strong()
+                                            .color(Colors::TEXT),
+                                    );
+                                    ui.label(""); // key column — intentionally empty
+                                    ui.horizontal(|ui| {
+                                        if ui
+                                            .small_button(
+                                                RichText::new("Block All").color(Color32::RED),
+                                            )
+                                            .clicked()
+                                        {
+                                            to_block_continent = Some(region.continent);
+                                        }
+                                        if ui
+                                            .small_button(
+                                                RichText::new("Unblock All")
+                                                    .color(Colors::GREEN),
+                                            )
+                                            .clicked()
+                                        {
+                                            to_unblock_continent = Some(region.continent);
+                                        }
+                                    });
+                                    ui.end_row();
+                                }
+
                                 ui.label(&region.description);
                                 ui.label(
                                     RichText::new(&region.name)
@@ -145,6 +180,38 @@ impl App {
                 let relay_ips = self.server_regions[i].relay_ips.clone();
                 unblock_region(&relay_ips);
                 self.server_regions[i].blocked = false;
+            }
+            if let Some(continent) = to_block_continent {
+                let ips_to_block: Vec<Vec<String>> = self
+                    .server_regions
+                    .iter()
+                    .filter(|r| r.continent == continent && !r.blocked)
+                    .map(|r| r.relay_ips.clone())
+                    .collect();
+                for ips in &ips_to_block {
+                    block_region(ips);
+                }
+                for region in &mut self.server_regions {
+                    if region.continent == continent && !region.blocked {
+                        region.blocked = true;
+                    }
+                }
+            }
+            if let Some(continent) = to_unblock_continent {
+                let ips_to_unblock: Vec<Vec<String>> = self
+                    .server_regions
+                    .iter()
+                    .filter(|r| r.continent == continent && r.blocked)
+                    .map(|r| r.relay_ips.clone())
+                    .collect();
+                for ips in &ips_to_unblock {
+                    unblock_region(ips);
+                }
+                for region in &mut self.server_regions {
+                    if region.continent == continent && region.blocked {
+                        region.blocked = false;
+                    }
+                }
             }
         });
     }
