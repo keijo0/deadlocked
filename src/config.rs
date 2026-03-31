@@ -342,6 +342,7 @@ pub struct AntiAfk {
     pub enabled: bool,
     pub interval_min: f32,
     pub interval_max: f32,
+    pub walk_bot: bool,
 }
 
 impl Default for AntiAfk {
@@ -350,6 +351,7 @@ impl Default for AntiAfk {
             enabled: false,
             interval_min: 5.0,
             interval_max: 10.0,
+            walk_bot: false,
         }
     }
 }

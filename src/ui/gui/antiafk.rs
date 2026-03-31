@@ -9,6 +9,10 @@ impl App {
                 self.send_config();
             }
 
+            if checkbox(ui, "Walk Bot", &mut self.config.misc.antiafk.walk_bot) {
+                self.send_config();
+            }
+
             if drag(
                 ui,
                 "Min Interval (s)",

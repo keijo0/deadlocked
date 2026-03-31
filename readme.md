@@ -21,7 +21,7 @@ These features inject synthetic mouse/keyboard events and do **not** touch game 
 | **RCS (Recoil Control System)** | `/dev/uinput` | Relative mouse movement |
 | **Triggerbot** | `/dev/uinput` | Left mouse button press/release |
 | **Bunnyhop (SEMI BROKEN ATM)** | `/dev/uinput` | Space bar press/release |
-| **Anti-AFK** | `xdotool` subprocess | Small relative mouse movement |
+| **Anti-AFK** | `xdotool` subprocess | Small relative mouse movement; optionally a random WASD key press (walk bot) |
 
 ## Setup
 

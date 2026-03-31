@@ -150,6 +150,7 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
 
         let interval_min = cfg.interval_min.max(1.0) as u64;
         let interval_max = cfg.interval_max.max(cfg.interval_min).max(1.0) as u64;
+        let walk_bot = cfg.walk_bot;
         drop(cfg);
 
         if last_action.elapsed() >= Duration::from_secs(interval_min) {
@@ -164,6 +165,33 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
                     let _ = child.wait();
                 }
                 Err(err) => log::warn!("anti-afk: failed to run xdotool: {err}"),
+            }
+
+            if walk_bot {
+                const WASD: [&str; 4] = ["w", "a", "s", "d"];
+                let key = WASD[lcg_rand(&mut rng_state, 4) as usize];
+                // hold duration: 300-800 ms
+                let hold_ms = 300 + lcg_rand(&mut rng_state, 501);
+
+                match std::process::Command::new("xdotool")
+                    .args(["keydown", "--clearmodifiers", key])
+                    .spawn()
+                {
+                    Ok(mut c) => {
+                        let _ = c.wait();
+                    }
+                    Err(err) => log::warn!("anti-afk walk-bot: keydown failed: {err}"),
+                }
+                sleep(Duration::from_millis(hold_ms));
+                match std::process::Command::new("xdotool")
+                    .args(["keyup", "--clearmodifiers", key])
+                    .spawn()
+                {
+                    Ok(mut c) => {
+                        let _ = c.wait();
+                    }
+                    Err(err) => log::warn!("anti-afk walk-bot: keyup failed: {err}"),
+                }
             }
 
             let sleep_secs = interval_min
