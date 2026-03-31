@@ -104,13 +104,70 @@ pub fn unblock_region(relay_ips: &[String]) {
 }
 
 fn run_iptables(args: &[&str], ip: &str, action: &str) {
-    match Command::new("sudo").arg("iptables").args(args).status() {
-        Ok(status) if !status.success() => {
-            log::warn!("iptables {action} failed for {ip} (exit {})", status.code().unwrap_or(-1));
+    let iptables = match find_binary(&[
+        "/usr/sbin/iptables",
+        "/sbin/iptables",
+        "/usr/local/sbin/iptables",
+        "iptables",
+    ]) {
+        Some(p) => p,
+        None => {
+            log::warn!("iptables binary not found; cannot {action} {ip}");
+            return;
+        }
+    };
+
+    // Try with sudo first; fall back to direct invocation (works when already root).
+    let sudo = find_binary(&["/usr/bin/sudo", "/bin/sudo", "sudo"]);
+
+    let status = if let Some(ref sudo_path) = sudo {
+        Command::new(sudo_path).arg(&iptables).args(args).status()
+    } else {
+        Command::new(&iptables).args(args).status()
+    };
+
+    match status {
+        Ok(s) if !s.success() => {
+            log::warn!(
+                "iptables {action} failed for {ip} (exit {})",
+                s.code().unwrap_or(-1)
+            );
         }
         Err(e) => {
             log::warn!("failed to run iptables for {ip}: {e}");
         }
         _ => {}
     }
+}
+
+/// Search for a binary by trying each candidate in order.
+/// Candidates that are absolute paths are checked with [`std::path::Path::exists`];
+/// bare names are resolved through the process `PATH` as a last resort.
+fn find_binary(candidates: &[&str]) -> Option<std::path::PathBuf> {
+    for &candidate in candidates {
+        let path = std::path::Path::new(candidate);
+        if path.is_absolute() {
+            if path.exists() {
+                return Some(path.to_path_buf());
+            }
+        } else {
+            // Bare name — rely on PATH only as a fallback.
+            if which_in_path(candidate) {
+                return Some(std::path::PathBuf::from(candidate));
+            }
+        }
+    }
+    None
+}
+
+/// Returns `true` if `name` can be located via the current process `PATH`.
+fn which_in_path(name: &str) -> bool {
+    if let Ok(path_var) = std::env::var("PATH") {
+        for dir in std::env::split_paths(&path_var) {
+            if dir.join(name).exists() {
+                return true;
+            }
+        }
+    }
+    false
 }
