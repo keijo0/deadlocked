@@ -4,6 +4,9 @@ use crate::{
     cs2::entity::weapon_class::WeaponClass, data::Data, math::world_to_screen, ui::app::App,
 };
 
+/// CS2 runs at 64 ticks per second (15.625 ms per tick).
+const CS2_TICK_RATE: f32 = 64.0;
+
 impl App {
     pub fn overlay_debug(&self, painter: &Painter, data: &Data) {
         if self.config.hud.debug {
@@ -114,22 +117,55 @@ impl App {
             None,
         );
 
-        let blocked: Vec<&str> = self
-            .server_regions
-            .iter()
-            .filter(|r| r.blocked)
-            .map(|r| r.description.as_str())
-            .collect();
-        if !blocked.is_empty() {
-            let blocked_str = if blocked.len() == self.server_regions.len() {
-                "all".to_string()
-            } else {
-                blocked.join(", ")
-            };
+        let mut line: f32 = 3.0;
+
+        if !self.server_regions.is_empty() {
+            let enabled: Vec<&str> = self
+                .server_regions
+                .iter()
+                .filter(|r| !r.blocked)
+                .map(|r| r.name.as_str())
+                .collect();
+
+            if enabled.len() == self.server_regions.len() {
+                self.text(
+                    painter,
+                    "QD: all",
+                    position + egui::vec2(0.0, self.config.hud.font_size * line),
+                    Align2::LEFT_TOP,
+                    None,
+                );
+                line += 1.0;
+            } else if !enabled.is_empty() {
+                self.text(
+                    painter,
+                    "QD:",
+                    position + egui::vec2(0.0, self.config.hud.font_size * line),
+                    Align2::LEFT_TOP,
+                    None,
+                );
+                line += 1.0;
+                for name in &enabled {
+                    self.text(
+                        painter,
+                        name.to_uppercase(),
+                        position + egui::vec2(8.0, self.config.hud.font_size * line),
+                        Align2::LEFT_TOP,
+                        None,
+                    );
+                    line += 1.0;
+                }
+            }
+        }
+
+        if self.config.aim.global.aimbot.backtrack {
+            let bt_ms = (self.config.aim.global.aimbot.backtrack_ticks as f32
+                * (1000.0 / CS2_TICK_RATE))
+                .round() as u32;
             self.text(
                 painter,
-                format!("Blocked: {}", blocked_str),
-                position + egui::vec2(0.0, self.config.hud.font_size * 3.0),
+                format!("BT: +{}ms", bt_ms),
+                position + egui::vec2(0.0, self.config.hud.font_size * line),
                 Align2::LEFT_TOP,
                 None,
             );
