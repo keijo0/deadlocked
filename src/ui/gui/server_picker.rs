@@ -118,33 +118,34 @@ impl App {
 
                             for (i, region) in self.server_regions.iter().enumerate() {
                                 // Emit a continent header row when the continent changes.
+                                // Each header must emit exactly 3 grid cells before end_row()
+                                // to keep the grid's column state correct.
                                 if prev_continent != Some(region.continent) {
                                     prev_continent = Some(region.continent);
+                                    // Cell 1: continent name
                                     ui.label(
                                         RichText::new(region.continent.as_str())
                                             .strong()
                                             .color(Colors::TEXT),
                                     );
-                                    ui.label(""); // key column — intentionally empty
-                                    ui.horizontal(|ui| {
-                                        if ui
-                                            .small_button(
-                                                RichText::new("Block All").color(Color32::RED),
-                                            )
-                                            .clicked()
-                                        {
-                                            to_block_continent = Some(region.continent);
-                                        }
-                                        if ui
-                                            .small_button(
-                                                RichText::new("Unblock All")
-                                                    .color(Colors::GREEN),
-                                            )
-                                            .clicked()
-                                        {
-                                            to_unblock_continent = Some(region.continent);
-                                        }
-                                    });
+                                    // Cell 2: "Block All" button for this continent
+                                    if ui
+                                        .small_button(
+                                            RichText::new("Block All").color(Color32::RED),
+                                        )
+                                        .clicked()
+                                    {
+                                        to_block_continent = Some(region.continent);
+                                    }
+                                    // Cell 3: "Unblock All" button for this continent
+                                    if ui
+                                        .small_button(
+                                            RichText::new("Unblock All").color(Colors::GREEN),
+                                        )
+                                        .clicked()
+                                    {
+                                        to_unblock_continent = Some(region.continent);
+                                    }
                                     ui.end_row();
                                 }
 
