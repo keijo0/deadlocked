@@ -366,10 +366,24 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
 /// Block all relay IPs for a region using iptables.
 /// Both directions are dropped so the game client cannot reach the relay
 /// (OUTPUT) and cannot receive traffic from it (INPUT).
+///
+/// Rules are inserted at position 1 (`-I … 1`) rather than appended (`-A`)
+/// so that they take priority over any pre-existing ACCEPT rules in the
+/// chain (e.g. conntrack ESTABLISHED/RELATED rules added by ufw or
+/// firewalld).  Without this, appended DROP rules would never be evaluated
+/// for packets that already match an earlier ACCEPT rule.
 pub fn block_region(relay_ips: &[String]) {
     for ip in relay_ips {
-        run_iptables(&["-A", "INPUT", "-s", ip, "-j", "DROP"], ip, "block INPUT");
-        run_iptables(&["-A", "OUTPUT", "-d", ip, "-j", "DROP"], ip, "block OUTPUT");
+        run_iptables(
+            &["-I", "INPUT", "1", "-s", ip, "-j", "DROP"],
+            ip,
+            "block INPUT",
+        );
+        run_iptables(
+            &["-I", "OUTPUT", "1", "-d", ip, "-j", "DROP"],
+            ip,
+            "block OUTPUT",
+        );
     }
 }
 
