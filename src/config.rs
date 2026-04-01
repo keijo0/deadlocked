@@ -322,18 +322,12 @@ impl Default for HudConfig {
     }
 }
 
-pub const WALK_DURATION_MIN_SECS: f32 = 0.05;
-pub const WALK_DURATION_MAX_SECS: f32 = 5.0;
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
 pub struct AntiAfk {
     pub enabled: bool,
     pub interval_min: f32,
     pub interval_max: f32,
-    pub walk_bot: bool,
-    pub walk_duration_min: f32,
-    pub walk_duration_max: f32,
 }
 
 impl Default for AntiAfk {
@@ -342,9 +336,6 @@ impl Default for AntiAfk {
             enabled: false,
             interval_min: 5.0,
             interval_max: 10.0,
-            walk_bot: false,
-            walk_duration_min: 0.3,
-            walk_duration_max: 0.8,
         }
     }
 }

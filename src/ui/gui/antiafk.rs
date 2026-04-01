@@ -1,18 +1,11 @@
 use egui::{DragValue, Ui};
 
-use crate::{
-    config::{WALK_DURATION_MAX_SECS, WALK_DURATION_MIN_SECS},
-    ui::{app::App, gui::helpers::{checkbox, collapsing_open, drag}},
-};
+use crate::ui::{app::App, gui::helpers::{checkbox, collapsing_open, drag}};
 
 impl App {
     pub fn antiafk_settings(&mut self, ui: &mut Ui) {
         collapsing_open(ui, "Anti-AFK", |ui| {
             if checkbox(ui, "Enable", &mut self.config.misc.antiafk.enabled) {
-                self.send_config();
-            }
-
-            if checkbox(ui, "Walk Bot", &mut self.config.misc.antiafk.walk_bot) {
                 self.send_config();
             }
 
@@ -32,26 +25,6 @@ impl App {
                 DragValue::new(&mut self.config.misc.antiafk.interval_max)
                     .range(1.0..=60.0)
                     .speed(0.5),
-            ) {
-                self.send_config();
-            }
-
-            if drag(
-                ui,
-                "Walk Duration Min (s)",
-                DragValue::new(&mut self.config.misc.antiafk.walk_duration_min)
-                    .range(WALK_DURATION_MIN_SECS..=WALK_DURATION_MAX_SECS)
-                    .speed(0.05),
-            ) {
-                self.send_config();
-            }
-
-            if drag(
-                ui,
-                "Walk Duration Max (s)",
-                DragValue::new(&mut self.config.misc.antiafk.walk_duration_max)
-                    .range(WALK_DURATION_MIN_SECS..=WALK_DURATION_MAX_SECS)
-                    .speed(0.05),
             ) {
                 self.send_config();
             }
