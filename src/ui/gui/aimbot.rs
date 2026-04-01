@@ -131,6 +131,15 @@ impl App {
             self.send_config();
         }
 
+        if checkbox_hover(
+            ui,
+            "Smoke/Wall Check",
+            "Blocks aiming through map geometry and smoke volumes",
+            &mut self.weapon_config().aimbot.smoke_wall_check,
+        ) {
+            self.send_config();
+        }
+
         ui.separator();
 
         if checkbox_hover(

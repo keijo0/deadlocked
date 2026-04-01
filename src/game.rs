@@ -76,6 +76,7 @@ impl GameManager {
     pub fn run(&mut self) {
         self.send_game_message(Message::GameStatus(GameStatus::NotStarted));
         let mut previous_status = GameStatus::NotStarted;
+        let mut next_data_tick = Instant::now();
         loop {
             let start = Instant::now();
             while let Ok(message) = self.channel.try_receive() {
@@ -98,10 +99,15 @@ impl GameManager {
                     previous_status = GameStatus::Working;
                 }
                 self.game.run(&self.config, &mut self.mouse);
-                let mut data = self.data.lock();
-                self.game.data(&self.config, &mut data);
+                let now = Instant::now();
+                if now >= next_data_tick {
+                    let mut data = self.data.lock();
+                    self.game.data(&self.config, &mut data);
+                    next_data_tick = now + data_loop_duration(&self.config);
+                }
             } else {
                 *self.data.lock() = Data::default();
+                next_data_tick = Instant::now();
             }
 
             if is_valid {
@@ -180,4 +186,9 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
 fn lcg_rand(state: &mut u64, max: u64) -> u64 {
     *state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
     (*state >> 33) % max
+}
+
+fn data_loop_duration(config: &Config) -> Duration {
+    let hz = config.hud.data_refresh_rate.clamp(20, 240);
+    Duration::from_micros(1_000_000 / hz)
 }
