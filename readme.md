@@ -13,12 +13,21 @@ All other functionality (ESP, aimbot, triggerbot, bunnyhop, etc.) is retained.
 
 ## Memory safety guarantee
 
-The game process memory handle is wrapped in a private `ReadOnlyMem` newtype
-(`src/os/process.rs`) that exposes **only** `read_at`.  Because the inner
-`File` is private and `OpenOptions` is never called with `.write(true)` for the
-process handle, it is a **compile-time error** to call any write operation on
-the game process memory.  The only syscall used against the game process is
-`process_vm_readv` (Linux read-only cross-process memory API).
+No code in this repository writes to the game process memory.  There are two
+mechanisms used to **read** game memory, and both are strictly read-only:
+
+1. **`process_vm_readv`** — the Linux `process_vm_readv(2)` syscall is used for
+   the bulk of reads (`read`, `read_or_zeroed`, `read_vec`, `read_typed_vec`).
+   This is a read-only syscall; its write counterpart `process_vm_writev` is
+   never called anywhere in the codebase.
+
+2. **`/proc/{pid}/mem` via `ReadOnlyMem`** — the file `/proc/{pid}/mem` is
+   opened with `OpenOptions::new().read(true)` and wrapped in a private
+   `ReadOnlyMem` newtype (`src/os/process.rs`) that exposes **only** `read_at`.
+   Because the inner `File` is private and `.write(true)` is never passed to
+   `OpenOptions`, it is a **compile-time error** to call any write operation on
+   this handle.  This path is used by `read_bytes` (and therefore `dump_module`
+   and `scan`).
 
 ## Features that write to the input device (`/dev/uinput` or `xdotool`)
 
