@@ -132,7 +132,7 @@ impl CS2 {
         offsets.controller.action_tracking_services =
             client.get("CCSPlayerController", "m_pActionTrackingServices")?;
         offsets.controller.ping =
-            client.get("CBasePlayerController", "m_nPing").unwrap_or(0);
+            client.get_opt("CBasePlayerController", "m_nPing").unwrap_or(0);
 
         offsets.pawn.health = client.get("C_BaseEntity", "m_iHealth")?;
         offsets.pawn.armor = client.get("C_CSPlayerPawn", "m_ArmorValue")?;
@@ -173,7 +173,7 @@ impl CS2 {
         offsets.inferno.fire_positions = client.get("C_Inferno", "m_firePositions")?;
 
         offsets.spotted_state.mask =
-            client.get("EntitySpottedState_t", "m_bSpottedByMask").unwrap_or(0);
+            client.get_opt("EntitySpottedState_t", "m_bSpottedByMask").unwrap_or(0);
 
         offsets.action_tracking.round_kills = client.get(
             "CCSPlayerController_ActionTrackingServices",

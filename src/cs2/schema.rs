@@ -92,6 +92,12 @@ impl ModuleScope {
         f
     }
 
+    /// Like `get`, but returns `None` silently when the field is absent.
+    /// Use for optional fields whose absence is expected on some game versions.
+    pub fn get_opt(&self, class: &str, field: &str) -> Option<u64> {
+        self.classes.get(class)?.get(field)
+    }
+
     pub fn get_class(&self, class: &str) -> Option<&Class> {
         self.classes.get(class)
     }
