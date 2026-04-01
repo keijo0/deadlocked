@@ -1,7 +1,7 @@
 use egui::{Color32, Grid, RichText, ScrollArea, Ui};
 
 use crate::{
-    server_picker::{Continent, block_region, fetch_servers_async, unblock_region},
+    server_picker::{Continent, block_region, fetch_servers_async, unblock_region, ServerRegion},
     ui::{app::App, color::Colors, gui::helpers::collapsing_open},
 };
 
@@ -13,6 +13,16 @@ impl App {
             self.server_picker_loading = false;
             match result {
                 Ok(regions) => {
+                    // Unblock any previously-blocked regions so that iptables rules
+                    // from the old list are not left behind as orphans.
+                    let old_blocked: Vec<&ServerRegion> = self
+                        .server_regions
+                        .iter()
+                        .filter(|r| r.blocked)
+                        .collect();
+                    for region in old_blocked {
+                        unblock_region(&region.relay_ips);
+                    }
                     self.server_regions = regions;
                     self.server_picker_error = None;
                 }
@@ -189,9 +199,9 @@ impl App {
                     .filter(|(_, r)| r.continent == continent && !r.blocked)
                     .map(|(i, _)| i)
                     .collect();
-                for i in &indices {
-                    block_region(&self.server_regions[*i].relay_ips.clone());
-                    self.server_regions[*i].blocked = true;
+                for i in indices {
+                    block_region(&self.server_regions[i].relay_ips);
+                    self.server_regions[i].blocked = true;
                 }
             }
             if let Some(continent) = to_unblock_continent {
@@ -202,9 +212,9 @@ impl App {
                     .filter(|(_, r)| r.continent == continent && r.blocked)
                     .map(|(i, _)| i)
                     .collect();
-                for i in &indices {
-                    unblock_region(&self.server_regions[*i].relay_ips.clone());
-                    self.server_regions[*i].blocked = false;
+                for i in indices {
+                    unblock_region(&self.server_regions[i].relay_ips);
+                    self.server_regions[i].blocked = false;
                 }
             }
         });

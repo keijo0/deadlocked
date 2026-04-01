@@ -1,4 +1,4 @@
-use std::{process::Command, sync::Arc, thread};
+use std::{net::Ipv4Addr, process::Command, sync::Arc, thread};
 
 use utils::{log, sync::Mutex};
 
@@ -29,12 +29,22 @@ impl Continent {
     }
 }
 
-/// Maps a Steam relay datacenter code (IATA airport/city code) to its continent.
-/// The input `name` is expected to be a lowercase 3-letter airport/city code as
-/// reported by the Steam server picker (e.g. `"iad"`, `"lhr"`, `"sgp"`).
-/// Returns `Continent::Unknown` for any code not in the mapping table.
+/// Maps a Steam SDR datacenter pop code to its geographic continent.
+///
+/// CS2 uses standard 3-letter IATA/city codes (e.g. `"lhr"`, `"iad"`, `"sto"`).
+/// Some pop codes may include numeric suffixes or non-IATA aliases, so this
+/// function normalises the code by stripping any trailing ASCII digits before
+/// matching, so `"maa2"` is treated identically to `"maa"`.
+///
+/// Codes that are not recognised (after normalisation) return
+/// [`Continent::Unknown`].
 fn continent_from_name(name: &str) -> Continent {
-    match name.to_lowercase().as_str() {
+    // Strip trailing digits so numbered variants (e.g. "maa2", "bom2") match
+    // their base code.
+    let lower = name.to_lowercase();
+    let normalised = lower.trim_end_matches(|c: char| c.is_ascii_digit());
+
+    match normalised {
         // North America
         "iad" | "ord" | "lax" | "sea" | "atl" | "dfw" | "mia" | "den" | "pdx" | "sjc"
         | "okc" | "ytz" | "yyc" | "yul" | "yvr" | "mex" | "xna" => Continent::NorthAmerica,
@@ -46,11 +56,12 @@ fn continent_from_name(name: &str) -> Continent {
         | "man" | "bru" | "muc" | "cdg" | "ber" | "ham" | "dus" | "tll" | "rig" | "vno" => {
             Continent::Europe
         }
-        // Asia
+        // Asia — includes non-IATA city codes used by Valve's SDR:
+        //   seo = Seoul (Valve uses "seo", IATA is "icn")
+        //   tyo = Tokyo (common Valve alias; IATA is "nrt"/"hnd")
         "sgp" | "hkg" | "tyo" | "nrt" | "osk" | "bom" | "del" | "maa" | "ccu" | "hyb"
-        | "bkk" | "kul" | "icn" | "sha" | "pek" | "can" | "szx" | "pnq" | "blr" | "amd" => {
-            Continent::Asia
-        }
+        | "bkk" | "kul" | "icn" | "seo" | "sha" | "pek" | "can" | "szx" | "pnq" | "blr"
+        | "amd" => Continent::Asia,
         // Middle East
         "dxb" | "bah" | "khi" | "kwi" | "tlv" | "ist" | "esb" | "ruh" | "auh" => {
             Continent::MiddleEast
@@ -61,6 +72,159 @@ fn continent_from_name(name: &str) -> Continent {
         "syd" | "mel" | "per" | "bne" | "adl" | "akl" | "cbr" => Continent::Oceania,
         _ => Continent::Unknown,
     }
+}
+
+/// Fallback continent classifier that inspects the human-readable description
+/// returned by the Steam SDR API (e.g. `"Stockholm - Kista"`).  Used when the
+/// pop code is not recognised by [`continent_from_name`] so that newly added or
+/// non-standard pops are still placed in the right continent group rather than
+/// being silently dropped into `Unknown` (which users can easily miss when
+/// clicking continent-level "Block All" buttons).
+fn continent_from_description(desc: &str) -> Continent {
+    let d = desc.to_lowercase();
+
+    // North America — cities / regions
+    if d.contains("ashburn")
+        || d.contains("chicago")
+        || d.contains("los angeles")
+        || d.contains("seattle")
+        || d.contains("atlanta")
+        || d.contains("dallas")
+        || d.contains("miami")
+        || d.contains("denver")
+        || d.contains("portland")
+        || d.contains("san jose")
+        || d.contains("oklahoma")
+        || d.contains("toronto")
+        || d.contains("calgary")
+        || d.contains("montreal")
+        || d.contains("vancouver")
+        || d.contains("mexico")
+        || d.contains("fayetteville")
+        || d.contains("north america")
+    {
+        return Continent::NorthAmerica;
+    }
+
+    // South America
+    if d.contains("sao paulo")
+        || d.contains("são paulo")
+        || d.contains("rio")
+        || d.contains("santiago")
+        || d.contains("lima")
+        || d.contains("bogota")
+        || d.contains("bogotá")
+        || d.contains("buenos aires")
+        || d.contains("south america")
+    {
+        return Continent::SouthAmerica;
+    }
+
+    // Europe — cities / countries (covers Valve's sub-city pop names like
+    // "Stockholm - Kista", "Stockholm - Bromma", etc.)
+    if d.contains("stockholm")
+        || d.contains("sweden")
+        || d.contains("london")
+        || d.contains("amsterdam")
+        || d.contains("frankfurt")
+        || d.contains("paris")
+        || d.contains("madrid")
+        || d.contains("vienna")
+        || d.contains("warsaw")
+        || d.contains("prague")
+        || d.contains("helsinki")
+        || d.contains("budapest")
+        || d.contains("zurich")
+        || d.contains("milan")
+        || d.contains("lisbon")
+        || d.contains("athens")
+        || d.contains("oslo")
+        || d.contains("copenhagen")
+        || d.contains("dublin")
+        || d.contains("brussels")
+        || d.contains("munich")
+        || d.contains("berlin")
+        || d.contains("hamburg")
+        || d.contains("dusseldorf")
+        || d.contains("düsseldorf")
+        || d.contains("tallinn")
+        || d.contains("riga")
+        || d.contains("vilnius")
+        || d.contains("manchester")
+        || d.contains("europe")
+    {
+        return Continent::Europe;
+    }
+
+    // Asia
+    if d.contains("singapore")
+        || d.contains("hong kong")
+        || d.contains("tokyo")
+        || d.contains("osaka")
+        || d.contains("mumbai")
+        || d.contains("delhi")
+        || d.contains("chennai")
+        || d.contains("kolkata")
+        || d.contains("hyderabad")
+        || d.contains("bangkok")
+        || d.contains("kuala lumpur")
+        || d.contains("seoul")
+        || d.contains("shanghai")
+        || d.contains("beijing")
+        || d.contains("guangzhou")
+        || d.contains("shenzhen")
+        || d.contains("pune")
+        || d.contains("bangalore")
+        || d.contains("bengaluru")
+        || d.contains("ahmedabad")
+        || d.contains("asia")
+    {
+        return Continent::Asia;
+    }
+
+    // Middle East
+    if d.contains("dubai")
+        || d.contains("bahrain")
+        || d.contains("karachi")
+        || d.contains("kuwait")
+        || d.contains("tel aviv")
+        || d.contains("istanbul")
+        || d.contains("ankara")
+        || d.contains("riyadh")
+        || d.contains("abu dhabi")
+        || d.contains("middle east")
+    {
+        return Continent::MiddleEast;
+    }
+
+    // Africa
+    if d.contains("johannesburg")
+        || d.contains("lagos")
+        || d.contains("nairobi")
+        || d.contains("cairo")
+        || d.contains("accra")
+        || d.contains("dakar")
+        || d.contains("africa")
+    {
+        return Continent::Africa;
+    }
+
+    // Oceania
+    if d.contains("sydney")
+        || d.contains("melbourne")
+        || d.contains("perth")
+        || d.contains("brisbane")
+        || d.contains("adelaide")
+        || d.contains("auckland")
+        || d.contains("canberra")
+        || d.contains("australia")
+        || d.contains("new zealand")
+        || d.contains("oceania")
+    {
+        return Continent::Oceania;
+    }
+
+    Continent::Unknown
 }
 
 #[derive(Debug, Clone)]
@@ -94,7 +258,7 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
             "-s",
             "--max-time",
             "10",
-            "https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=1422450",
+            "https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730",
         ])
         .output()
         .map_err(|e| format!("Failed to execute curl: {e}"))?;
@@ -131,7 +295,43 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
 
         let relay_ips: Vec<String> = relays
             .iter()
-            .filter_map(|r| r.get("ipv4").and_then(|ip| ip.as_str()).map(String::from))
+            .flat_map(|r| {
+                let ip_str = match r.get("ipv4").and_then(|ip| ip.as_str()) {
+                    Some(s) => s,
+                    None => return vec![],
+                };
+                // `num_addresses` is the count of consecutive relay IPs starting at
+                // `ipv4`.  When absent or explicitly 0, treat it as 1 so the base
+                // IP is always included.  Cap at u32::MAX to avoid truncation when
+                // converting from u64 (Steam returns small values in practice, but
+                // be safe).
+                let count_u64 = r
+                    .get("num_addresses")
+                    .and_then(|n| n.as_u64())
+                    .unwrap_or(1)
+                    .max(1);
+                let count = if count_u64 > u32::MAX as u64 {
+                    log::warn!(
+                        "relay {ip_str:?} has num_addresses={count_u64} which exceeds u32::MAX; capping"
+                    );
+                    u32::MAX
+                } else {
+                    count_u64 as u32
+                };
+                let base: Ipv4Addr = match ip_str.parse() {
+                    Ok(ip) => ip,
+                    Err(e) => {
+                        log::warn!("skipping unparseable relay IP {ip_str:?}: {e}");
+                        return vec![];
+                    }
+                };
+                let base_u32 = u32::from(base);
+                (0..count)
+                    .filter_map(|i| {
+                        base_u32.checked_add(i).map(|n| Ipv4Addr::from(n).to_string())
+                    })
+                    .collect()
+            })
             .collect();
 
         if relay_ips.is_empty() {
@@ -139,7 +339,14 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
         }
 
         regions.push(ServerRegion {
-            continent: continent_from_name(name),
+            continent: {
+                let by_code = continent_from_name(name);
+                if by_code == Continent::Unknown {
+                    continent_from_description(&description)
+                } else {
+                    by_code
+                }
+            },
             name: name.clone(),
             description,
             relay_ips,
@@ -157,16 +364,20 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
 }
 
 /// Block all relay IPs for a region using iptables.
+/// Both directions are dropped so the game client cannot reach the relay
+/// (OUTPUT) and cannot receive traffic from it (INPUT).
 pub fn block_region(relay_ips: &[String]) {
     for ip in relay_ips {
-        run_iptables(&["-A", "INPUT", "-s", ip, "-j", "DROP"], ip, "block");
+        run_iptables(&["-A", "INPUT", "-s", ip, "-j", "DROP"], ip, "block INPUT");
+        run_iptables(&["-A", "OUTPUT", "-d", ip, "-j", "DROP"], ip, "block OUTPUT");
     }
 }
 
 /// Remove the iptables DROP rules for a region.
 pub fn unblock_region(relay_ips: &[String]) {
     for ip in relay_ips {
-        run_iptables(&["-D", "INPUT", "-s", ip, "-j", "DROP"], ip, "unblock");
+        run_iptables(&["-D", "INPUT", "-s", ip, "-j", "DROP"], ip, "unblock INPUT");
+        run_iptables(&["-D", "OUTPUT", "-d", ip, "-j", "DROP"], ip, "unblock OUTPUT");
     }
 }
 
@@ -194,7 +405,10 @@ fn run_iptables(args: &[&str], ip: &str, action: &str) {
     };
 
     match status {
-        Ok(s) if !s.success() => {
+        Ok(s) if s.success() => {
+            log::debug!("iptables {action} succeeded for {ip}");
+        }
+        Ok(s) => {
             log::warn!(
                 "iptables {action} failed for {ip} (exit {})",
                 s.code().unwrap_or(-1)
@@ -203,7 +417,6 @@ fn run_iptables(args: &[&str], ip: &str, action: &str) {
         Err(e) => {
             log::warn!("failed to run iptables for {ip}: {e}");
         }
-        _ => {}
     }
 }
 
