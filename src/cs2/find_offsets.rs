@@ -131,8 +131,15 @@ impl CS2 {
         offsets.controller.color = client.get("CCSPlayerController", "m_iCompTeammateColor")?;
         offsets.controller.action_tracking_services =
             client.get("CCSPlayerController", "m_pActionTrackingServices")?;
-        offsets.controller.ping =
-            client.get_opt("CBasePlayerController", "m_nPing").unwrap_or(0);
+        // m_nPing may appear on different controller classes depending on CS2 version.
+        // Try CBasePlayerController first (most common), then the CS-specific controller,
+        // and fall back to the legacy m_iPing name if m_nPing is absent.
+        offsets.controller.ping = client
+            .get_opt("CBasePlayerController", "m_nPing")
+            .or_else(|| client.get_opt("CCSPlayerController", "m_nPing"))
+            .or_else(|| client.get_opt("CBasePlayerController", "m_iPing"))
+            .or_else(|| client.get_opt("CCSPlayerController", "m_iPing"))
+            .unwrap_or(0);
 
         offsets.pawn.health = client.get("C_BaseEntity", "m_iHealth")?;
         offsets.pawn.armor = client.get("C_CSPlayerPawn", "m_ArmorValue")?;

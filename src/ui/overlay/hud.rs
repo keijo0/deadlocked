@@ -254,6 +254,7 @@ impl App {
                 Align2::LEFT_TOP,
                 None,
             );
+            line += 1.0;
         }
     }
 
