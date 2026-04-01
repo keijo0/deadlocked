@@ -29,6 +29,9 @@ impl Continent {
     }
 }
 
+/// Maps a Steam SDR datacenter pop code (lowercase 3-letter airport/city code,
+/// e.g. `"lhr"`, `"iad"`) to its geographic continent for grouping purposes.
+/// Codes that are not recognised return [`Continent::Unknown`].
 fn continent_from_name(name: &str) -> Continent {
     match name.to_lowercase().as_str() {
         // North America
@@ -153,16 +156,20 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
 }
 
 /// Block all relay IPs for a region using iptables.
+/// Both directions are dropped so the game client cannot reach the relay
+/// (OUTPUT) and cannot receive traffic from it (INPUT).
 pub fn block_region(relay_ips: &[String]) {
     for ip in relay_ips {
-        run_iptables(&["-A", "INPUT", "-s", ip, "-j", "DROP"], ip, "block");
+        run_iptables(&["-A", "INPUT", "-s", ip, "-j", "DROP"], ip, "block INPUT");
+        run_iptables(&["-A", "OUTPUT", "-d", ip, "-j", "DROP"], ip, "block OUTPUT");
     }
 }
 
 /// Remove the iptables DROP rules for a region.
 pub fn unblock_region(relay_ips: &[String]) {
     for ip in relay_ips {
-        run_iptables(&["-D", "INPUT", "-s", ip, "-j", "DROP"], ip, "unblock");
+        run_iptables(&["-D", "INPUT", "-s", ip, "-j", "DROP"], ip, "unblock INPUT");
+        run_iptables(&["-D", "OUTPUT", "-d", ip, "-j", "DROP"], ip, "unblock OUTPUT");
     }
 }
 
