@@ -87,78 +87,102 @@ impl App {
         }
 
         let position = pos2(10.0, data.window_size.y / 2.0);
-        let hotkeys_str = self
-            .config
-            .aim
-            .aimbot_hotkeys
-            .iter()
-            .map(|k| format!("{:?}", k))
-            .collect::<Vec<_>>()
-            .join(", ");
-        self.text(
-            painter,
-            format!(
-                "Aimbot [{}]: {}",
-                hotkeys_str,
-                if data.aimbot_active { "ON" } else { "OFF" }
-            ),
-            position,
-            Align2::LEFT_TOP,
-            None,
-        );
-        let ab = self.aimbot_config(&data.weapon);
-        self.text(
-            painter,
-            format!("FOV: {:.1}  Smooth: {:.1}", ab.fov, ab.smooth),
-            position + egui::vec2(0.0, self.config.hud.font_size),
-            Align2::LEFT_TOP,
-            None,
-        );
-        let tb = self.triggerbot_config(&data.weapon);
-        self.text(
-            painter,
-            format!("Ms: {}-{}", tb.delay.start(), tb.delay.end()),
-            position + egui::vec2(0.0, self.config.hud.font_size * 2.0),
-            Align2::LEFT_TOP,
-            None,
-        );
-        self.text(
-            painter,
-            format!(
-                "Triggerbot [{:?}]: {}",
-                self.config.aim.triggerbot_hotkey,
-                if data.triggerbot_active { "ON" } else { "OFF" }
-            ),
-            position + egui::vec2(0.0, self.config.hud.font_size * 3.0),
-            Align2::LEFT_TOP,
-            None,
-        );
-        self.text(
-            painter,
-            format!(
-                "ESP [{:?}]: {}",
-                self.config.player.esp_hotkey,
-                if data.esp_active { "ON" } else { "OFF" }
-            ),
-            position + egui::vec2(0.0, self.config.hud.font_size * 4.0),
-            Align2::LEFT_TOP,
-            None,
-        );
-        self.text(
-            painter,
-            format!(
-                "Bunnyhop [{:?}]: {}",
-                self.config.misc.bunnyhop_hotkey,
-                if self.config.misc.bunnyhop { "ON" } else { "OFF" }
-            ),
-            position + egui::vec2(0.0, self.config.hud.font_size * 5.0),
-            Align2::LEFT_TOP,
-            None,
-        );
+        let font_size = self.config.hud.font_size;
+        let mut line: f32 = 0.0;
 
-        let mut line: f32 = 6.0;
+        if self.config.hud.keybind_aimbot {
+            let hotkeys_str = self
+                .config
+                .aim
+                .aimbot_hotkeys
+                .iter()
+                .map(|k| format!("{:?}", k))
+                .collect::<Vec<_>>()
+                .join(", ");
+            self.text(
+                painter,
+                format!(
+                    "Aimbot [{}]: {}",
+                    hotkeys_str,
+                    if data.aimbot_active { "ON" } else { "OFF" }
+                ),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
 
-        if !self.server_regions.is_empty() {
+        if self.config.hud.keybind_fov {
+            let ab = self.aimbot_config(&data.weapon);
+            self.text(
+                painter,
+                format!("FOV: {:.1}  Smooth: {:.1}", ab.fov, ab.smooth),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
+
+        if self.config.hud.keybind_trigger_delay {
+            let tb = self.triggerbot_config(&data.weapon);
+            self.text(
+                painter,
+                format!("Ms: {}-{}", tb.delay.start(), tb.delay.end()),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
+
+        if self.config.hud.keybind_triggerbot {
+            self.text(
+                painter,
+                format!(
+                    "Triggerbot [{:?}]: {}",
+                    self.config.aim.triggerbot_hotkey,
+                    if data.triggerbot_active { "ON" } else { "OFF" }
+                ),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
+
+        if self.config.hud.keybind_esp {
+            self.text(
+                painter,
+                format!(
+                    "ESP [{:?}]: {}",
+                    self.config.player.esp_hotkey,
+                    if data.esp_active { "ON" } else { "OFF" }
+                ),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
+
+        if self.config.hud.keybind_bunnyhop {
+            self.text(
+                painter,
+                format!(
+                    "Bunnyhop [{:?}]: {}",
+                    self.config.misc.bunnyhop_hotkey,
+                    if self.config.misc.bunnyhop { "ON" } else { "OFF" }
+                ),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
+
+        if self.config.hud.keybind_server_picker && !self.server_regions.is_empty() {
             let enabled: Vec<&str> = self
                 .server_regions
                 .iter()
@@ -170,7 +194,7 @@ impl App {
                 self.text(
                     painter,
                     "QD: all",
-                    position + egui::vec2(0.0, self.config.hud.font_size * line),
+                    position + egui::vec2(0.0, font_size * line),
                     Align2::LEFT_TOP,
                     None,
                 );
@@ -179,7 +203,7 @@ impl App {
                 self.text(
                     painter,
                     "QD:",
-                    position + egui::vec2(0.0, self.config.hud.font_size * line),
+                    position + egui::vec2(0.0, font_size * line),
                     Align2::LEFT_TOP,
                     None,
                 );
@@ -188,7 +212,7 @@ impl App {
                     self.text(
                         painter,
                         name.to_uppercase(),
-                        position + egui::vec2(8.0, self.config.hud.font_size * line),
+                        position + egui::vec2(8.0, font_size * line),
                         Align2::LEFT_TOP,
                         None,
                     );
@@ -197,7 +221,7 @@ impl App {
             }
         }
 
-        if self.config.aim.global.aimbot.backtrack {
+        if self.config.hud.keybind_backtrack && self.config.aim.global.aimbot.backtrack {
             let bt_ms = (self.config.aim.global.aimbot.backtrack_ticks as f32
                 * (1000.0 / CS2_TICK_RATE))
                 .round() as u32;
@@ -210,7 +234,23 @@ impl App {
             self.text(
                 painter,
                 label,
-                position + egui::vec2(0.0, self.config.hud.font_size * line),
+                position + egui::vec2(0.0, font_size * line),
+                Align2::LEFT_TOP,
+                None,
+            );
+            line += 1.0;
+        }
+
+        if self.config.hud.keybind_ping {
+            let label = if data.ping > 0 {
+                format!("Ping: {}ms", data.ping)
+            } else {
+                "Ping: N/A".to_string()
+            };
+            self.text(
+                painter,
+                label,
+                position + egui::vec2(0.0, font_size * line),
                 Align2::LEFT_TOP,
                 None,
             );
