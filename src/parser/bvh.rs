@@ -230,7 +230,7 @@ impl Bvh {
         primitives.sort_by(|&a_idx, &b_idx| {
             let a_cent = self.triangles[a_idx].centroid();
             let b_cent = self.triangles[b_idx].centroid();
-            a_cent[axis].partial_cmp(&b_cent[axis]).unwrap()
+            a_cent[axis].partial_cmp(&b_cent[axis]).unwrap_or(std::cmp::Ordering::Equal)
         });
 
         let mid = primitives.len() / 2;
