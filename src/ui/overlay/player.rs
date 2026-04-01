@@ -122,10 +122,12 @@ impl App {
         // corner corner_size length: equal in both axes, proportional to box width
         let corner_size = (half_width / 2.0).max(4.0);
 
-        let tl = pos2(top.x - half_width, top.y);
-        let tr = pos2(top.x + half_width, top.y);
-        let bl = pos2(bottom.x - half_width, bottom.y);
-        let br = pos2(bottom.x + half_width, bottom.y);
+        // Use the midpoint x so the box stays rectangular even at uneven angles.
+        let center_x = (top.x + bottom.x) / 2.0;
+        let tl = pos2(center_x - half_width, top.y);
+        let tr = pos2(center_x + half_width, top.y);
+        let bl = pos2(center_x - half_width, bottom.y);
+        let br = pos2(center_x + half_width, bottom.y);
 
         if self.config.player.draw_box != DrawMode::None {
             let outline_stroke = if self.config.hud.text_outline {
