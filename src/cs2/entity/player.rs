@@ -448,7 +448,7 @@ impl Player {
             {
                 return false;
             }
-        } else {
+        } else if cs2.offsets.spotted_state.mask != 0 {
             let spotted_mask = self.spotted_mask(cs2);
             if (spotted_mask & (1 << cs2.target.local_pawn_index)) == 0 {
                 return false;

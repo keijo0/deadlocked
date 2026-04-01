@@ -172,7 +172,8 @@ impl CS2 {
         offsets.inferno.fire_count = client.get("C_Inferno", "m_fireCount")?;
         offsets.inferno.fire_positions = client.get("C_Inferno", "m_firePositions")?;
 
-        offsets.spotted_state.mask = client.get("EntitySpottedState_t", "m_bSpottedByMask")?;
+        offsets.spotted_state.mask =
+            client.get("EntitySpottedState_t", "m_bSpottedByMask").unwrap_or(0);
 
         offsets.action_tracking.round_kills = client.get(
             "CCSPlayerController_ActionTrackingServices",
