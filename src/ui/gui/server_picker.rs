@@ -12,17 +12,32 @@ impl App {
         if let Some(result) = result {
             self.server_picker_loading = false;
             match result {
-                Ok(regions) => {
-                    // Unblock any previously-blocked regions so that iptables rules
-                    // from the old list are not left behind as orphans.
-                    let old_blocked: Vec<&ServerRegion> = self
+                Ok(mut regions) => {
+                    // Snapshot previously-blocked regions before replacing the list.
+                    let old_blocked: Vec<ServerRegion> = self
                         .server_regions
                         .iter()
                         .filter(|r| r.blocked)
+                        .cloned()
                         .collect();
-                    for region in old_blocked {
-                        unblock_region(&region.relay_ips);
+
+                    // Restore blocked state for regions that still exist in the new list.
+                    // Re-apply iptables rules in case the relay IPs changed.
+                    for new_region in &mut regions {
+                        if let Some(old) = old_blocked.iter().find(|r| r.name == new_region.name) {
+                            unblock_region(&old.relay_ips);
+                            block_region(&new_region.relay_ips);
+                            new_region.blocked = true;
+                        }
                     }
+
+                    // Unblock regions that were blocked before but are no longer in the new list.
+                    for old in &old_blocked {
+                        if !regions.iter().any(|r| r.name == old.name) {
+                            unblock_region(&old.relay_ips);
+                        }
+                    }
+
                     self.server_regions = regions;
                     self.server_picker_error = None;
                 }
