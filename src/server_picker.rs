@@ -2,74 +2,12 @@ use std::{process::Command, sync::Arc, thread};
 
 use utils::{log, sync::Mutex};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Continent {
-    Africa,
-    Asia,
-    Europe,
-    MiddleEast,
-    NorthAmerica,
-    Oceania,
-    SouthAmerica,
-    Unknown,
-}
-
-impl Continent {
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Continent::Africa => "Africa",
-            Continent::Asia => "Asia",
-            Continent::Europe => "Europe",
-            Continent::MiddleEast => "Middle East",
-            Continent::NorthAmerica => "North America",
-            Continent::Oceania => "Oceania",
-            Continent::SouthAmerica => "South America",
-            Continent::Unknown => "Unknown",
-        }
-    }
-}
-
-/// Maps a Steam relay datacenter code (IATA airport/city code) to its continent.
-/// The input `name` is expected to be a lowercase 3-letter airport/city code as
-/// reported by the Steam server picker (e.g. `"iad"`, `"lhr"`, `"sgp"`).
-/// Returns `Continent::Unknown` for any code not in the mapping table.
-fn continent_from_name(name: &str) -> Continent {
-    match name.to_lowercase().as_str() {
-        // North America
-        "iad" | "ord" | "lax" | "sea" | "atl" | "dfw" | "mia" | "den" | "pdx" | "sjc"
-        | "okc" | "ytz" | "yyc" | "yul" | "yvr" | "mex" | "xna" => Continent::NorthAmerica,
-        // South America
-        "gru" | "gig" | "scl" | "lim" | "bog" | "bue" | "eze" => Continent::SouthAmerica,
-        // Europe
-        "lhr" | "ams" | "fra" | "par" | "mad" | "sto" | "vie" | "waw" | "prg" | "hel"
-        | "bud" | "zur" | "zrh" | "mil" | "lis" | "ath" | "osl" | "cph" | "dub" | "arn"
-        | "man" | "bru" | "muc" | "cdg" | "ber" | "ham" | "dus" | "tll" | "rig" | "vno" => {
-            Continent::Europe
-        }
-        // Asia
-        "sgp" | "hkg" | "tyo" | "nrt" | "osk" | "bom" | "del" | "maa" | "ccu" | "hyb"
-        | "bkk" | "kul" | "icn" | "sha" | "pek" | "can" | "szx" | "pnq" | "blr" | "amd" => {
-            Continent::Asia
-        }
-        // Middle East
-        "dxb" | "bah" | "khi" | "kwi" | "tlv" | "ist" | "esb" | "ruh" | "auh" => {
-            Continent::MiddleEast
-        }
-        // Africa
-        "jnb" | "lag" | "nbo" | "cai" | "acc" | "dkr" => Continent::Africa,
-        // Oceania
-        "syd" | "mel" | "per" | "bne" | "adl" | "akl" | "cbr" => Continent::Oceania,
-        _ => Continent::Unknown,
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct ServerRegion {
     pub name: String,
     pub description: String,
     pub relay_ips: Vec<String>,
     pub blocked: bool,
-    pub continent: Continent,
 }
 
 /// Passed through an Arc<Mutex<>> from the fetch thread to the UI thread.
@@ -139,7 +77,6 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
         }
 
         regions.push(ServerRegion {
-            continent: continent_from_name(name),
             name: name.clone(),
             description,
             relay_ips,
@@ -147,11 +84,7 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
         });
     }
 
-    regions.sort_by(|a, b| {
-        a.continent
-            .cmp(&b.continent)
-            .then_with(|| a.description.cmp(&b.description))
-    });
+    regions.sort_by(|a, b| a.description.cmp(&b.description));
 
     Ok(regions)
 }
