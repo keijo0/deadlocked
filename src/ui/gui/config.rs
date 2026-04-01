@@ -1,9 +1,8 @@
 use egui::{Align, Button, Ui};
-use utils::log;
 
 use crate::{
     config::{
-        BASE_PATH, CONFIG_PATH, Config, available_configs, delete_config, parse_config,
+        BASE_PATH, CONFIG_PATH, available_configs, delete_config, parse_config,
         write_config,
     },
     ui::{app::App, color::Colors, grenades::read_grenades},
@@ -47,45 +46,12 @@ impl App {
 
         ui.separator();
 
-        if ui.button("Reset").clicked() {
-            self.config = Config::default();
-            self.send_config();
-            log::info!("loaded default config");
-        }
-
         if ui.button("Config Folder").clicked() {
             std::process::Command::new("xdg-open")
                 .arg(BASE_PATH.as_os_str())
                 .status()
                 .unwrap();
         }
-
-        ui.separator();
-
-        egui::ComboBox::new("accent_color", "Accent Color")
-            .selected_text(
-                Colors::ACCENT_COLORS
-                    .iter()
-                    .find(|c| c.1 == self.config.accent_color)
-                    .unwrap_or(&Colors::ACCENT_COLORS[5])
-                    .0,
-            )
-            .show_ui(ui, |ui| {
-                for (name, color) in Colors::ACCENT_COLORS {
-                    if ui
-                        .add(
-                            Button::selectable(color == self.config.accent_color, name)
-                                .fill(color),
-                        )
-                        .clicked()
-                    {
-                        self.config.accent_color = color;
-                        ui.ctx()
-                            .global_style_mut(|style| style.visuals.selection.bg_fill = color);
-                        self.send_config();
-                    }
-                }
-            });
     }
 
     fn config_list(&mut self, ui: &mut Ui) {
@@ -116,7 +82,7 @@ impl App {
             self.current_config = config_path;
             self.send_config();
             ui.ctx().global_style_mut(|style| {
-                style.visuals.selection.bg_fill = self.config.accent_color
+                style.visuals.selection.bg_fill = Colors::PURPLE
             });
         }
 

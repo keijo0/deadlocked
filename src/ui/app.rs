@@ -21,6 +21,7 @@ use crate::{
     message::{GameStatus, Message},
     server_picker::{ServerRegion, new_fetch_result},
     ui::{
+        color::Colors,
         grenades::{Grenade, GrenadeList, read_grenades},
         gui::{Tab, aimbot::AimbotTab},
         trail::Trail,
@@ -106,8 +107,8 @@ impl App {
     }
 
     fn create_window(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        let gui = WindowContext::new(event_loop, false, self.config.accent_color);
-        let overlay = WindowContext::new(event_loop, true, self.config.accent_color);
+        let gui = WindowContext::new(event_loop, false, Colors::PURPLE);
+        let overlay = WindowContext::new(event_loop, true, Colors::PURPLE);
 
         self.display_scale = gui.window().scale_factor() as f32;
         log::info!("detected display scale: {}", self.display_scale);

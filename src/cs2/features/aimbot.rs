@@ -4,7 +4,7 @@ use utils::log;
 use crate::{
     config::{Config, KeyMode},
     cs2::{
-        CS2,
+        CS2, CS2_TICK_RATE,
         entity::{player::Player, weapon_class::WeaponClass},
     },
     math::{angles_to_fov, vec2_clamp},
@@ -81,7 +81,7 @@ impl CS2 {
 
             if config.backtrack {
                 let target_pawn = target.pawn;
-                let max_ticks = ((config.backtrack_ms as f32 / 1000.0) * 64.0).round() as usize;
+                let max_ticks = ((config.backtrack_ms as f32 / 1000.0) * CS2_TICK_RATE).round() as usize;
 
                 // Collect bone positions from history into a local Vec to avoid borrow conflicts
                 let hist_positions: Vec<glam::Vec3> = {

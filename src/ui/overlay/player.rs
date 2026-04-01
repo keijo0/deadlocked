@@ -157,7 +157,7 @@ impl App {
         if self.config.player.armor_text && player.armor > 0 {
             self.text(
                 painter,
-                format!("{}a", player.armor),
+                player.armor.to_string(),
                 pos2(tr.x + corner_size, tr.y + offset),
                 Align2::LEFT_TOP,
                 Some(Self::alpha(Color32::from_rgb(100, 149, 237), alpha)),

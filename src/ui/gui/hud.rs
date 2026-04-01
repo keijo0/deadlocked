@@ -63,9 +63,6 @@ impl App {
                         ) {
                             self.send_config();
                         }
-                        if checkbox(right, "Ping", &mut self.config.hud.keybind_ping) {
-                            self.send_config();
-                        }
                     });
                 }
 
@@ -82,6 +79,9 @@ impl App {
                     "Spectator List Color",
                     &mut self.config.hud.spectator_list_color,
                 ) {
+                    self.send_config();
+                }
+                if color_picker(ui, "FOV Arrow Color", &mut self.config.hud.fov_arrow_color) {
                     self.send_config();
                 }
             });
@@ -127,25 +127,6 @@ impl App {
             .checkbox(&mut self.config.hud.fov_arrows, "FOV Arrows")
             .changed()
         {
-            self.send_config();
-        }
-
-        ui.horizontal(|ui| {
-            if ui
-                .add(
-                    DragValue::new(&mut self.config.hud.fov_arrow_size)
-                        .range(0.0..=50.0)
-                        .speed(0.1)
-                        .max_decimals(1),
-                )
-                .changed()
-            {
-                self.send_config();
-            }
-            ui.label("FOV Arrow Size");
-        });
-
-        if color_picker(ui, "FOV Arrow Color", &mut self.config.hud.fov_arrow_color) {
             self.send_config();
         }
     }
@@ -201,6 +182,21 @@ impl App {
                 self.send_config();
             }
             ui.label("Icon Size");
+        });
+
+        ui.horizontal(|ui| {
+            if ui
+                .add(
+                    DragValue::new(&mut self.config.hud.fov_arrow_size)
+                        .range(0.0..=50.0)
+                        .speed(0.1)
+                        .max_decimals(1),
+                )
+                .changed()
+            {
+                self.send_config();
+            }
+            ui.label("FOV Arrow Size");
         });
 
         if ui

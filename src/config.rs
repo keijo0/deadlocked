@@ -39,7 +39,7 @@ impl Default for Config {
             player: PlayerConfig::default(),
             hud: HudConfig::default(),
             misc: UnsafeConfig::default(),
-            accent_color: Colors::BLUE,
+            accent_color: Colors::PURPLE,
         }
     }
 }

@@ -34,6 +34,9 @@ mod offsets;
 mod schema;
 mod target;
 
+/// CS2 runs at 64 ticks per second.
+pub const CS2_TICK_RATE: f32 = 64.0;
+
 #[derive(Debug)]
 pub struct CS2 {
     is_valid: bool,
@@ -370,7 +373,7 @@ impl CS2 {
         if !aimbot_config.backtrack {
             return;
         }
-        let max_ticks = ((aimbot_config.backtrack_ms as f32 / 1000.0) * 64.0).round() as usize;
+        let max_ticks = ((aimbot_config.backtrack_ms as f32 / 1000.0) * CS2_TICK_RATE).round() as usize;
 
         let mut records: Vec<(u64, BacktrackRecord)> = Vec::with_capacity(self.players.len());
         for player in &self.players {

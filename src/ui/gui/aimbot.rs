@@ -133,7 +133,7 @@ impl App {
 
         ui.separator();
 
-        // Individual bones (excluding LeftHip/RightHip which are merged below)
+        // Single bones
         for bone in [
             Bones::Head,
             Bones::Neck,
@@ -142,16 +142,6 @@ impl App {
             Bones::Spine2,
             Bones::Spine1,
             Bones::Hip,
-            Bones::LeftShoulder,
-            Bones::RightShoulder,
-            Bones::LeftElbow,
-            Bones::RightElbow,
-            Bones::LeftHand,
-            Bones::RightHand,
-            Bones::LeftKnee,
-            Bones::RightKnee,
-            Bones::LeftFoot,
-            Bones::RightFoot,
         ] {
             let text = format!("{:?}", bone);
             let index = self
@@ -170,28 +160,27 @@ impl App {
             }
         }
 
-        // Merged Hip (L+R) entry — selects/deselects LeftHip and RightHip together
-        {
-            let has_left = self
-                .weapon_config()
-                .aimbot
-                .bones
-                .contains(&Bones::LeftHip);
-            let has_right = self
-                .weapon_config()
-                .aimbot
-                .bones
-                .contains(&Bones::RightHip);
+        // Merged L/R bone pairs
+        for (label, left, right) in [
+            ("Shoulder", Bones::LeftShoulder, Bones::RightShoulder),
+            ("Elbow", Bones::LeftElbow, Bones::RightElbow),
+            ("Hand", Bones::LeftHand, Bones::RightHand),
+            ("Knee", Bones::LeftKnee, Bones::RightKnee),
+            ("Foot", Bones::LeftFoot, Bones::RightFoot),
+            ("Hip", Bones::LeftHip, Bones::RightHip),
+        ] {
+            let has_left = self.weapon_config().aimbot.bones.contains(&left);
+            let has_right = self.weapon_config().aimbot.bones.contains(&right);
             let selected = has_left || has_right;
-            if ui.selectable_label(selected, "Hip (L+R)").clicked() {
+            if ui.selectable_label(selected, label).clicked() {
                 if selected {
                     self.weapon_config()
                         .aimbot
                         .bones
-                        .retain(|b| *b != Bones::LeftHip && *b != Bones::RightHip);
+                        .retain(|b| *b != left && *b != right);
                 } else {
-                    self.weapon_config().aimbot.bones.push(Bones::LeftHip);
-                    self.weapon_config().aimbot.bones.push(Bones::RightHip);
+                    self.weapon_config().aimbot.bones.push(left);
+                    self.weapon_config().aimbot.bones.push(right);
                 }
                 self.send_config();
             }

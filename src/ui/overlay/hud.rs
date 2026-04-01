@@ -235,22 +235,6 @@ impl App {
             );
             line += 1.0;
         }
-
-        if self.config.hud.keybind_ping {
-            let label = if data.ping >= 0 {
-                format!("Ping: {}ms", data.ping)
-            } else {
-                "Ping: N/A".to_string()
-            };
-            self.text(
-                painter,
-                label,
-                position + egui::vec2(0.0, font_size * line),
-                Align2::LEFT_TOP,
-                None,
-            );
-            line += 1.0;
-        }
     }
 
     pub fn draw_sniper_crosshair(&self, painter: &Painter, data: &Data) {
