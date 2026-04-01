@@ -315,10 +315,10 @@ impl Default for HudConfig {
             text_outline: true,
             text_color: Colors::TEXT,
             line_width: 2.0,
-            font_size: 16.0,
+            font_size: 14.0,
             icon_size: 20.0,
-            overlay_refresh_rate: 120,
-            data_refresh_rate: 100,
+            overlay_refresh_rate: 280,
+            data_refresh_rate: 280,
             debug: false,
         }
     }
