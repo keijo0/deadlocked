@@ -198,7 +198,7 @@ fn run_iptables(args: &[&str], ip: &str, action: &str) {
 
     match status {
         Ok(s) if s.success() => {
-            log::info!("iptables {action} succeeded for {ip}");
+            log::debug!("iptables {action} succeeded for {ip}");
         }
         Ok(s) => {
             log::warn!(

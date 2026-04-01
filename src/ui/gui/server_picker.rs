@@ -1,7 +1,7 @@
 use egui::{Color32, Grid, RichText, ScrollArea, Ui};
 
 use crate::{
-    server_picker::{Continent, block_region, fetch_servers_async, unblock_region},
+    server_picker::{Continent, block_region, fetch_servers_async, unblock_region, ServerRegion},
     ui::{app::App, color::Colors, gui::helpers::collapsing_open},
 };
 
@@ -13,6 +13,16 @@ impl App {
             self.server_picker_loading = false;
             match result {
                 Ok(regions) => {
+                    // Unblock any previously-blocked regions so that iptables rules
+                    // from the old list are not left behind as orphans.
+                    let old_blocked: Vec<&ServerRegion> = self
+                        .server_regions
+                        .iter()
+                        .filter(|r| r.blocked)
+                        .collect();
+                    for region in old_blocked {
+                        unblock_region(&region.relay_ips);
+                    }
                     self.server_regions = regions;
                     self.server_picker_error = None;
                 }
