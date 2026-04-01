@@ -31,9 +31,8 @@ impl Continent {
 
 /// Maps a Steam SDR datacenter pop code to its geographic continent.
 ///
-/// Deadlock (and other Valve games) sometimes append a numeric suffix to a base
-/// IATA/city code (e.g. `"maa2"`, `"bom2"`, `"iad1"`) and occasionally use
-/// non-IATA city codes (e.g. `"seo"` for Seoul, `"tyo"` for Tokyo).  This
+/// CS2 uses standard 3-letter IATA/city codes (e.g. `"lhr"`, `"iad"`, `"sto"`).
+/// Some pop codes may include numeric suffixes or non-IATA aliases, so this
 /// function normalises the code by stripping any trailing ASCII digits before
 /// matching, so `"maa2"` is treated identically to `"maa"`.
 ///
@@ -57,7 +56,7 @@ fn continent_from_name(name: &str) -> Continent {
         | "man" | "bru" | "muc" | "cdg" | "ber" | "ham" | "dus" | "tll" | "rig" | "vno" => {
             Continent::Europe
         }
-        // Asia — includes Deadlock-specific non-IATA codes:
+        // Asia — includes non-IATA city codes used by Valve's SDR:
         //   seo = Seoul (Valve uses "seo", IATA is "icn")
         //   tyo = Tokyo (common Valve alias; IATA is "nrt"/"hnd")
         "sgp" | "hkg" | "tyo" | "nrt" | "osk" | "bom" | "del" | "maa" | "ccu" | "hyb"
@@ -259,7 +258,7 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
             "-s",
             "--max-time",
             "10",
-            "https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=1422450",
+            "https://api.steampowered.com/ISteamApps/GetSDRConfig/v1/?appid=730",
         ])
         .output()
         .map_err(|e| format!("Failed to execute curl: {e}"))?;
