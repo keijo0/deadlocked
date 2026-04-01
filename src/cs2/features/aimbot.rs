@@ -81,7 +81,7 @@ impl CS2 {
 
             if config.backtrack {
                 let target_pawn = target.pawn;
-                let max_ticks = config.backtrack_ticks as usize;
+                let max_ticks = ((config.backtrack_ms as f32 / 1000.0) * 64.0).round() as usize;
 
                 // Collect bone positions from history into a local Vec to avoid borrow conflicts
                 let hist_positions: Vec<glam::Vec3> = {

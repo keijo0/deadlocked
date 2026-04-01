@@ -1,5 +1,4 @@
 use egui::{DragValue, Ui};
-use strum::IntoEnumIterator as _;
 
 use crate::{
     cs2::bones::Bones,
@@ -118,15 +117,6 @@ impl App {
             self.send_config();
         }
 
-        if combo_box(
-            ui,
-            "targeting_mode",
-            "Targeting Mode",
-            &mut self.weapon_config().aimbot.targeting_mode,
-        ) {
-            self.send_config();
-        }
-
         ui.separator();
 
         if checkbox(
@@ -143,7 +133,26 @@ impl App {
 
         ui.separator();
 
-        for bone in Bones::iter() {
+        // Individual bones (excluding LeftHip/RightHip which are merged below)
+        for bone in [
+            Bones::Head,
+            Bones::Neck,
+            Bones::Spine4,
+            Bones::Spine3,
+            Bones::Spine2,
+            Bones::Spine1,
+            Bones::Hip,
+            Bones::LeftShoulder,
+            Bones::RightShoulder,
+            Bones::LeftElbow,
+            Bones::RightElbow,
+            Bones::LeftHand,
+            Bones::RightHand,
+            Bones::LeftKnee,
+            Bones::RightKnee,
+            Bones::LeftFoot,
+            Bones::RightFoot,
+        ] {
             let text = format!("{:?}", bone);
             let index = self
                 .weapon_config()
@@ -156,6 +165,33 @@ impl App {
                     self.weapon_config().aimbot.bones.remove(index);
                 } else {
                     self.weapon_config().aimbot.bones.push(bone);
+                }
+                self.send_config();
+            }
+        }
+
+        // Merged Hip (L+R) entry — selects/deselects LeftHip and RightHip together
+        {
+            let has_left = self
+                .weapon_config()
+                .aimbot
+                .bones
+                .contains(&Bones::LeftHip);
+            let has_right = self
+                .weapon_config()
+                .aimbot
+                .bones
+                .contains(&Bones::RightHip);
+            let selected = has_left || has_right;
+            if ui.selectable_label(selected, "Hip (L+R)").clicked() {
+                if selected {
+                    self.weapon_config()
+                        .aimbot
+                        .bones
+                        .retain(|b| *b != Bones::LeftHip && *b != Bones::RightHip);
+                } else {
+                    self.weapon_config().aimbot.bones.push(Bones::LeftHip);
+                    self.weapon_config().aimbot.bones.push(Bones::RightHip);
                 }
                 self.send_config();
             }
@@ -331,15 +367,21 @@ impl App {
                 self.send_config();
             }
 
-            if drag(
-                ui,
-                "Backtrack Ticks",
-                DragValue::new(&mut self.config.aim.global.aimbot.backtrack_ticks)
-                    .range(1..=32)
-                    .speed(0.1),
-            ) {
-                self.send_config();
-            }
+            ui.horizontal(|ui| {
+                if ui
+                    .add(
+                        DragValue::new(&mut self.config.aim.global.aimbot.backtrack_ms)
+                            .range(15..=500)
+                            .speed(1.0)
+                            .suffix("ms"),
+                    )
+                    .changed()
+                {
+                    self.send_config();
+                }
+                ui.label("Backtrack Duration")
+                    .on_hover_text("How far back in time to search for targets (15ms ≈ 1 tick at 64Hz)");
+            });
         }
     }
 }

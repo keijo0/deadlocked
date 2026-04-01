@@ -4,9 +4,6 @@ use crate::{
     cs2::entity::weapon_class::WeaponClass, data::Data, math::world_to_screen, ui::app::App,
 };
 
-/// CS2 runs at 64 ticks per second (15.625 ms per tick).
-const CS2_TICK_RATE: f32 = 64.0;
-
 impl App {
     pub fn overlay_debug(&self, painter: &Painter, data: &Data) {
         if self.config.hud.debug {
@@ -222,9 +219,7 @@ impl App {
         }
 
         if self.config.hud.keybind_backtrack && self.config.aim.global.aimbot.backtrack {
-            let bt_ms = (self.config.aim.global.aimbot.backtrack_ticks as f32
-                * (1000.0 / CS2_TICK_RATE))
-                .round() as u32;
+            let bt_ms = self.config.aim.global.aimbot.backtrack_ms;
             let ping = data.ping.max(0) as u32;
             let label = if ping > 0 {
                 format!("BT: +{}ms (~{}ms w/ ping)", bt_ms, bt_ms + ping)

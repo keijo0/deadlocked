@@ -370,7 +370,7 @@ impl CS2 {
         if !aimbot_config.backtrack {
             return;
         }
-        let max_ticks = aimbot_config.backtrack_ticks as usize;
+        let max_ticks = ((aimbot_config.backtrack_ms as f32 / 1000.0) * 64.0).round() as usize;
 
         let mut records: Vec<(u64, BacktrackRecord)> = Vec::with_capacity(self.players.len());
         for player in &self.players {

@@ -4,7 +4,7 @@ use glam::Vec2;
 use strum::IntoEnumIterator;
 
 use crate::{
-    config::{Config, TargetingMode},
+    config::Config,
     constants::cs2,
     cs2::{
         CS2,
@@ -61,12 +61,10 @@ impl CS2 {
         self.target.previous_aim_punch = aim_punch;
 
         let aimbot_config = self.aimbot_config(config);
-        let targeting_mode = &aimbot_config.targeting_mode;
         let max_fov = aimbot_config.fov;
         let is_custom_mode = self.is_custom_game_mode();
 
         let mut best_fov = 360.0;
-        let mut best_distance = f32::MAX;
         let eye_position = local_player.eye_position(self);
 
         if self.target.player.is_none() {
@@ -100,14 +98,10 @@ impl CS2 {
                 continue;
             }
 
-            let should_select = match targeting_mode {
-                TargetingMode::Fov => fov < best_fov,
-                TargetingMode::Distance => distance < best_distance,
-            };
+            let should_select = fov < best_fov;
 
             if should_select {
                 best_fov = fov;
-                best_distance = distance;
 
                 self.target.player = Some(*player);
                 self.target.angle = angle;

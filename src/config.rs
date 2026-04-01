@@ -80,9 +80,8 @@ pub struct AimbotConfig {
     pub fov: f32,
     pub smooth: f32,
     pub bones: Vec<Bones>,
-    pub targeting_mode: TargetingMode,
     pub backtrack: bool,
-    pub backtrack_ticks: u32,
+    pub backtrack_ms: u32,
 }
 
 impl Default for AimbotConfig {
@@ -107,9 +106,8 @@ impl Default for AimbotConfig {
                 Bones::Spine1,
                 Bones::Hip,
             ],
-            targeting_mode: TargetingMode::Fov,
             backtrack: false,
-            backtrack_ticks: 12,
+            backtrack_ms: 187,
         }
     }
 }
@@ -136,12 +134,6 @@ impl Default for RcsConfig {
 pub enum KeyMode {
     Hold,
     Toggle,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, EnumIter)]
-pub enum TargetingMode {
-    Fov,
-    Distance,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -228,7 +220,7 @@ pub struct PlayerConfig {
     pub skeleton_color: Color32,
     pub health_bar: bool,
     pub health_text: bool,
-    pub armor_bar: bool,
+    pub armor_text: bool,
     pub player_name: bool,
     pub weapon_icon: bool,
     pub tags: bool,
@@ -249,7 +241,7 @@ impl Default for PlayerConfig {
             skeleton_color: Color32::WHITE,
             health_bar: true,
             health_text: true,
-            armor_bar: true,
+            armor_text: true,
             player_name: true,
             weapon_icon: true,
             tags: true,

@@ -70,7 +70,7 @@ impl App {
         if ui.checkbox(&mut self.config.player.health_text, "Health Text").changed() {
             self.send_config();
         }
-        if ui.checkbox(&mut self.config.player.armor_bar, "Armor Bar").changed() {
+        if ui.checkbox(&mut self.config.player.armor_text, "Armor Text").changed() {
             self.send_config();
         }
         if ui.checkbox(&mut self.config.player.player_name, "Player Name").changed() {

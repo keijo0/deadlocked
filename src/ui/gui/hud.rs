@@ -25,48 +25,47 @@ impl App {
                 }
 
                 if self.config.hud.keybind_list {
-                    ui.indent("keybind_list_indicators", |ui| {
-                        ui.label("Aim");
-                        ui.indent("keybind_aim", |ui| {
-                            if checkbox(ui, "Aimbot", &mut self.config.hud.keybind_aimbot) {
-                                self.send_config();
-                            }
-                            if checkbox(ui, "FOV / Smooth", &mut self.config.hud.keybind_fov) {
-                                self.send_config();
-                            }
-                            if checkbox(
-                                ui,
-                                "Trigger Delay",
-                                &mut self.config.hud.keybind_trigger_delay,
-                            ) {
-                                self.send_config();
-                            }
-                            if checkbox(ui, "Triggerbot", &mut self.config.hud.keybind_triggerbot) {
-                                self.send_config();
-                            }
-                            if checkbox(ui, "Backtrack", &mut self.config.hud.keybind_backtrack) {
-                                self.send_config();
-                            }
-                        });
-                        ui.label("Other");
-                        ui.indent("keybind_other", |ui| {
-                            if checkbox(ui, "ESP", &mut self.config.hud.keybind_esp) {
-                                self.send_config();
-                            }
-                            if checkbox(ui, "Bunnyhop", &mut self.config.hud.keybind_bunnyhop) {
-                                self.send_config();
-                            }
-                            if checkbox(
-                                ui,
-                                "Server Picker",
-                                &mut self.config.hud.keybind_server_picker,
-                            ) {
-                                self.send_config();
-                            }
-                            if checkbox(ui, "Ping", &mut self.config.hud.keybind_ping) {
-                                self.send_config();
-                            }
-                        });
+                    ui.columns(2, |cols| {
+                        let left = &mut cols[0];
+                        left.label("Aim");
+                        if checkbox(left, "Aimbot", &mut self.config.hud.keybind_aimbot) {
+                            self.send_config();
+                        }
+                        if checkbox(left, "FOV / Smooth", &mut self.config.hud.keybind_fov) {
+                            self.send_config();
+                        }
+                        if checkbox(
+                            left,
+                            "Trigger Delay",
+                            &mut self.config.hud.keybind_trigger_delay,
+                        ) {
+                            self.send_config();
+                        }
+                        if checkbox(left, "Triggerbot", &mut self.config.hud.keybind_triggerbot) {
+                            self.send_config();
+                        }
+                        if checkbox(left, "Backtrack", &mut self.config.hud.keybind_backtrack) {
+                            self.send_config();
+                        }
+
+                        let right = &mut cols[1];
+                        right.label("Other");
+                        if checkbox(right, "ESP", &mut self.config.hud.keybind_esp) {
+                            self.send_config();
+                        }
+                        if checkbox(right, "Bunnyhop", &mut self.config.hud.keybind_bunnyhop) {
+                            self.send_config();
+                        }
+                        if checkbox(
+                            right,
+                            "Server Picker",
+                            &mut self.config.hud.keybind_server_picker,
+                        ) {
+                            self.send_config();
+                        }
+                        if checkbox(right, "Ping", &mut self.config.hud.keybind_ping) {
+                            self.send_config();
+                        }
                     });
                 }
 
