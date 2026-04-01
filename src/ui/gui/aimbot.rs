@@ -133,6 +133,29 @@ impl App {
 
         ui.separator();
 
+        if checkbox_hover(
+            ui,
+            "Humanization",
+            "Randomizes the aim point within the hitbox each frame for a more human-like appearance",
+            &mut self.weapon_config().aimbot.humanization,
+        ) {
+            self.send_config();
+        }
+
+        if drag(
+            ui,
+            "Humanization Amount",
+            DragValue::new(&mut self.weapon_config().aimbot.humanization_amount)
+                .range(0.0..=30.0)
+                .speed(0.1)
+                .max_decimals(1)
+                .suffix(" u"),
+        ) {
+            self.send_config();
+        }
+
+        ui.separator();
+
         // Single bones
         for bone in [
             Bones::Head,

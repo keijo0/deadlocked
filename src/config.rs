@@ -82,6 +82,8 @@ pub struct AimbotConfig {
     pub bones: Vec<Bones>,
     pub backtrack: bool,
     pub backtrack_ms: u32,
+    pub humanization: bool,
+    pub humanization_amount: f32,
 }
 
 impl Default for AimbotConfig {
@@ -108,6 +110,8 @@ impl Default for AimbotConfig {
             ],
             backtrack: false,
             backtrack_ms: 187,
+            humanization: false,
+            humanization_amount: 5.0,
         }
     }
 }
