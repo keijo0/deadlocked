@@ -1,4 +1,4 @@
-use std::{process::Command, sync::Arc, thread};
+use std::{net::Ipv4Addr, process::Command, sync::Arc, thread};
 
 use utils::{log, sync::Mutex};
 
@@ -130,7 +130,33 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
 
         let relay_ips: Vec<String> = relays
             .iter()
-            .filter_map(|r| r.get("ipv4").and_then(|ip| ip.as_str()).map(String::from))
+            .flat_map(|r| {
+                let ip_str = match r.get("ipv4").and_then(|ip| ip.as_str()) {
+                    Some(s) => s,
+                    None => return vec![],
+                };
+                // `num_addresses` is the count of consecutive relay IPs starting at
+                // `ipv4`.  When absent or explicitly 0, treat it as 1 so the base
+                // IP is always included.
+                let count = r
+                    .get("num_addresses")
+                    .and_then(|n| n.as_u64())
+                    .unwrap_or(1)
+                    .max(1) as u32;
+                let base: Ipv4Addr = match ip_str.parse() {
+                    Ok(ip) => ip,
+                    Err(e) => {
+                        log::warn!("skipping unparseable relay IP {ip_str:?}: {e}");
+                        return vec![];
+                    }
+                };
+                let base_u32 = u32::from(base);
+                (0..count)
+                    .filter_map(|i| {
+                        base_u32.checked_add(i).map(|n| Ipv4Addr::from(n).to_string())
+                    })
+                    .collect()
+            })
             .collect();
 
         if relay_ips.is_empty() {
