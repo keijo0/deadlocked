@@ -17,7 +17,7 @@ use crate::{
         CONFIG_PATH, Config, DEFAULT_CONFIG_NAME, available_configs, parse_config, write_config,
     },
     cs2::entity::weapon::Weapon,
-    data::{Data, SoundType},
+    data::Data,
     message::{GameStatus, Message},
     server_picker::{ServerRegion, new_fetch_result},
     ui::{
@@ -42,7 +42,6 @@ pub struct App {
     pub game_status: GameStatus,
     pub display_scale: f32,
     pub trails: HashMap<u64, Trail>,
-    pub player_sounds: HashMap<u64, (Instant, SoundType)>,
 
     pub grenades: GrenadeList,
     pub new_grenade: Grenade,
@@ -88,7 +87,6 @@ impl App {
             game_status: GameStatus::NotStarted,
             display_scale: 1.0,
             trails: HashMap::new(),
-            player_sounds: HashMap::new(),
 
             grenades,
             new_grenade: Grenade::new(),

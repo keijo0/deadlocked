@@ -18,10 +18,6 @@ pub mod cs2 {
 
     pub const WEAPON_UNKNOWN: &str = "unknown";
 
-    pub const SOUND_ESP_FOOTSTEP_DIAMETER_DEFAULT: f32 = 2000.0;
-    pub const SOUND_ESP_GUNSHOT_DIAMETER_DEFAULT: f32 = 3000.0;
-    pub const SOUND_ESP_WEAPON_DIAMETER_DEFAULT: f32 = 1000.0;
-
     pub const GRENADES: &[Weapon] = &[
         Weapon::Decoy,
         Weapon::Flashbang,

@@ -8,13 +8,6 @@ use crate::cs2::{
     entity::{EntityInfo, weapon::Weapon},
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize)]
-pub enum SoundType {
-    Footstep,
-    Gunshot,
-    Weapon,
-}
-
 #[derive(Debug, Clone)]
 pub struct BacktrackRecord {
     pub bones: HashMap<Bones, Vec3>,
@@ -62,7 +55,6 @@ pub struct PlayerData {
     pub visible: bool,
     pub color: i32,
     pub rotation: f32,
-    pub sound: Option<SoundType>,
 }
 
 #[derive(Debug, Default, Serialize)]

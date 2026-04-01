@@ -233,7 +233,6 @@ pub struct PlayerConfig {
     pub weapon_icon: bool,
     pub tags: bool,
     pub visible_only: bool,
-    pub sound: SoundConfig,
 }
 
 impl Default for PlayerConfig {
@@ -255,33 +254,6 @@ impl Default for PlayerConfig {
             weapon_icon: true,
             tags: true,
             visible_only: false,
-            sound: SoundConfig::default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
-pub struct SoundConfig {
-    pub enabled: bool,
-    pub footstep_diameter: f32,
-    pub gunshot_diameter: f32,
-    pub weapon_diameter: f32,
-    pub fadeout_start: f32,
-    pub fadeout_duration: f32,
-    pub show_visible: bool,
-}
-
-impl Default for SoundConfig {
-    fn default() -> Self {
-        Self {
-            enabled: false,
-            footstep_diameter: crate::constants::cs2::SOUND_ESP_FOOTSTEP_DIAMETER_DEFAULT,
-            gunshot_diameter: crate::constants::cs2::SOUND_ESP_GUNSHOT_DIAMETER_DEFAULT,
-            weapon_diameter: crate::constants::cs2::SOUND_ESP_WEAPON_DIAMETER_DEFAULT,
-            fadeout_start: 1.0,
-            fadeout_duration: 1.0,
-            show_visible: true,
         }
     }
 }

@@ -1,9 +1,9 @@
-use egui::{DragValue, Ui};
+use egui::Ui;
 
 use crate::ui::{
     app::App,
     gui::helpers::{
-        checkbox, checkbox_hover, collapsing_open, color_picker, combo_box, drag, keybind, scroll,
+        checkbox, checkbox_hover, collapsing_open, color_picker, combo_box, keybind, scroll,
     },
 };
 
@@ -136,104 +136,6 @@ impl App {
             {
                 self.send_config();
             }
-        });
-
-        ui.collapsing("Sound ESP", |ui| {
-            if checkbox_hover(
-                ui,
-                "Enabled",
-                "Show a circle under players when they make sound",
-                &mut self.config.player.sound.enabled,
-            ) {
-                self.send_config();
-            }
-
-            if drag(
-                ui,
-                "Fadeout Time (s)",
-                DragValue::new(&mut self.config.player.sound.fadeout_duration)
-                    .range(0.0..=10.0)
-                    .speed(0.01),
-            ) {
-                self.send_config();
-            }
-
-            if drag(
-                ui,
-                "Fadeout Start (s)",
-                DragValue::new(&mut self.config.player.sound.fadeout_start)
-                    .range(0.0..=10.0)
-                    .speed(0.01),
-            ) {
-                self.send_config();
-            }
-
-            if checkbox(
-                ui,
-                "Show Visible",
-                &mut self.config.player.sound.show_visible,
-            ) {
-                self.send_config();
-            }
-
-            ui.collapsing("Ranges", |ui| {
-                ui.horizontal(|ui| {
-                    let response = ui.add(
-                        egui::DragValue::new(&mut self.config.player.sound.footstep_diameter)
-                            .speed(10.0)
-                            .range(200.0..=6000.0),
-                    );
-
-                    ui.label("Footstep");
-
-                    if ui.button("↺").on_hover_text("Reset").clicked() {
-                        self.config.player.sound.footstep_diameter =
-                            crate::constants::cs2::SOUND_ESP_FOOTSTEP_DIAMETER_DEFAULT;
-                        self.send_config();
-                    }
-                    if response.changed() {
-                        self.send_config();
-                    }
-                });
-
-                ui.horizontal(|ui| {
-                    let response = ui.add(
-                        egui::DragValue::new(&mut self.config.player.sound.gunshot_diameter)
-                            .speed(10.0)
-                            .range(200.0..=10000.0),
-                    );
-
-                    ui.label("Gunshot");
-
-                    if ui.button("↺").on_hover_text("Reset").clicked() {
-                        self.config.player.sound.gunshot_diameter =
-                            crate::constants::cs2::SOUND_ESP_GUNSHOT_DIAMETER_DEFAULT;
-                        self.send_config();
-                    }
-                    if response.changed() {
-                        self.send_config();
-                    }
-                });
-
-                ui.horizontal(|ui| {
-                    let response = ui.add(
-                        egui::DragValue::new(&mut self.config.player.sound.weapon_diameter)
-                            .speed(10.0)
-                            .range(200.0..=6000.0),
-                    );
-
-                    ui.label("Weapon");
-
-                    if ui.button("↺").on_hover_text("Reset").clicked() {
-                        self.config.player.sound.weapon_diameter =
-                            crate::constants::cs2::SOUND_ESP_WEAPON_DIAMETER_DEFAULT;
-                        self.send_config();
-                    }
-                    if response.changed() {
-                        self.send_config();
-                    }
-                });
-            });
         });
     }
 }

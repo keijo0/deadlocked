@@ -37,7 +37,6 @@ impl App {
         let painter = ui.layer_painter(egui::LayerId::background());
 
         self.update_trails();
-        self.update_player_sounds();
         let data = &self.data.lock();
 
         self.update_window(data);

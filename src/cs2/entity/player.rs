@@ -1,9 +1,9 @@
 use super::weapon::Weapon;
 use std::collections::HashMap;
 
-use glam::{Vec2, Vec3, vec2};
+use glam::{Vec2, Vec3};
 
-use crate::{constants::cs2, cs2::bones::Bones, data::SoundType};
+use crate::{constants::cs2, cs2::bones::Bones};
 
 use super::{CS2, weapon_class::WeaponClass};
 
@@ -484,37 +484,6 @@ impl Player {
         let flags = cs2.process.read::<i32>(self.pawn + cs2.offsets.pawn.flags);
         // FL_ONGROUND = (1 << 0)
         (flags & 1) == 0
-    }
-
-    pub fn is_making_sound(&self, cs2: &CS2) -> Option<SoundType> {
-        if self.shots_fired(cs2) > 0 {
-            return Some(SoundType::Gunshot);
-        }
-
-        let velocity = self.velocity(cs2);
-        let speed = vec2(velocity.x, velocity.y).length();
-        let current_weapon = self.weapon(cs2);
-
-        let is_jumping = velocity.z > 100.0 && self.is_in_air(cs2);
-        // knife walking speed is 250 units/s
-        let is_walking = speed > 100.0;
-        let is_standing = speed < 10.0;
-
-        // check for scoping (only for snipers)
-        let is_scoped = self.is_scoped(cs2);
-
-        if is_walking || is_standing {
-            return None;
-        }
-
-        // awp and scout are not the only snipers...
-        if is_scoped && WeaponClass::from_string(current_weapon.as_ref()) == WeaponClass::Sniper {
-            Some(SoundType::Weapon)
-        } else if speed > 150.0 || is_jumping || velocity.z < -200.0 {
-            Some(SoundType::Footstep)
-        } else {
-            None
-        }
     }
 }
 

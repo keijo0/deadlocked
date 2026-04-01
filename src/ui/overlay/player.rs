@@ -1,12 +1,10 @@
-use std::time::{Duration, Instant};
-
 use egui::{Align2, Color32, FontId, Painter, Stroke, pos2};
 use glam::vec3;
 
 use crate::{
     config::{BoxMode, DrawMode},
     cs2::bones::Bones,
-    data::{Data, PlayerData, SoundType},
+    data::{Data, PlayerData},
     math::world_to_screen,
     ui::app::App,
 };
@@ -17,55 +15,8 @@ impl App {
             return;
         }
 
-        let sound = self.player_sounds.get(&player.steam_id);
-        let sound_alpha = if self.config.player.sound.enabled {
-            self.player_sound_alpha(player, sound, data)
-        } else {
-            None
-        };
-
-        self.player_box(painter, player, data, sound_alpha);
-        self.skeleton(painter, player, data, sound_alpha);
-    }
-
-    fn player_sound_alpha(
-        &self,
-        player: &PlayerData,
-        sound: Option<&(Instant, SoundType)>,
-        data: &Data,
-    ) -> Option<f32> {
-        if self.config.player.sound.show_visible && player.visible {
-            return Some(1.0);
-        }
-
-        let Some((time, sound)) = sound else {
-            return Some(0.0);
-        };
-
-        let local_player = &data.local_player;
-        let max_distance = match sound {
-            SoundType::Footstep => self.config.player.sound.footstep_diameter,
-            SoundType::Gunshot => self.config.player.sound.gunshot_diameter,
-            SoundType::Weapon => self.config.player.sound.weapon_diameter,
-        };
-        if local_player.position.distance(player.position) > max_distance {
-            return Some(0.0);
-        }
-
-        if time.elapsed() > self.total_sound_duration() {
-            return Some(0.0);
-        }
-
-        Some(
-            1.0 - ((time.elapsed().as_secs_f32() - self.config.player.sound.fadeout_start)
-                / self.config.player.sound.fadeout_duration),
-        )
-    }
-
-    fn total_sound_duration(&self) -> Duration {
-        Duration::from_secs_f32(
-            self.config.player.sound.fadeout_start + self.config.player.sound.fadeout_duration,
-        )
+        self.player_box(painter, player, data, None);
+        self.skeleton(painter, player, data, None);
     }
 
     fn alpha(color: Color32, alpha: f32) -> Color32 {
@@ -274,22 +225,5 @@ impl App {
 
             painter.line(vec![a, b], stroke);
         }
-    }
-
-    pub fn update_player_sounds(&mut self) {
-        let data = self.data.lock();
-
-        for player in &data.players {
-            let Some(sound) = &player.sound else {
-                continue;
-            };
-
-            self.player_sounds
-                .insert(player.steam_id, (Instant::now(), *sound));
-        }
-
-        let total_duration = self.total_sound_duration();
-        self.player_sounds
-            .retain(|_, (time, _)| time.elapsed() < total_duration);
     }
 }

@@ -169,7 +169,6 @@ impl Game for CS2 {
                 visible: player.visible(self, &local_player),
                 color: player.color(self),
                 rotation: player.rotation(self),
-                sound: player.is_making_sound(self),
             };
 
             if !self.is_ffa() && player.team(self) == local_team {
@@ -195,7 +194,6 @@ impl Game for CS2 {
             visible: true,
             color: local_player.color(self),
             rotation: local_player.rotation(self),
-            sound: None,
         };
 
         data.entities = self
