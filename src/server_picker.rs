@@ -62,6 +62,159 @@ fn continent_from_name(name: &str) -> Continent {
     }
 }
 
+/// Fallback continent classifier that inspects the human-readable description
+/// returned by the Steam SDR API (e.g. `"Stockholm - Kista"`).  Used when the
+/// pop code is not recognised by [`continent_from_name`] so that newly added or
+/// non-standard pops are still placed in the right continent group rather than
+/// being silently dropped into `Unknown` (which users can easily miss when
+/// clicking continent-level "Block All" buttons).
+fn continent_from_description(desc: &str) -> Continent {
+    let d = desc.to_lowercase();
+
+    // North America — cities / regions
+    if d.contains("ashburn")
+        || d.contains("chicago")
+        || d.contains("los angeles")
+        || d.contains("seattle")
+        || d.contains("atlanta")
+        || d.contains("dallas")
+        || d.contains("miami")
+        || d.contains("denver")
+        || d.contains("portland")
+        || d.contains("san jose")
+        || d.contains("oklahoma")
+        || d.contains("toronto")
+        || d.contains("calgary")
+        || d.contains("montreal")
+        || d.contains("vancouver")
+        || d.contains("mexico")
+        || d.contains("fayetteville")
+        || d.contains("north america")
+    {
+        return Continent::NorthAmerica;
+    }
+
+    // South America
+    if d.contains("sao paulo")
+        || d.contains("são paulo")
+        || d.contains("rio")
+        || d.contains("santiago")
+        || d.contains("lima")
+        || d.contains("bogota")
+        || d.contains("bogotá")
+        || d.contains("buenos aires")
+        || d.contains("south america")
+    {
+        return Continent::SouthAmerica;
+    }
+
+    // Europe — cities / countries (covers Valve's sub-city pop names like
+    // "Stockholm - Kista", "Stockholm - Bromma", etc.)
+    if d.contains("stockholm")
+        || d.contains("sweden")
+        || d.contains("london")
+        || d.contains("amsterdam")
+        || d.contains("frankfurt")
+        || d.contains("paris")
+        || d.contains("madrid")
+        || d.contains("vienna")
+        || d.contains("warsaw")
+        || d.contains("prague")
+        || d.contains("helsinki")
+        || d.contains("budapest")
+        || d.contains("zurich")
+        || d.contains("milan")
+        || d.contains("lisbon")
+        || d.contains("athens")
+        || d.contains("oslo")
+        || d.contains("copenhagen")
+        || d.contains("dublin")
+        || d.contains("brussels")
+        || d.contains("munich")
+        || d.contains("berlin")
+        || d.contains("hamburg")
+        || d.contains("dusseldorf")
+        || d.contains("düsseldorf")
+        || d.contains("tallinn")
+        || d.contains("riga")
+        || d.contains("vilnius")
+        || d.contains("manchester")
+        || d.contains("europe")
+    {
+        return Continent::Europe;
+    }
+
+    // Asia
+    if d.contains("singapore")
+        || d.contains("hong kong")
+        || d.contains("tokyo")
+        || d.contains("osaka")
+        || d.contains("mumbai")
+        || d.contains("delhi")
+        || d.contains("chennai")
+        || d.contains("kolkata")
+        || d.contains("hyderabad")
+        || d.contains("bangkok")
+        || d.contains("kuala lumpur")
+        || d.contains("seoul")
+        || d.contains("shanghai")
+        || d.contains("beijing")
+        || d.contains("guangzhou")
+        || d.contains("shenzhen")
+        || d.contains("pune")
+        || d.contains("bangalore")
+        || d.contains("bengaluru")
+        || d.contains("ahmedabad")
+        || d.contains("asia")
+    {
+        return Continent::Asia;
+    }
+
+    // Middle East
+    if d.contains("dubai")
+        || d.contains("bahrain")
+        || d.contains("karachi")
+        || d.contains("kuwait")
+        || d.contains("tel aviv")
+        || d.contains("istanbul")
+        || d.contains("ankara")
+        || d.contains("riyadh")
+        || d.contains("abu dhabi")
+        || d.contains("middle east")
+    {
+        return Continent::MiddleEast;
+    }
+
+    // Africa
+    if d.contains("johannesburg")
+        || d.contains("lagos")
+        || d.contains("nairobi")
+        || d.contains("cairo")
+        || d.contains("accra")
+        || d.contains("dakar")
+        || d.contains("africa")
+    {
+        return Continent::Africa;
+    }
+
+    // Oceania
+    if d.contains("sydney")
+        || d.contains("melbourne")
+        || d.contains("perth")
+        || d.contains("brisbane")
+        || d.contains("adelaide")
+        || d.contains("auckland")
+        || d.contains("canberra")
+        || d.contains("australia")
+        || d.contains("new zealand")
+        || d.contains("oceania")
+    {
+        return Continent::Oceania;
+    }
+
+    Continent::Unknown
+}
+
 #[derive(Debug, Clone)]
 pub struct ServerRegion {
     pub name: String,
@@ -137,12 +290,22 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
                 };
                 // `num_addresses` is the count of consecutive relay IPs starting at
                 // `ipv4`.  When absent or explicitly 0, treat it as 1 so the base
-                // IP is always included.
-                let count = r
+                // IP is always included.  Cap at u32::MAX to avoid truncation when
+                // converting from u64 (Steam returns small values in practice, but
+                // be safe).
+                let count_u64 = r
                     .get("num_addresses")
                     .and_then(|n| n.as_u64())
                     .unwrap_or(1)
-                    .max(1) as u32;
+                    .max(1);
+                let count = if count_u64 > u32::MAX as u64 {
+                    log::warn!(
+                        "relay {ip_str:?} has num_addresses={count_u64} which exceeds u32::MAX; capping"
+                    );
+                    u32::MAX
+                } else {
+                    count_u64 as u32
+                };
                 let base: Ipv4Addr = match ip_str.parse() {
                     Ok(ip) => ip,
                     Err(e) => {
@@ -164,7 +327,14 @@ fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
         }
 
         regions.push(ServerRegion {
-            continent: continent_from_name(name),
+            continent: {
+                let by_code = continent_from_name(name);
+                if by_code == Continent::Unknown {
+                    continent_from_description(&description)
+                } else {
+                    by_code
+                }
+            },
             name: name.clone(),
             description,
             relay_ips,
