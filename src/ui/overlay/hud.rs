@@ -97,14 +97,19 @@ impl App {
             .join(", ");
         self.text(
             painter,
-            format!("Aimbot: {}", hotkeys_str),
+            format!(
+                "Aimbot [{}]: {}",
+                hotkeys_str,
+                if data.aimbot_active { "ON" } else { "OFF" }
+            ),
             position,
             Align2::LEFT_TOP,
             None,
         );
+        let ab = self.aimbot_config(&data.weapon);
         self.text(
             painter,
-            format!("FOV: {:.1}", self.aimbot_config(&data.weapon).fov),
+            format!("FOV: {:.1}  Smooth: {:.1}", ab.fov, ab.smooth),
             position + egui::vec2(0.0, self.config.hud.font_size),
             Align2::LEFT_TOP,
             None,
@@ -120,16 +125,38 @@ impl App {
         self.text(
             painter,
             format!(
-                "ESP [{:?}]: {}",
-                self.config.player.esp_hotkey,
-                if data.esp_active { "ON" } else { "OFF" }
+                "Triggerbot [{:?}]: {}",
+                self.config.aim.triggerbot_hotkey,
+                if data.triggerbot_active { "ON" } else { "OFF" }
             ),
             position + egui::vec2(0.0, self.config.hud.font_size * 3.0),
             Align2::LEFT_TOP,
             None,
         );
+        self.text(
+            painter,
+            format!(
+                "ESP [{:?}]: {}",
+                self.config.player.esp_hotkey,
+                if data.esp_active { "ON" } else { "OFF" }
+            ),
+            position + egui::vec2(0.0, self.config.hud.font_size * 4.0),
+            Align2::LEFT_TOP,
+            None,
+        );
+        self.text(
+            painter,
+            format!(
+                "Bunnyhop [{:?}]: {}",
+                self.config.misc.bunnyhop_hotkey,
+                if self.config.misc.bunnyhop { "ON" } else { "OFF" }
+            ),
+            position + egui::vec2(0.0, self.config.hud.font_size * 5.0),
+            Align2::LEFT_TOP,
+            None,
+        );
 
-        let mut line: f32 = 4.0;
+        let mut line: f32 = 6.0;
 
         if !self.server_regions.is_empty() {
             let enabled: Vec<&str> = self
