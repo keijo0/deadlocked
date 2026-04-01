@@ -131,6 +131,8 @@ impl CS2 {
         offsets.controller.color = client.get("CCSPlayerController", "m_iCompTeammateColor")?;
         offsets.controller.action_tracking_services =
             client.get("CCSPlayerController", "m_pActionTrackingServices")?;
+        offsets.controller.ping =
+            client.get("CBasePlayerController", "m_nPing").unwrap_or(0);
 
         offsets.pawn.health = client.get("C_BaseEntity", "m_iHealth")?;
         offsets.pawn.armor = client.get("C_CSPlayerPawn", "m_ArmorValue")?;

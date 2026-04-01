@@ -131,6 +131,16 @@ impl Player {
             .read_string_uncached(self.controller + cs2.offsets.controller.name)
     }
 
+    /// Returns the player's ping in milliseconds as reported by the server.
+    /// Returns 0 if the offset is unavailable.
+    pub fn ping(&self, cs2: &CS2) -> i32 {
+        if cs2.offsets.controller.ping == 0 {
+            return 0;
+        }
+        cs2.process
+            .read(self.controller + cs2.offsets.controller.ping)
+    }
+
     /// returns a pawn-only player
     #[allow(unused)]
     pub fn spectator_target(&self, cs2: &CS2) -> Option<Self> {

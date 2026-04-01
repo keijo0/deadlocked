@@ -226,6 +226,7 @@ impl Game for CS2 {
         data.is_ffa = self.is_ffa();
         data.is_custom_mode = self.is_custom_game_mode();
         data.map_name = self.current_map();
+        data.ping = local_player.ping(self);
         data.aimbot_active = {
             let aimbot_config = self.aimbot_config(config);
             aimbot_config.enabled

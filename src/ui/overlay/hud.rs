@@ -162,9 +162,15 @@ impl App {
             let bt_ms = (self.config.aim.global.aimbot.backtrack_ticks as f32
                 * (1000.0 / CS2_TICK_RATE))
                 .round() as u32;
+            let ping = data.ping.max(0) as u32;
+            let label = if ping > 0 {
+                format!("BT: +{}ms (~{}ms w/ ping)", bt_ms, bt_ms + ping)
+            } else {
+                format!("BT: +{}ms", bt_ms)
+            };
             self.text(
                 painter,
-                format!("BT: +{}ms", bt_ms),
+                label,
                 position + egui::vec2(0.0, self.config.hud.font_size * line),
                 Align2::LEFT_TOP,
                 None,

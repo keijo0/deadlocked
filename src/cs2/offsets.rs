@@ -40,6 +40,7 @@ pub struct PlayerControllerOffsets {
     pub owner_entity: u64,             // i32 (h_pOwnerEntity)
     pub color: u64,                    // i32 (m_iCompTeammateColor)
     pub action_tracking_services: u64, // Pointer -> ActionTrackingServices (m_pActionTrackingServices)
+    pub ping: u64,                     // i32 (m_nPing)
 }
 
 #[derive(Debug, Default)]

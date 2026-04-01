@@ -41,6 +41,7 @@ pub struct Data {
     pub aimbot_active: bool,
     pub triggerbot_active: bool,
     pub esp_active: bool,
+    pub ping: i32,
     #[serde(skip)]
     pub backtrack_history: HashMap<u64, VecDeque<BacktrackRecord>>,
 }
