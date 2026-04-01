@@ -117,8 +117,19 @@ impl App {
             Align2::LEFT_TOP,
             None,
         );
+        self.text(
+            painter,
+            format!(
+                "ESP [{:?}]: {}",
+                self.config.player.esp_hotkey,
+                if data.esp_active { "ON" } else { "OFF" }
+            ),
+            position + egui::vec2(0.0, self.config.hud.font_size * 3.0),
+            Align2::LEFT_TOP,
+            None,
+        );
 
-        let mut line: f32 = 3.0;
+        let mut line: f32 = 4.0;
 
         if !self.server_regions.is_empty() {
             let enabled: Vec<&str> = self
