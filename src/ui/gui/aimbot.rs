@@ -146,9 +146,9 @@ impl App {
             ui,
             "Humanization Amount",
             DragValue::new(&mut self.weapon_config().aimbot.humanization_amount)
-                .range(0.0..=30.0)
-                .speed(0.1)
-                .max_decimals(1)
+                .range(0.0..=2.0)
+                .speed(0.01)
+                .max_decimals(2)
                 .suffix(" u"),
         ) {
             self.send_config();
@@ -157,15 +157,7 @@ impl App {
         ui.separator();
 
         // Single bones
-        for bone in [
-            Bones::Head,
-            Bones::Neck,
-            Bones::Spine4,
-            Bones::Spine3,
-            Bones::Spine2,
-            Bones::Spine1,
-            Bones::Hip,
-        ] {
+        for bone in [Bones::Head, Bones::Neck, Bones::Hip] {
             let text = format!("{:?}", bone);
             let index = self
                 .weapon_config()
@@ -178,6 +170,27 @@ impl App {
                     self.weapon_config().aimbot.bones.remove(index);
                 } else {
                     self.weapon_config().aimbot.bones.push(bone);
+                }
+                self.send_config();
+            }
+        }
+
+        // Spine (all four segments as one toggle)
+        {
+            let spine_bones = [Bones::Spine1, Bones::Spine2, Bones::Spine3, Bones::Spine4];
+            let selected = spine_bones
+                .iter()
+                .any(|b| self.weapon_config().aimbot.bones.contains(b));
+            if ui.selectable_label(selected, "Spine").clicked() {
+                if selected {
+                    self.weapon_config()
+                        .aimbot
+                        .bones
+                        .retain(|b| !spine_bones.contains(b));
+                } else {
+                    for b in spine_bones {
+                        self.weapon_config().aimbot.bones.push(b);
+                    }
                 }
                 self.send_config();
             }

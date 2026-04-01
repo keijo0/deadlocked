@@ -111,7 +111,7 @@ impl Default for AimbotConfig {
             backtrack: false,
             backtrack_ms: 187,
             humanization: false,
-            humanization_amount: 5.0,
+            humanization_amount: 1.0,
         }
     }
 }

@@ -76,22 +76,41 @@ impl CS2 {
             return;
         }
 
+        let view_angles = local_player.view_angles(self);
+
         let target_angle = {
             let mut smallest_fov = 360.0;
             let mut smallest_angle = glam::Vec2::ZERO;
 
-            // Compute a single random offset (per aimbot call) so the aim point drifts
-            // naturally each frame rather than snapping to the same spot.
+            // Generate multiple random candidate positions and pick the one whose aim angle
+            // is closest to the current view angles (mouse-relative humanization).
+            // This keeps the aim near where the crosshair already is while still randomising
+            // the exact point on the body, making the movement appear more human.
+            const HUMANIZATION_CANDIDATES: usize = 8;
             let humanize = |pos: glam::Vec3| -> glam::Vec3 {
                 if !config.humanization || config.humanization_amount <= 0.0 {
                     return pos;
                 }
                 let r = config.humanization_amount;
                 let mut rng = rand::rng();
-                let dx: f32 = rng.random_range(-r..=r);
-                let dy: f32 = rng.random_range(-r..=r);
-                let dz: f32 = rng.random_range(-r..=r);
-                pos + glam::Vec3::new(dx, dy, dz)
+                let mut best_pos = pos;
+                let mut best_fov = f32::MAX;
+                for _ in 0..HUMANIZATION_CANDIDATES {
+                    let candidate = pos
+                        + glam::Vec3::new(
+                            rng.random_range(-r..=r),
+                            rng.random_range(-r..=r),
+                            rng.random_range(-r..=r),
+                        );
+                    let candidate_angle =
+                        self.angle_to_target(&local_player, &candidate, &self.target.previous_aim_punch);
+                    let fov = angles_to_fov(&view_angles, &candidate_angle);
+                    if fov < best_fov {
+                        best_fov = fov;
+                        best_pos = candidate;
+                    }
+                }
+                best_pos
             };
 
             if config.backtrack {
@@ -120,7 +139,7 @@ impl CS2 {
                             &humanize(*bone_pos),
                             &self.target.previous_aim_punch,
                         );
-                        let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                        let fov = angles_to_fov(&view_angles, &angle);
                         if fov < smallest_fov {
                             smallest_fov = fov;
                             smallest_angle = angle;
@@ -134,7 +153,7 @@ impl CS2 {
                             &humanize(bone_pos),
                             &self.target.previous_aim_punch,
                         );
-                        let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                        let fov = angles_to_fov(&view_angles, &angle);
                         if fov < smallest_fov {
                             smallest_fov = fov;
                             smallest_angle = angle;
@@ -149,7 +168,7 @@ impl CS2 {
                         &humanize(bone_pos),
                         &self.target.previous_aim_punch,
                     );
-                    let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                    let fov = angles_to_fov(&view_angles, &angle);
                     if fov < smallest_fov {
                         smallest_fov = fov;
                         smallest_angle = angle;
@@ -160,7 +179,6 @@ impl CS2 {
             smallest_angle
         };
 
-        let view_angles = local_player.view_angles(self);
         if angles_to_fov(&view_angles, &target_angle)
             > (config.fov
                 * if config.distance_adjusted_fov {
