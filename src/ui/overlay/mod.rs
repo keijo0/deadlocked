@@ -2,7 +2,7 @@ use egui::{Align2, Color32, Painter, Pos2, Shape, Stroke, Ui, pos2};
 use glam::{Vec3, vec3};
 
 use crate::{
-    config::AimbotConfig,
+    config::{AimbotConfig, TriggerbotConfig},
     cs2::entity::weapon::Weapon,
     data::Data,
     math::world_to_screen,
@@ -21,6 +21,15 @@ impl App {
             return &weapon_config.aimbot;
         }
         &self.config.aim.global.aimbot
+    }
+
+    fn triggerbot_config(&self, weapon: &Weapon) -> &TriggerbotConfig {
+        if let Some(weapon_config) = self.config.aim.weapons.get(weapon)
+            && weapon_config.triggerbot.enable_override
+        {
+            return &weapon_config.triggerbot;
+        }
+        &self.config.aim.global.triggerbot
     }
 
     pub fn overlay(&mut self, ui: &mut Ui) {

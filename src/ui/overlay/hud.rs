@@ -109,9 +109,10 @@ impl App {
             Align2::LEFT_TOP,
             None,
         );
+        let tb = self.triggerbot_config(&data.weapon);
         self.text(
             painter,
-            format!("RCS: {:?}", self.config.aim.triggerbot_hotkey),
+            format!("Ms: {}-{}", tb.delay.start(), tb.delay.end()),
             position + egui::vec2(0.0, self.config.hud.font_size * 2.0),
             Align2::LEFT_TOP,
             None,
