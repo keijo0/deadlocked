@@ -29,11 +29,23 @@ impl Continent {
     }
 }
 
-/// Maps a Steam SDR datacenter pop code (lowercase 3-letter airport/city code,
-/// e.g. `"lhr"`, `"iad"`) to its geographic continent for grouping purposes.
-/// Codes that are not recognised return [`Continent::Unknown`].
+/// Maps a Steam SDR datacenter pop code to its geographic continent.
+///
+/// Deadlock (and other Valve games) sometimes append a numeric suffix to a base
+/// IATA/city code (e.g. `"maa2"`, `"bom2"`, `"iad1"`) and occasionally use
+/// non-IATA city codes (e.g. `"seo"` for Seoul, `"tyo"` for Tokyo).  This
+/// function normalises the code by stripping any trailing ASCII digits before
+/// matching, so `"maa2"` is treated identically to `"maa"`.
+///
+/// Codes that are not recognised (after normalisation) return
+/// [`Continent::Unknown`].
 fn continent_from_name(name: &str) -> Continent {
-    match name.to_lowercase().as_str() {
+    // Strip trailing digits so numbered variants (e.g. "maa2", "bom2") match
+    // their base code.
+    let lower = name.to_lowercase();
+    let normalised = lower.trim_end_matches(|c: char| c.is_ascii_digit());
+
+    match normalised {
         // North America
         "iad" | "ord" | "lax" | "sea" | "atl" | "dfw" | "mia" | "den" | "pdx" | "sjc"
         | "okc" | "ytz" | "yyc" | "yul" | "yvr" | "mex" | "xna" => Continent::NorthAmerica,
@@ -45,11 +57,12 @@ fn continent_from_name(name: &str) -> Continent {
         | "man" | "bru" | "muc" | "cdg" | "ber" | "ham" | "dus" | "tll" | "rig" | "vno" => {
             Continent::Europe
         }
-        // Asia
+        // Asia — includes Deadlock-specific non-IATA codes:
+        //   seo = Seoul (Valve uses "seo", IATA is "icn")
+        //   tyo = Tokyo (common Valve alias; IATA is "nrt"/"hnd")
         "sgp" | "hkg" | "tyo" | "nrt" | "osk" | "bom" | "del" | "maa" | "ccu" | "hyb"
-        | "bkk" | "kul" | "icn" | "sha" | "pek" | "can" | "szx" | "pnq" | "blr" | "amd" => {
-            Continent::Asia
-        }
+        | "bkk" | "kul" | "icn" | "seo" | "sha" | "pek" | "can" | "szx" | "pnq" | "blr"
+        | "amd" => Continent::Asia,
         // Middle East
         "dxb" | "bah" | "khi" | "kwi" | "tlv" | "ist" | "esb" | "ruh" | "auh" => {
             Continent::MiddleEast
