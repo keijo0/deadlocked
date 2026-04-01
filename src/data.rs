@@ -17,7 +17,6 @@ pub enum SoundType {
 
 #[derive(Debug, Clone)]
 pub struct BacktrackRecord {
-    pub head: Vec3,
     pub bones: HashMap<Bones, Vec3>,
 }
 

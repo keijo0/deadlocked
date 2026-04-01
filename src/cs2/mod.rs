@@ -377,7 +377,6 @@ impl CS2 {
         let mut records: Vec<(u64, BacktrackRecord)> = Vec::with_capacity(self.players.len());
         for player in &self.players {
             let record = BacktrackRecord {
-                head: player.bone_position(self, Bones::Head.u64()),
                 bones: player.all_bones(self),
             };
             records.push((player.pawn, record));
