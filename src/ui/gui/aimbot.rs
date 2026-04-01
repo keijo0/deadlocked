@@ -24,7 +24,8 @@ impl App {
             ui.selectable_value(&mut self.aimbot_tab, AimbotTab::Global, "Global");
             ui.selectable_value(&mut self.aimbot_tab, AimbotTab::Weapon, "Weapon");
             if self.aimbot_tab == AimbotTab::Weapon {
-                combo_box(ui, "aimbot_weapon", "Weapon", &mut self.aimbot_weapon);
+                self.aimbot_weapon = self.data.lock().weapon.clone();
+                ui.label(format!("{:?}", self.aimbot_weapon));
             }
         });
         ui.separator();
@@ -318,5 +319,27 @@ impl App {
             }
             ui.label("RCS Smooth");
         });
+
+        if self.aimbot_tab == AimbotTab::Global {
+            ui.separator();
+
+            if checkbox(
+                ui,
+                "Enable Backtrack",
+                &mut self.config.aim.global.aimbot.backtrack,
+            ) {
+                self.send_config();
+            }
+
+            if drag(
+                ui,
+                "Backtrack Ticks",
+                DragValue::new(&mut self.config.aim.global.aimbot.backtrack_ticks)
+                    .range(1..=32)
+                    .speed(0.1),
+            ) {
+                self.send_config();
+            }
+        }
     }
 }

@@ -1,8 +1,8 @@
-use egui::{DragValue, Ui};
+use egui::Ui;
 
 use crate::ui::{
     app::App,
-    gui::helpers::{checkbox, drag, keybind},
+    gui::helpers::{checkbox, keybind},
 };
 
 impl App {
@@ -16,26 +16,6 @@ impl App {
             "bunnyhop_hotkey",
             "Bunnyhop Hotkey",
             &mut self.config.misc.bunnyhop_hotkey,
-        ) {
-            self.send_config();
-        }
-
-        ui.separator();
-
-        if checkbox(
-            ui,
-            "Enable Backtrack",
-            &mut self.config.aim.global.aimbot.backtrack,
-        ) {
-            self.send_config();
-        }
-
-        if drag(
-            ui,
-            "Backtrack Ticks",
-            DragValue::new(&mut self.config.aim.global.aimbot.backtrack_ticks)
-                .range(1..=32)
-                .speed(0.1),
         ) {
             self.send_config();
         }

@@ -1,4 +1,4 @@
-use egui::{Align, Ui};
+use egui::Ui;
 use utils::log;
 
 use crate::{
@@ -69,22 +69,18 @@ impl App {
                             self.current_tab = tab;
                         }
                     }
-
-                    ui.with_layout(egui::Layout::right_to_left(Align::Center), |ui| {
-                        if ui.button("Report Issue").clicked() {
-                            let _ = std::process::Command::new("xdg-open")
-                                .arg("https://github.com/keijo0/deadlocked/issues")
-                                .status();
-                        }
-
-                        ui.label(egui::RichText::new(format!("{}", self.game_status)).color(
-                            match self.game_status {
-                                GameStatus::Working => Colors::GREEN,
-                                GameStatus::NotStarted => Colors::YELLOW,
-                            },
-                        ));
-                    });
                 });
+            });
+
+        egui::Panel::bottom("status_bar")
+            .resizable(false)
+            .show_inside(ui, |ui| {
+                ui.label(egui::RichText::new(format!("{}", self.game_status)).color(
+                    match self.game_status {
+                        GameStatus::Working => Colors::GREEN,
+                        GameStatus::NotStarted => Colors::YELLOW,
+                    },
+                ));
             });
 
         egui::CentralPanel::default().show_inside(ui, |ui| match self.current_tab {

@@ -17,40 +17,36 @@ impl App {
                 .auto_shrink([false, true])
                 .id_salt("config_left")
                 .show(left, |left| {
-                    self.config_left(left);
+                    self.config_list(left);
                 });
 
             let right = &mut cols[1];
-
-            if right.button("Refresh").clicked() {
-                self.available_configs = available_configs();
-                self.grenades = read_grenades();
-            }
-
-            right.horizontal(|right| {
-                if right.button("+").clicked() && !self.new_config_name.is_empty() {
-                    if !self.new_config_name.ends_with(".toml") {
-                        self.new_config_name.push_str(".toml");
-                    }
-                    let path = CONFIG_PATH.join(&self.new_config_name);
-                    write_config(&self.config, &path);
-                    self.new_config_name.clear();
-                    self.current_config = path;
-                    self.available_configs = available_configs();
-                }
-                right.text_edit_singleline(&mut self.new_config_name);
-            });
-
-            egui::ScrollArea::vertical()
-                .auto_shrink([false, true])
-                .id_salt("config_right")
-                .show(right, |right| {
-                    self.config_right(right);
-                });
+            self.config_controls(right);
         });
     }
 
-    fn config_left(&mut self, ui: &mut Ui) {
+    fn config_controls(&mut self, ui: &mut Ui) {
+        if ui.button("Refresh").clicked() {
+            self.available_configs = available_configs();
+            self.grenades = read_grenades();
+        }
+
+        ui.horizontal(|ui| {
+            if ui.button("+").clicked() && !self.new_config_name.is_empty() {
+                if !self.new_config_name.ends_with(".toml") {
+                    self.new_config_name.push_str(".toml");
+                }
+                let path = CONFIG_PATH.join(&self.new_config_name);
+                write_config(&self.config, &path);
+                self.new_config_name.clear();
+                self.current_config = path;
+                self.available_configs = available_configs();
+            }
+            ui.text_edit_singleline(&mut self.new_config_name);
+        });
+
+        ui.separator();
+
         if ui.button("Reset").clicked() {
             self.config = Config::default();
             self.send_config();
@@ -92,7 +88,7 @@ impl App {
             });
     }
 
-    fn config_right(&mut self, ui: &mut Ui) {
+    fn config_list(&mut self, ui: &mut Ui) {
         let mut clicked_config = None;
         let mut delete = None;
 
