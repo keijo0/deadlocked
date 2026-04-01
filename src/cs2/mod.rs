@@ -34,6 +34,8 @@ mod offsets;
 mod schema;
 mod target;
 
+const OFFSET_REFRESH_INTERVAL: Duration = Duration::from_secs(60);
+
 #[derive(Debug)]
 pub struct CS2 {
     is_valid: bool,
@@ -52,6 +54,7 @@ pub struct CS2 {
     weapon: Weapon,
     planted_c4: Option<PlantedC4>,
     last_cache: Instant,
+    last_offset_update: Instant,
     bhop_space_pressed: bool,
 }
 
@@ -77,7 +80,7 @@ impl Game for CS2 {
             }
         };
         log::info!("offsets found");
-
+        self.last_offset_update = Instant::now();
         self.is_valid = true;
     }
 
@@ -86,6 +89,21 @@ impl Game for CS2 {
             self.is_valid = false;
             log::debug!("process is no longer valid");
             return;
+        }
+
+        if self.last_offset_update.elapsed() > OFFSET_REFRESH_INTERVAL {
+            match self.find_offsets() {
+                Some(new_offsets) => {
+                    self.offsets = new_offsets;
+                    self.last_offset_update = Instant::now();
+                    log::info!("offsets refreshed");
+                }
+                None => {
+                    self.is_valid = false;
+                    log::warn!("failed to refresh offsets, reconnecting");
+                    return;
+                }
+            }
         }
 
         self.input.update(&self.process, &self.offsets);
@@ -283,6 +301,7 @@ impl CS2 {
             weapon: Weapon::default(),
             planted_c4: None,
             last_cache: Instant::now(),
+            last_offset_update: Instant::now(),
             bhop_space_pressed: false,
         }
     }
