@@ -1,14 +1,8 @@
 use std::hash::Hash;
 
-use egui::{CollapsingHeader, Color32, DragValue, Event, Sense, Ui, Widget};
+use egui::{Color32, DragValue, Event, Sense, Ui, Widget};
 
 use crate::cs2::key_codes::KeyCode;
-
-pub fn collapsing_open(ui: &mut Ui, title: &str, add_body: impl FnOnce(&mut Ui)) {
-    CollapsingHeader::new(title)
-        .default_open(true)
-        .show(ui, add_body);
-}
 
 pub fn scroll(ui: &mut Ui, id: &str, add_content: impl FnOnce(&mut Ui)) {
     egui::ScrollArea::vertical()

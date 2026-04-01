@@ -24,6 +24,7 @@ pub enum Tab {
     Hud,
     Grenades,
     Misc,
+    ServerPicker,
     Config,
 }
 
@@ -50,13 +51,14 @@ impl App {
             .resizable(false)
             .show_inside(ui, |ui| {
                 ui.horizontal(|ui| {
-                    ui.spacing_mut().button_padding = egui::vec2(10.0, 4.0);
+                    ui.spacing_mut().button_padding = egui::vec2(5.0, 2.0);
                     for (tab, label) in [
                         (Tab::Aimbot, "Aimbot"),
                         (Tab::Player, "Player"),
                         (Tab::Hud, "Hud"),
                         (Tab::Grenades, "Grenades"),
                         (Tab::Misc, "Misc"),
+                        (Tab::ServerPicker, "Server Picker"),
                         (Tab::Config, "Config"),
                     ] {
                         let selected = self.current_tab == tab;
@@ -91,6 +93,7 @@ impl App {
             Tab::Hud => self.hud_settings(ui),
             Tab::Grenades => self.grenade_settings(ui),
             Tab::Misc => self.misc_settings(ui),
+            Tab::ServerPicker => self.server_picker_settings(ui),
             Tab::Config => self.config_settings(ui),
         });
     }

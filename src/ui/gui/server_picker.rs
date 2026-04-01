@@ -2,7 +2,7 @@ use egui::{Color32, Grid, RichText, ScrollArea, Ui};
 
 use crate::{
     server_picker::{Continent, block_region, fetch_servers_async, unblock_region, ServerRegion},
-    ui::{app::App, color::Colors, gui::helpers::collapsing_open},
+    ui::{app::App, color::Colors},
 };
 
 impl App {
@@ -51,8 +51,7 @@ impl App {
     pub fn server_picker_settings(&mut self, ui: &mut Ui) {
         self.poll_server_picker();
 
-        collapsing_open(ui, "Server Picker", |ui| {
-            ui.horizontal(|ui| {
+        ui.horizontal(|ui| {
                 let btn_label = if self.server_picker_loading {
                     "Loading…"
                 } else if self.server_regions.is_empty() {
@@ -232,6 +231,5 @@ impl App {
                     self.server_regions[i].blocked = false;
                 }
             }
-        });
     }
 }
