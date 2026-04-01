@@ -34,11 +34,15 @@ mod offsets;
 mod schema;
 mod target;
 
+<<<<<<< HEAD
 /// CS2 runs at 64 ticks per second.
 pub const CS2_TICK_RATE: f32 = 64.0;
 
 const WORLD_SCAN_INTERVAL: Duration = Duration::from_millis(50);
 const BVH_CHECK_INTERVAL: Duration = Duration::from_secs(1);
+=======
+const OFFSET_REFRESH_INTERVAL: Duration = Duration::from_secs(60);
+>>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
 
 #[derive(Debug)]
 pub struct CS2 {
@@ -57,8 +61,13 @@ pub struct CS2 {
     esp: EspToggle,
     weapon: Weapon,
     planted_c4: Option<PlantedC4>,
+<<<<<<< HEAD
     next_world_scan: Instant,
     next_bvh_check: Instant,
+=======
+    last_cache: Instant,
+    last_offset_update: Instant,
+>>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
     bhop_space_pressed: bool,
 }
 
@@ -84,7 +93,7 @@ impl Game for CS2 {
             }
         };
         log::info!("offsets found");
-
+        self.last_offset_update = Instant::now();
         self.is_valid = true;
     }
 
@@ -93,6 +102,21 @@ impl Game for CS2 {
             self.is_valid = false;
             log::debug!("process is no longer valid");
             return;
+        }
+
+        if self.last_offset_update.elapsed() > OFFSET_REFRESH_INTERVAL {
+            match self.find_offsets() {
+                Some(new_offsets) => {
+                    self.offsets = new_offsets;
+                    self.last_offset_update = Instant::now();
+                    log::info!("offsets refreshed");
+                }
+                None => {
+                    self.is_valid = false;
+                    log::warn!("failed to refresh offsets, reconnecting");
+                    return;
+                }
+            }
         }
 
         self.input.update(&self.process, &self.offsets);
@@ -305,8 +329,13 @@ impl CS2 {
             esp: EspToggle::default(),
             weapon: Weapon::default(),
             planted_c4: None,
+<<<<<<< HEAD
             next_world_scan: Instant::now(),
             next_bvh_check: Instant::now(),
+=======
+            last_cache: Instant::now(),
+            last_offset_update: Instant::now(),
+>>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
             bhop_space_pressed: false,
         }
     }
