@@ -132,10 +132,10 @@ impl Player {
     }
 
     /// Returns the player's ping in milliseconds as reported by the server.
-    /// Returns 0 if the offset is unavailable.
+    /// Returns -1 if the offset is unavailable.
     pub fn ping(&self, cs2: &CS2) -> i32 {
         if cs2.offsets.controller.ping == 0 {
-            return 0;
+            return -1;
         }
         cs2.process
             .read(self.controller + cs2.offsets.controller.ping)

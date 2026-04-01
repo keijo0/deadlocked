@@ -242,7 +242,7 @@ impl App {
         }
 
         if self.config.hud.keybind_ping {
-            let label = if data.ping > 0 {
+            let label = if data.ping >= 0 {
                 format!("Ping: {}ms", data.ping)
             } else {
                 "Ping: N/A".to_string()
