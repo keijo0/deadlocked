@@ -139,7 +139,11 @@ impl CS2 {
             .get_opt("CBasePlayerController", "m_hPawn")
             .or_else(|| client.get_opt("CCSPlayerController", "m_hPawn"))
             .unwrap_or(0);
-        offsets.controller.owner_entity = client.get("C_BaseEntity", "m_hOwnerEntity")?;
+        // m_hOwnerEntity may appear on different entity classes depending on CS2 version.
+        offsets.controller.owner_entity = client
+            .get_opt("C_BaseEntity", "m_hOwnerEntity")
+            .or_else(|| client.get_opt("C_BaseModelEntity", "m_hOwnerEntity"))
+            .unwrap_or(0);
         offsets.controller.color = client.get("CCSPlayerController", "m_iCompTeammateColor")?;
         offsets.controller.action_tracking_services =
             client.get("CCSPlayerController", "m_pActionTrackingServices")?;
