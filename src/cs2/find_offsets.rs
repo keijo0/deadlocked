@@ -5,22 +5,22 @@ use utils::log;
 use crate::{
     constants::cs2,
     cs2::{CS2, offsets::Offsets, schema::Schema},
+    os::process::Process,
 };
 
 impl CS2 {
-    pub fn find_offsets(&self) -> Option<Offsets> {
+    pub fn find_offsets(process: &Process) -> Option<Offsets> {
         let start = Instant::now();
         let mut offsets = Offsets::default();
 
-        offsets.library.client = self.process.module_base_address(cs2::CLIENT_LIB)?;
-        offsets.library.engine = self.process.module_base_address(cs2::ENGINE_LIB)?;
-        offsets.library.tier0 = self.process.module_base_address(cs2::TIER0_LIB)?;
-        offsets.library.input = self.process.module_base_address(cs2::INPUT_LIB)?;
-        offsets.library.sdl = self.process.module_base_address(cs2::SDL_LIB)?;
-        offsets.library.schema = self.process.module_base_address(cs2::SCHEMA_LIB)?;
+        offsets.library.client = process.module_base_address(cs2::CLIENT_LIB)?;
+        offsets.library.engine = process.module_base_address(cs2::ENGINE_LIB)?;
+        offsets.library.tier0 = process.module_base_address(cs2::TIER0_LIB)?;
+        offsets.library.input = process.module_base_address(cs2::INPUT_LIB)?;
+        offsets.library.sdl = process.module_base_address(cs2::SDL_LIB)?;
+        offsets.library.schema = process.module_base_address(cs2::SCHEMA_LIB)?;
 
-        let Some(resource_offset) = self
-            .process
+        let Some(resource_offset) = process
             .get_interface_offset(offsets.library.engine, "GameResourceServiceClientV0")
         else {
             log::warn!("could not get offset for GameResourceServiceClient");
@@ -29,18 +29,16 @@ impl CS2 {
         offsets.interface.resource = resource_offset;
 
         offsets.interface.entity =
-            self.process.read::<u64>(offsets.interface.resource + 0x50) + 0x10;
+            process.read::<u64>(offsets.interface.resource + 0x50) + 0x10;
 
-        let Some(cvar_address) = self
-            .process
+        let Some(cvar_address) = process
             .get_interface_offset(offsets.library.tier0, "VEngineCvar0")
         else {
             log::warn!("could not get convar interface offset");
             return None;
         };
         offsets.interface.cvar = cvar_address;
-        let Some(input_address) = self
-            .process
+        let Some(input_address) = process
             .get_interface_offset(offsets.library.input, "InputSystemVersion0")
         else {
             log::warn!("could not get input interface offset");
@@ -48,22 +46,20 @@ impl CS2 {
         };
         offsets.interface.input = input_address;
 
-        let Some(local_player) = self
-            .process
+        let Some(local_player) = process
             .scan("48 83 3D ? ? ? ? 00 0F 95 C0 C3", offsets.library.client)
         else {
             log::warn!("could not find local player offset");
             return None;
         };
-        offsets.direct.local_player = self.process.get_relative_address(local_player, 0x03, 0x08);
-        offsets.direct.button_state = self.process.read::<u32>(
-            self.process
+        offsets.direct.local_player = process.get_relative_address(local_player, 0x03, 0x08);
+        offsets.direct.button_state = process.read::<u32>(
+            process
                 .get_interface_function(offsets.interface.input, 19)
                 + 0x14,
         ) as u64;
 
-        let Some(view_matrix) = self
-            .process
+        let Some(view_matrix) = process
             .scan("C6 83 ? ? 00 00 01 4C 8D 05", offsets.library.client)
         else {
             log::warn!("could not find view matrix offset");
@@ -71,49 +67,46 @@ impl CS2 {
         };
 
         offsets.direct.view_matrix =
-            self.process
+            process
                 .get_relative_address(view_matrix + 0x0A, 0x0, 0x04);
 
-        let Some(sdl_window) = self
-            .process
+        let Some(sdl_window) = process
             .get_module_export(offsets.library.sdl, "SDL_GetKeyboardFocus")
         else {
             log::warn!("could not find sdl window offset");
             return None;
         };
-        let sdl_window = self.process.get_relative_address(sdl_window, 0x02, 0x06);
-        let sdl_window = self.process.read(sdl_window);
-        offsets.direct.sdl_window = self.process.get_relative_address(sdl_window, 0x03, 0x07);
+        let sdl_window = process.get_relative_address(sdl_window, 0x02, 0x06);
+        let sdl_window = process.read(sdl_window);
+        offsets.direct.sdl_window = process.get_relative_address(sdl_window, 0x03, 0x07);
 
-        let Some(planted_c4) = self.process.scan(
+        let Some(planted_c4) = process.scan(
             "48 8D 35 ? ? ? ? 66 0F EF C0 C6 05 ? ? ? ? 01 48 8D 3D",
             offsets.library.client,
         ) else {
             log::warn!("could not find planted c4 offset");
             return None;
         };
-        offsets.direct.planted_c4 = self.process.get_relative_address(planted_c4, 0x03, 0x0E);
+        offsets.direct.planted_c4 = process.get_relative_address(planted_c4, 0x03, 0x0E);
 
         // xref "lobby_mapveto"
-        let Some(global_vars) = self.process.scan(
+        let Some(global_vars) = process.scan(
             "48 8D 05 ? ? ? ? 48 8B 00 8B 48 ? E9",
             offsets.library.client,
         ) else {
             log::warn!("could not find global vars offset");
             return None;
         };
-        offsets.direct.global_vars = self.process.get_relative_address(global_vars, 0x03, 0x07);
+        offsets.direct.global_vars = process.get_relative_address(global_vars, 0x03, 0x07);
 
-        let Some(ffa_address) = self
-            .process
+        let Some(ffa_address) = process
             .get_convar(offsets.interface.cvar, "mp_teammates_are_enemies")
         else {
-            log::warn!("could not get mp_tammates_are_enemies convar offset");
+            log::warn!("could not get mp_teammates_are_enemies convar offset");
             return None;
         };
         offsets.convar.ffa = ffa_address;
-        let Some(sensitivity_address) = self
-            .process
+        let Some(sensitivity_address) = process
             .get_convar(offsets.interface.cvar, "sensitivity")
         else {
             log::warn!("could not get sensitivity convar offset");
@@ -121,7 +114,7 @@ impl CS2 {
         };
         offsets.convar.sensitivity = sensitivity_address;
 
-        let schema = Schema::new(&self.process, offsets.library.schema)?;
+        let schema = Schema::new(process, offsets.library.schema)?;
         let client = schema.get_library(cs2::CLIENT_LIB)?;
 
         offsets.controller.steam_id = client.get("CBasePlayerController", "m_steamID")?;

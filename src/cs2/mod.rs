@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::time::{Duration, Instant};
 
 use glam::{IVec2, Mat4, Vec2, Vec3};
@@ -39,6 +40,7 @@ pub const CS2_TICK_RATE: f32 = 64.0;
 
 const WORLD_SCAN_INTERVAL: Duration = Duration::from_millis(50);
 const BVH_CHECK_INTERVAL: Duration = Duration::from_secs(1);
+const OFFSET_REFRESH_INTERVAL: Duration = Duration::from_secs(60);
 
 #[derive(Debug)]
 pub struct CS2 {
@@ -59,6 +61,8 @@ pub struct CS2 {
     planted_c4: Option<PlantedC4>,
     next_world_scan: Instant,
     next_bvh_check: Instant,
+    last_offset_update: Instant,
+    pending_offsets: Option<Receiver<Option<Offsets>>>,
     bhop_space_pressed: bool,
 }
 
@@ -75,7 +79,7 @@ impl Game for CS2 {
         log::info!("process found, pid: {}", process.pid);
         self.process = process;
 
-        self.offsets = match self.find_offsets() {
+        self.offsets = match CS2::find_offsets(&self.process) {
             Some(offsets) => offsets,
             None => {
                 self.process = Process::new(-1);
@@ -84,7 +88,7 @@ impl Game for CS2 {
             }
         };
         log::info!("offsets found");
-
+        self.last_offset_update = Instant::now();
         self.is_valid = true;
     }
 
@@ -93,6 +97,43 @@ impl Game for CS2 {
             self.is_valid = false;
             log::debug!("process is no longer valid");
             return;
+        }
+
+        if let Some(receiver) = &self.pending_offsets {
+            match receiver.try_recv() {
+                Ok(Some(new_offsets)) => {
+                    self.offsets = new_offsets;
+                    self.last_offset_update = Instant::now();
+                    self.pending_offsets = None;
+                    log::info!("offsets refreshed");
+                }
+                Ok(None) => {
+                    self.pending_offsets = None;
+                    self.is_valid = false;
+                    log::warn!("failed to refresh offsets, reconnecting");
+                    return;
+                }
+                Err(TryRecvError::Empty) => {}
+                Err(TryRecvError::Disconnected) => {
+                    self.pending_offsets = None;
+                    self.is_valid = false;
+                    log::warn!("offset refresh thread died, reconnecting");
+                    return;
+                }
+            }
+        }
+
+        if self.pending_offsets.is_none()
+            && self.last_offset_update.elapsed() > OFFSET_REFRESH_INTERVAL
+        {
+            let pid = self.process.pid;
+            let (tx, rx) = mpsc::channel();
+            self.pending_offsets = Some(rx);
+            std::thread::spawn(move || {
+                let process = Process::new(pid);
+                let _ = tx.send(CS2::find_offsets(&process));
+            });
+            log::debug!("offset refresh started in background");
         }
 
         self.input.update(&self.process, &self.offsets);
@@ -307,6 +348,8 @@ impl CS2 {
             planted_c4: None,
             next_world_scan: Instant::now(),
             next_bvh_check: Instant::now(),
+            last_offset_update: Instant::now(),
+            pending_offsets: None,
             bhop_space_pressed: false,
         }
     }
