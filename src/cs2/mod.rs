@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::time::{Duration, Instant};
 
 use glam::{IVec2, Mat4, Vec2, Vec3};
@@ -67,7 +68,9 @@ pub struct CS2 {
 =======
     last_cache: Instant,
     last_offset_update: Instant,
->>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
+=======
+    pending_offsets: Option<Receiver<Option<Offsets>>>,
+>>>>>>> cc35e08 (fix: run offset refresh on background thread to prevent game freeze)
     bhop_space_pressed: bool,
 }
 
@@ -84,7 +87,7 @@ impl Game for CS2 {
         log::info!("process found, pid: {}", process.pid);
         self.process = process;
 
-        self.offsets = match self.find_offsets() {
+        self.offsets = match CS2::find_offsets(&self.process) {
             Some(offsets) => offsets,
             None => {
                 self.process = Process::new(-1);
@@ -104,19 +107,41 @@ impl Game for CS2 {
             return;
         }
 
-        if self.last_offset_update.elapsed() > OFFSET_REFRESH_INTERVAL {
-            match self.find_offsets() {
-                Some(new_offsets) => {
+        if let Some(receiver) = &self.pending_offsets {
+            match receiver.try_recv() {
+                Ok(Some(new_offsets)) => {
                     self.offsets = new_offsets;
                     self.last_offset_update = Instant::now();
+                    self.pending_offsets = None;
                     log::info!("offsets refreshed");
                 }
-                None => {
+                Ok(None) => {
+                    self.pending_offsets = None;
                     self.is_valid = false;
                     log::warn!("failed to refresh offsets, reconnecting");
                     return;
                 }
+                Err(TryRecvError::Empty) => {}
+                Err(TryRecvError::Disconnected) => {
+                    self.pending_offsets = None;
+                    self.is_valid = false;
+                    log::warn!("offset refresh thread died, reconnecting");
+                    return;
+                }
             }
+        }
+
+        if self.pending_offsets.is_none()
+            && self.last_offset_update.elapsed() > OFFSET_REFRESH_INTERVAL
+        {
+            let pid = self.process.pid;
+            let (tx, rx) = mpsc::channel();
+            self.pending_offsets = Some(rx);
+            std::thread::spawn(move || {
+                let process = Process::new(pid);
+                let _ = tx.send(CS2::find_offsets(&process));
+            });
+            log::debug!("offset refresh started in background");
         }
 
         self.input.update(&self.process, &self.offsets);
@@ -335,7 +360,11 @@ impl CS2 {
 =======
             last_cache: Instant::now(),
             last_offset_update: Instant::now(),
+<<<<<<< HEAD
 >>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
+=======
+            pending_offsets: None,
+>>>>>>> cc35e08 (fix: run offset refresh on background thread to prevent game freeze)
             bhop_space_pressed: false,
         }
     }
