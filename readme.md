@@ -31,14 +31,26 @@ they write directly to game process memory:
 
 ## Requirements
 
+### Core cheat
+
 | Dependency | Purpose |
 |---|---|
 | `git` | Cloning the repository |
 | `rustup` / `cargo` | Building the project |
 | `sudo` | Running `setup.sh` (udev rules, group membership) |
 | `xdotool` | Anti-AFK feature |
-| `iptables` | Network-level filtering (optional, used for server picking) |
 | X11 libraries | Overlay window rendering |
+
+### Server picker (optional)
+
+The server picker feature lets you block CS2 matchmaking relays by continent.
+It is entirely optional — the rest of the cheat works without it.
+
+| Dependency | Purpose |
+|---|---|
+| `curl` | Fetches the Steam SDR server list from the Steam API |
+| `iptables` | Blocks / unblocks relay IPs at the network level |
+| `sudo` | Runs `iptables` commands with elevated privileges |
 
 ---
 
