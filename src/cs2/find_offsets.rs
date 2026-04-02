@@ -130,8 +130,15 @@ impl CS2 {
             .get_opt("CBasePlayerController", "m_steamID")
             .or_else(|| client.get_opt("CCSPlayerController", "m_steamID"))
             .unwrap_or(0);
-        offsets.controller.name = client.get("CBasePlayerController", "m_iszPlayerName")?;
-        offsets.controller.pawn = client.get("CBasePlayerController", "m_hPawn")?;
+        // m_iszPlayerName and m_hPawn may appear on different controller classes depending on CS2 version.
+        offsets.controller.name = client
+            .get_opt("CBasePlayerController", "m_iszPlayerName")
+            .or_else(|| client.get_opt("CCSPlayerController", "m_iszPlayerName"))
+            .unwrap_or(0);
+        offsets.controller.pawn = client
+            .get_opt("CBasePlayerController", "m_hPawn")
+            .or_else(|| client.get_opt("CCSPlayerController", "m_hPawn"))
+            .unwrap_or(0);
         offsets.controller.owner_entity = client.get("C_BaseEntity", "m_hOwnerEntity")?;
         offsets.controller.color = client.get("CCSPlayerController", "m_iCompTeammateColor")?;
         offsets.controller.action_tracking_services =
