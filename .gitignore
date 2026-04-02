@@ -7,3 +7,4 @@
 /radar/node_modules
 
 config.toml
+server-picker/target/
