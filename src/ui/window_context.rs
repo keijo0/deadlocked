@@ -258,39 +258,53 @@ fn gui_style(style: &mut Style, accent_color: egui::Color32) {
     for font in style.text_styles.iter_mut() {
         font.1.size = 16.0;
     }
-    //style.visuals.override_text_color = Some(Color32::WHITE);
 
     style.visuals.window_fill = Colors::BASE;
     style.visuals.panel_fill = Colors::BASE;
     style.visuals.extreme_bg_color = Colors::BACKDROP;
 
+    // Remove all rounded corners
+    style.visuals.window_corner_radius = egui::CornerRadius::ZERO;
+    style.visuals.menu_corner_radius = egui::CornerRadius::ZERO;
+
     let bg_stroke = Stroke::new(1.0, Colors::SUBTEXT);
     let fg_stroke = Stroke::new(1.0, Colors::TEXT);
     let dark_stroke = Stroke::new(1.0, Colors::BASE);
 
+    let hover_fill = egui::Color32::from_rgb(40, 40, 52);
+    let active_fill = egui::Color32::from_rgb(58, 58, 72);
+
     style.visuals.selection.bg_fill = accent_color;
     style.visuals.selection.stroke = dark_stroke;
 
-    style.visuals.widgets.active.bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.active.bg_fill = active_fill;
     style.visuals.widgets.active.bg_stroke = bg_stroke;
     style.visuals.widgets.active.fg_stroke = fg_stroke;
-    style.visuals.widgets.active.weak_bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.active.weak_bg_fill = active_fill;
+    style.visuals.widgets.active.corner_radius = egui::CornerRadius::ZERO;
 
-    style.visuals.widgets.hovered.bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.hovered.bg_fill = hover_fill;
     style.visuals.widgets.hovered.bg_stroke = bg_stroke;
     style.visuals.widgets.hovered.fg_stroke = fg_stroke;
-    style.visuals.widgets.hovered.weak_bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.hovered.weak_bg_fill = hover_fill;
+    style.visuals.widgets.hovered.corner_radius = egui::CornerRadius::ZERO;
 
     style.visuals.widgets.inactive.bg_fill = Colors::HIGHLIGHT;
     style.visuals.widgets.inactive.fg_stroke = fg_stroke;
     style.visuals.widgets.inactive.weak_bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.inactive.corner_radius = egui::CornerRadius::ZERO;
 
     style.visuals.widgets.noninteractive.bg_fill = Colors::HIGHLIGHT;
     style.visuals.widgets.noninteractive.fg_stroke = fg_stroke;
     style.visuals.widgets.noninteractive.weak_bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.noninteractive.corner_radius = egui::CornerRadius::ZERO;
 
-    style.visuals.widgets.open.bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.open.bg_fill = hover_fill;
     style.visuals.widgets.open.bg_stroke = bg_stroke;
     style.visuals.widgets.open.fg_stroke = fg_stroke;
-    style.visuals.widgets.open.weak_bg_fill = Colors::HIGHLIGHT;
+    style.visuals.widgets.open.weak_bg_fill = hover_fill;
+    style.visuals.widgets.open.corner_radius = egui::CornerRadius::ZERO;
+
+    style.spacing.button_padding = egui::vec2(4.0, 2.0);
+    style.spacing.item_spacing = egui::vec2(6.0, 4.0);
 }

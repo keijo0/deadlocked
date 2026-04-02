@@ -39,7 +39,7 @@ impl Default for Config {
             player: PlayerConfig::default(),
             hud: HudConfig::default(),
             misc: UnsafeConfig::default(),
-            accent_color: Colors::BLUE,
+            accent_color: Colors::PURPLE,
         }
     }
 }
@@ -76,13 +76,15 @@ pub struct AimbotConfig {
     pub distance_adjusted_fov: bool,
     pub start_bullet: i32,
     pub visibility_check: bool,
+    pub smoke_wall_check: bool,
     pub flash_check: bool,
     pub fov: f32,
     pub smooth: f32,
     pub bones: Vec<Bones>,
-    pub targeting_mode: TargetingMode,
     pub backtrack: bool,
-    pub backtrack_ticks: u32,
+    pub backtrack_ms: u32,
+    pub humanization: bool,
+    pub humanization_amount: f32,
 }
 
 impl Default for AimbotConfig {
@@ -95,6 +97,7 @@ impl Default for AimbotConfig {
             distance_adjusted_fov: true,
             start_bullet: 0,
             visibility_check: true,
+            smoke_wall_check: true,
             flash_check: true,
             fov: 2.5,
             smooth: 5.0,
@@ -107,9 +110,10 @@ impl Default for AimbotConfig {
                 Bones::Spine1,
                 Bones::Hip,
             ],
-            targeting_mode: TargetingMode::Fov,
             backtrack: false,
-            backtrack_ticks: 12,
+            backtrack_ms: 187,
+            humanization: true,
+            humanization_amount: 1.11,
         }
     }
 }
@@ -136,12 +140,6 @@ impl Default for RcsConfig {
 pub enum KeyMode {
     Hold,
     Toggle,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, EnumIter)]
-pub enum TargetingMode {
-    Fov,
-    Distance,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -228,7 +226,7 @@ pub struct PlayerConfig {
     pub skeleton_color: Color32,
     pub health_bar: bool,
     pub health_text: bool,
-    pub armor_bar: bool,
+    pub armor_text: bool,
     pub player_name: bool,
     pub weapon_icon: bool,
     pub tags: bool,
@@ -249,7 +247,7 @@ impl Default for PlayerConfig {
             skeleton_color: Color32::WHITE,
             health_bar: true,
             health_text: true,
-            armor_bar: true,
+            armor_text: true,
             player_name: true,
             weapon_icon: true,
             tags: true,
@@ -286,6 +284,8 @@ pub struct HudConfig {
     pub line_width: f32,
     pub font_size: f32,
     pub icon_size: f32,
+    pub overlay_refresh_rate: u64,
+    pub data_refresh_rate: u64,
     pub debug: bool,
 }
 
@@ -315,15 +315,14 @@ impl Default for HudConfig {
             text_outline: true,
             text_color: Colors::TEXT,
             line_width: 2.0,
-            font_size: 16.0,
+            font_size: 14.0,
             icon_size: 20.0,
+            overlay_refresh_rate: 280,
+            data_refresh_rate: 280,
             debug: false,
         }
     }
 }
-
-pub const WALK_DURATION_MIN_SECS: f32 = 0.05;
-pub const WALK_DURATION_MAX_SECS: f32 = 5.0;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
@@ -331,9 +330,6 @@ pub struct AntiAfk {
     pub enabled: bool,
     pub interval_min: f32,
     pub interval_max: f32,
-    pub walk_bot: bool,
-    pub walk_duration_min: f32,
-    pub walk_duration_max: f32,
 }
 
 impl Default for AntiAfk {
@@ -342,9 +338,6 @@ impl Default for AntiAfk {
             enabled: false,
             interval_min: 5.0,
             interval_max: 10.0,
-            walk_bot: false,
-            walk_duration_min: 0.3,
-            walk_duration_max: 0.8,
         }
     }
 }

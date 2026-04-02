@@ -1,12 +1,11 @@
 use egui::{Align, Button, Ui};
-use utils::log;
 
 use crate::{
     config::{
-        BASE_PATH, CONFIG_PATH, Config, available_configs, delete_config, parse_config,
+        BASE_PATH, CONFIG_PATH, available_configs, delete_config, parse_config,
         write_config,
     },
-    ui::{app::App, color::Colors, grenades::read_grenades, gui::helpers::collapsing_open},
+    ui::{app::App, color::Colors, grenades::read_grenades},
 };
 
 impl App {
@@ -17,86 +16,45 @@ impl App {
                 .auto_shrink([false, true])
                 .id_salt("config_left")
                 .show(left, |left| {
-                    self.config_left(left);
+                    self.config_list(left);
                 });
 
             let right = &mut cols[1];
+            self.config_controls(right);
+        });
+    }
 
-            collapsing_open(right, "Configs", |right| {
-                if right.button("Refresh").clicked() {
-                    self.available_configs = available_configs();
-                    self.grenades = read_grenades();
+    fn config_controls(&mut self, ui: &mut Ui) {
+        if ui.button("Refresh").clicked() {
+            self.available_configs = available_configs();
+            self.grenades = read_grenades();
+        }
+
+        ui.horizontal(|ui| {
+            if ui.button("+").clicked() && !self.new_config_name.is_empty() {
+                if !self.new_config_name.ends_with(".toml") {
+                    self.new_config_name.push_str(".toml");
                 }
-
-                right.horizontal(|right| {
-                    if right.button("+").clicked() && !self.new_config_name.is_empty() {
-                        if !self.new_config_name.ends_with(".toml") {
-                            self.new_config_name.push_str(".toml");
-                        }
-                        let path = CONFIG_PATH.join(&self.new_config_name);
-                        write_config(&self.config, &path);
-                        self.new_config_name.clear();
-                        self.current_config = path;
-                        self.available_configs = available_configs();
-                    }
-                    right.text_edit_singleline(&mut self.new_config_name);
-                });
-
-                egui::ScrollArea::vertical()
-                    .auto_shrink([false, true])
-                    .id_salt("config_right")
-                    .show(right, |right| {
-                        self.config_right(right);
-                    });
-            });
+                let path = CONFIG_PATH.join(&self.new_config_name);
+                write_config(&self.config, &path);
+                self.new_config_name.clear();
+                self.current_config = path;
+                self.available_configs = available_configs();
+            }
+            ui.text_edit_singleline(&mut self.new_config_name);
         });
+
+        ui.separator();
+
+        if ui.button("Config Folder").clicked() {
+            std::process::Command::new("xdg-open")
+                .arg(BASE_PATH.as_os_str())
+                .status()
+                .unwrap();
+        }
     }
 
-    fn config_left(&mut self, ui: &mut Ui) {
-        collapsing_open(ui, "Config", |ui| {
-            if ui.button("Reset").clicked() {
-                self.config = Config::default();
-                self.send_config();
-                log::info!("loaded default config");
-            }
-
-            if ui.button("Config Folder").clicked() {
-                std::process::Command::new("xdg-open")
-                    .arg(BASE_PATH.as_os_str())
-                    .status()
-                    .unwrap();
-            }
-        });
-
-        collapsing_open(ui, "Accent Color", |ui| {
-            egui::ComboBox::new("accent_color", "Accent Color")
-                .selected_text(
-                    Colors::ACCENT_COLORS
-                        .iter()
-                        .find(|c| c.1 == self.config.accent_color)
-                        .unwrap_or(&Colors::ACCENT_COLORS[5])
-                        .0,
-                )
-                .show_ui(ui, |ui| {
-                    for (name, color) in Colors::ACCENT_COLORS {
-                        if ui
-                            .add(
-                                Button::selectable(color == self.config.accent_color, name)
-                                    .fill(color),
-                            )
-                            .clicked()
-                        {
-                            self.config.accent_color = color;
-                            ui.ctx()
-                                .global_style_mut(|style| style.visuals.selection.bg_fill = color);
-                            self.send_config();
-                        }
-                    }
-                });
-        });
-    }
-
-    fn config_right(&mut self, ui: &mut Ui) {
+    fn config_list(&mut self, ui: &mut Ui) {
         let mut clicked_config = None;
         let mut delete = None;
 
@@ -124,7 +82,7 @@ impl App {
             self.current_config = config_path;
             self.send_config();
             ui.ctx().global_style_mut(|style| {
-                style.visuals.selection.bg_fill = self.config.accent_color
+                style.visuals.selection.bg_fill = Colors::PURPLE
             });
         }
 

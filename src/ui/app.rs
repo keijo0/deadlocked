@@ -21,15 +21,13 @@ use crate::{
     message::{GameStatus, Message},
     server_picker::{ServerRegion, new_fetch_result},
     ui::{
+        color::Colors,
         grenades::{Grenade, GrenadeList, read_grenades},
         gui::{Tab, aimbot::AimbotTab},
         trail::Trail,
         window_context::WindowContext,
     },
 };
-
-const FRAME_RATE: u64 = 200;
-const FRAME_DURATION: Duration = Duration::from_micros(1_000_000 / FRAME_RATE);
 
 pub struct App {
     pub gui: Option<WindowContext>,
@@ -41,6 +39,8 @@ pub struct App {
 
     pub game_status: GameStatus,
     pub display_scale: f32,
+    pub overlay_window_pos: Option<(i32, i32)>,
+    pub overlay_window_size: Option<(u32, u32)>,
     pub trails: HashMap<u64, Trail>,
 
     pub grenades: GrenadeList,
@@ -75,7 +75,7 @@ impl App {
             gui: None,
             overlay: None,
 
-            next_frame_time: Instant::now() + FRAME_DURATION,
+            next_frame_time: Instant::now() + frame_duration(&config),
 
             channel,
             data,
@@ -86,6 +86,8 @@ impl App {
 
             game_status: GameStatus::NotStarted,
             display_scale: 1.0,
+            overlay_window_pos: None,
+            overlay_window_size: None,
             trails: HashMap::new(),
 
             grenades,
@@ -106,8 +108,8 @@ impl App {
     }
 
     fn create_window(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        let gui = WindowContext::new(event_loop, false, self.config.accent_color);
-        let overlay = WindowContext::new(event_loop, true, self.config.accent_color);
+        let gui = WindowContext::new(event_loop, false, Colors::PURPLE);
+        let overlay = WindowContext::new(event_loop, true, Colors::PURPLE);
 
         self.display_scale = gui.window().scale_factor() as f32;
         log::info!("detected display scale: {}", self.display_scale);
@@ -126,14 +128,14 @@ impl ApplicationHandler for App {
             if let Some(window) = &self.overlay {
                 window.window().request_redraw();
             }
-            self.next_frame_time += FRAME_DURATION;
+            self.next_frame_time += frame_duration(&self.config);
         }
     }
 
     fn resumed(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         self.create_window(event_loop);
 
-        self.next_frame_time = Instant::now() + FRAME_DURATION;
+        self.next_frame_time = Instant::now() + frame_duration(&self.config);
         event_loop.set_control_flow(winit::event_loop::ControlFlow::WaitUntil(
             self.next_frame_time,
         ));
@@ -158,7 +160,9 @@ impl ApplicationHandler for App {
             return;
         };
 
-        let window = if gui.window().id() == window_id {
+        let is_gui_window = gui.window().id() == window_id;
+
+        let window = if is_gui_window {
             gui
         } else if overlay.window().id() == window_id {
             overlay
@@ -175,9 +179,10 @@ impl ApplicationHandler for App {
                 event_loop.set_control_flow(winit::event_loop::ControlFlow::WaitUntil(
                     self.next_frame_time,
                 ));
-                gui.request_redraw();
-                overlay.request_redraw();
-                self.render();
+                // Render once per frame from the GUI event to avoid double work.
+                if is_gui_window {
+                    self.render();
+                }
             }
             WindowEvent::KeyboardInput {
                 event,
@@ -217,4 +222,9 @@ impl ApplicationHandler for App {
             }
         }
     }
+}
+
+fn frame_duration(config: &Config) -> Duration {
+    let hz = config.hud.overlay_refresh_rate.clamp(30, 360);
+    Duration::from_micros(1_000_000 / hz)
 }

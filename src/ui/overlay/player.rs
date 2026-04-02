@@ -129,27 +129,6 @@ impl App {
             );
         }
 
-        if self.config.player.armor_bar && player.armor > 0 {
-            let x = bl.x
-                - self.config.hud.line_width
-                    * if self.config.player.health_bar {
-                        4.0
-                    } else {
-                        2.0
-                    };
-            let delta = bl.y - tl.y;
-            painter.line(
-                vec![
-                    pos2(x, bl.y),
-                    pos2(x, bl.y - (delta * player.armor as f32 / 100.0)),
-                ],
-                Stroke::new(
-                    self.config.hud.line_width,
-                    Self::alpha(Color32::BLUE, alpha),
-                ),
-            );
-        }
-
         let mut offset = 0.0;
         let font_size = self.config.hud.font_size;
         let text_color = Self::alpha(self.config.hud.text_color, alpha);
@@ -171,6 +150,17 @@ impl App {
                 pos2(tr.x + corner_size, tr.y + offset),
                 Align2::LEFT_TOP,
                 Some(Self::alpha(health_color, alpha)),
+            );
+            offset += font_size;
+        }
+
+        if self.config.player.armor_text && player.armor > 0 {
+            self.text(
+                painter,
+                player.armor.to_string(),
+                pos2(tr.x + corner_size, tr.y + offset),
+                Align2::LEFT_TOP,
+                Some(Self::alpha(Color32::from_rgb(100, 149, 237), alpha)),
             );
         }
 

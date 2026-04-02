@@ -7,8 +7,8 @@ pub struct Colors;
 impl Colors {
     pub const BACKDROP: Color32 = Color32::from_rgb(4, 4, 2);
     pub const BASE: Color32 = Color32::from_rgb(0, 0, 0);
-    pub const HIGHLIGHT: Color32 = Color32::from_rgb(100, 100, 120);
-    pub const SUBTEXT: Color32 = Color32::from_rgb(180, 180, 180);
+    pub const HIGHLIGHT: Color32 = Color32::from_rgb(20, 20, 26);
+    pub const SUBTEXT: Color32 = Color32::from_rgb(120, 120, 120);
     pub const TEXT: Color32 = Color32::from_rgb(190, 170, 155);
     pub const RED: Color32 = Color32::from_rgb(240, 100, 100);
     pub const ORANGE: Color32 = Color32::from_rgb(240, 140, 90);

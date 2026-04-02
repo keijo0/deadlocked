@@ -1,94 +1,27 @@
-use egui::{DragValue, Ui};
+use egui::Ui;
 
 use crate::ui::{
     app::App,
-    gui::helpers::{checkbox, collapsing_open, drag, keybind},
+    gui::helpers::{checkbox, keybind},
 };
 
 impl App {
     pub fn misc_settings(&mut self, ui: &mut Ui) {
-        collapsing_open(ui, "Automation", |ui| {
-            if ui
-                .checkbox(&mut self.config.misc.bunnyhop, "Bunnyhop")
-                .changed()
-            {
-                self.send_config();
-            }
+        if checkbox(ui, "Bunnyhop", &mut self.config.misc.bunnyhop) {
+            self.send_config();
+        }
 
-            if keybind(
-                ui,
-                "bunnyhop_hotkey",
-                "Bunnyhop Hotkey",
-                &mut self.config.misc.bunnyhop_hotkey,
-            ) {
-                self.send_config();
-            }
-        });
+        if keybind(
+            ui,
+            "bunnyhop_hotkey",
+            "Bunnyhop Hotkey",
+            &mut self.config.misc.bunnyhop_hotkey,
+        ) {
+            self.send_config();
+        }
 
-        collapsing_open(ui, "Backtrack", |ui| {
-            if checkbox(
-                ui,
-                "Enable Backtrack",
-                &mut self.config.aim.global.aimbot.backtrack,
-            ) {
-                self.send_config();
-            }
-
-            if drag(
-                ui,
-                "Backtrack Ticks",
-                DragValue::new(&mut self.config.aim.global.aimbot.backtrack_ticks)
-                    .range(1..=32)
-                    .speed(0.1),
-            ) {
-                self.send_config();
-            }
-        });
+        ui.separator();
 
         self.antiafk_settings(ui);
-
-        self.server_picker_settings(ui);
-
-        collapsing_open(ui, "HUD", |ui| {
-            if checkbox(
-                ui,
-                "Keybind List",
-                &mut self.config.hud.keybind_list,
-            ) {
-                self.send_config();
-            }
-
-            if self.config.hud.keybind_list {
-                ui.indent("keybind_list_indicators", |ui| {
-                    if checkbox(ui, "Aimbot", &mut self.config.hud.keybind_aimbot) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "FOV / Smooth", &mut self.config.hud.keybind_fov) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "Trigger Delay", &mut self.config.hud.keybind_trigger_delay) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "Triggerbot", &mut self.config.hud.keybind_triggerbot) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "ESP", &mut self.config.hud.keybind_esp) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "Bunnyhop", &mut self.config.hud.keybind_bunnyhop) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "Server Picker", &mut self.config.hud.keybind_server_picker) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "Backtrack", &mut self.config.hud.keybind_backtrack) {
-                        self.send_config();
-                    }
-                    if checkbox(ui, "Ping", &mut self.config.hud.keybind_ping) {
-                        self.send_config();
-                    }
-                });
-            }
-        });
     }
 }

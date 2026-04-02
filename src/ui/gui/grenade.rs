@@ -6,7 +6,6 @@ use crate::{
         app::App,
         color::Colors,
         grenades::{Grenade, write_grenades},
-        gui::helpers::collapsing_open,
     },
 };
 
@@ -70,85 +69,81 @@ impl App {
     }
 
     fn record_grenade(&mut self, ui: &mut Ui) {
-        collapsing_open(ui, "Add Grenade", |ui| {
-            let data = self.data.lock();
+        let data = self.data.lock();
 
-            if !data.in_game {
-                ui.label("Not in game.");
-                return;
-            }
+        if !data.in_game {
+            ui.label("Not in game.");
+            return;
+        }
 
-            let grenade = if !GRENADES.contains(&data.local_player.weapon) {
-                ui.colored_label(Colors::YELLOW, "Invalid Weapon");
-                return;
-            } else {
-                &data.local_player.weapon
+        let grenade = if !GRENADES.contains(&data.local_player.weapon) {
+            ui.colored_label(Colors::YELLOW, "Invalid Weapon");
+            return;
+        } else {
+            &data.local_player.weapon
+        };
+
+        ui.horizontal(|ui| {
+            ui.text_edit_singleline(&mut self.new_grenade.name);
+            ui.label("Name");
+        });
+
+        ui.horizontal(|ui| {
+            ui.text_edit_multiline(&mut self.new_grenade.description);
+            ui.label("Instructions");
+        });
+
+        ui.checkbox(&mut self.new_grenade.modifiers.jump, "Jump");
+        ui.checkbox(&mut self.new_grenade.modifiers.duck, "Duck");
+        ui.checkbox(&mut self.new_grenade.modifiers.run, "Run");
+
+        if ui.button("Save").clicked() {
+            let map = &data.map_name;
+            let grenade_list = match self.grenades.get_mut(map) {
+                Some(list) => list,
+                None => {
+                    self.grenades.insert(map.to_owned(), Vec::new());
+                    self.grenades.get_mut(map).unwrap()
+                }
             };
 
-            ui.horizontal(|ui| {
-                ui.text_edit_singleline(&mut self.new_grenade.name);
-                ui.label("Name");
-            });
+            let mut new_grenade = Grenade::new();
+            std::mem::swap(&mut new_grenade, &mut self.new_grenade);
 
-            ui.horizontal(|ui| {
-                ui.text_edit_multiline(&mut self.new_grenade.description);
-                ui.label("Instructions");
-            });
+            new_grenade.weapon = grenade.clone();
+            new_grenade.position = data.local_player.position;
+            new_grenade.view_angles = data.view_angles;
 
-            ui.checkbox(&mut self.new_grenade.modifiers.jump, "Jump");
-            ui.checkbox(&mut self.new_grenade.modifiers.duck, "Duck");
-            ui.checkbox(&mut self.new_grenade.modifiers.run, "Run");
-
-            if ui.button("Save").clicked() {
-                let map = &data.map_name;
-                let grenade_list = match self.grenades.get_mut(map) {
-                    Some(list) => list,
-                    None => {
-                        self.grenades.insert(map.to_owned(), Vec::new());
-                        self.grenades.get_mut(map).unwrap()
-                    }
-                };
-
-                let mut new_grenade = Grenade::new();
-                std::mem::swap(&mut new_grenade, &mut self.new_grenade);
-
-                new_grenade.weapon = grenade.clone();
-                new_grenade.position = data.local_player.position;
-                new_grenade.view_angles = data.view_angles;
-
-                grenade_list.push(new_grenade);
-                write_grenades(&self.grenades);
-            }
-        });
+            grenade_list.push(new_grenade);
+            write_grenades(&self.grenades);
+        }
     }
 
     fn edit_grenade(&mut self, ui: &mut Ui) {
-        collapsing_open(ui, "Edit Grenade", |ui| {
-            let (map, index) = match &self.current_grenade {
-                Some(grenade) => grenade,
-                None => return,
-            };
+        let (map, index) = match &self.current_grenade {
+            Some(grenade) => grenade,
+            None => return,
+        };
 
-            let Some(grenades) = self.grenades.get_mut(map) else {
-                return;
-            };
-            let Some(grenade) = grenades.get_mut(*index) else {
-                return;
-            };
+        let Some(grenades) = self.grenades.get_mut(map) else {
+            return;
+        };
+        let Some(grenade) = grenades.get_mut(*index) else {
+            return;
+        };
 
-            ui.horizontal(|ui| {
-                ui.text_edit_singleline(&mut grenade.name);
-                ui.label("Name");
-            });
-
-            ui.horizontal(|ui| {
-                ui.text_edit_multiline(&mut grenade.description);
-                ui.label("Description");
-            });
-
-            ui.checkbox(&mut grenade.modifiers.jump, "Jump");
-            ui.checkbox(&mut grenade.modifiers.duck, "Duck");
-            ui.checkbox(&mut grenade.modifiers.run, "Run");
+        ui.horizontal(|ui| {
+            ui.text_edit_singleline(&mut grenade.name);
+            ui.label("Name");
         });
+
+        ui.horizontal(|ui| {
+            ui.text_edit_multiline(&mut grenade.description);
+            ui.label("Description");
+        });
+
+        ui.checkbox(&mut grenade.modifiers.jump, "Jump");
+        ui.checkbox(&mut grenade.modifiers.duck, "Duck");
+        ui.checkbox(&mut grenade.modifiers.run, "Run");
     }
 }

@@ -1,10 +1,11 @@
 use glam::vec2;
+use rand::RngExt;
 use utils::log;
 
 use crate::{
     config::{Config, KeyMode},
     cs2::{
-        CS2,
+        CS2, CS2_TICK_RATE,
         entity::{player::Player, weapon_class::WeaponClass},
     },
     math::{angles_to_fov, vec2_clamp},
@@ -71,17 +72,57 @@ impl CS2 {
             return;
         }
 
+        if config.smoke_wall_check {
+            let target_position = target.bone_position(self, self.target.bone_index);
+            if !self.is_path_clear(local_player.eye_position(self), target_position) {
+                return;
+            }
+        }
+
         if local_player.shots_fired(self) < config.start_bullet {
             return;
         }
+
+        let view_angles = local_player.view_angles(self);
 
         let target_angle = {
             let mut smallest_fov = 360.0;
             let mut smallest_angle = glam::Vec2::ZERO;
 
+            // Generate multiple random candidate positions and pick the one whose aim angle
+            // is closest to the current view angles (mouse-relative humanization).
+            // This keeps the aim near where the crosshair already is while still randomising
+            // the exact point on the body, making the movement appear more human.
+            const HUMANIZATION_CANDIDATES: usize = 8;
+            let humanize = |pos: glam::Vec3| -> glam::Vec3 {
+                if !config.humanization || config.humanization_amount <= 0.0 {
+                    return pos;
+                }
+                let r = config.humanization_amount;
+                let mut rng = rand::rng();
+                let mut best_pos = pos;
+                let mut best_fov = f32::MAX;
+                for _ in 0..HUMANIZATION_CANDIDATES {
+                    let candidate = pos
+                        + glam::Vec3::new(
+                            rng.random_range(-r..=r),
+                            rng.random_range(-r..=r),
+                            rng.random_range(-r..=r),
+                        );
+                    let candidate_angle =
+                        self.angle_to_target(&local_player, &candidate, &self.target.previous_aim_punch);
+                    let fov = angles_to_fov(&view_angles, &candidate_angle);
+                    if fov < best_fov {
+                        best_fov = fov;
+                        best_pos = candidate;
+                    }
+                }
+                best_pos
+            };
+
             if config.backtrack {
                 let target_pawn = target.pawn;
-                let max_ticks = config.backtrack_ticks as usize;
+                let max_ticks = ((config.backtrack_ms as f32 / 1000.0) * CS2_TICK_RATE).round() as usize;
 
                 // Collect bone positions from history into a local Vec to avoid borrow conflicts
                 let hist_positions: Vec<glam::Vec3> = {
@@ -102,10 +143,10 @@ impl CS2 {
                     for bone_pos in &hist_positions {
                         let angle = self.angle_to_target(
                             &local_player,
-                            bone_pos,
+                            &humanize(*bone_pos),
                             &self.target.previous_aim_punch,
                         );
-                        let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                        let fov = angles_to_fov(&view_angles, &angle);
                         if fov < smallest_fov {
                             smallest_fov = fov;
                             smallest_angle = angle;
@@ -116,10 +157,10 @@ impl CS2 {
                         let bone_pos = target.bone_position(self, bone.u64());
                         let angle = self.angle_to_target(
                             &local_player,
-                            &bone_pos,
+                            &humanize(bone_pos),
                             &self.target.previous_aim_punch,
                         );
-                        let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                        let fov = angles_to_fov(&view_angles, &angle);
                         if fov < smallest_fov {
                             smallest_fov = fov;
                             smallest_angle = angle;
@@ -129,9 +170,12 @@ impl CS2 {
             } else {
                 for bone in &config.bones {
                     let bone_pos = target.bone_position(self, bone.u64());
-                    let angle =
-                        self.angle_to_target(&local_player, &bone_pos, &self.target.previous_aim_punch);
-                    let fov = angles_to_fov(&local_player.view_angles(self), &angle);
+                    let angle = self.angle_to_target(
+                        &local_player,
+                        &humanize(bone_pos),
+                        &self.target.previous_aim_punch,
+                    );
+                    let fov = angles_to_fov(&view_angles, &angle);
                     if fov < smallest_fov {
                         smallest_fov = fov;
                         smallest_angle = angle;
@@ -142,7 +186,6 @@ impl CS2 {
             smallest_angle
         };
 
-        let view_angles = local_player.view_angles(self);
         if angles_to_fov(&view_angles, &target_angle)
             > (config.fov
                 * if config.distance_adjusted_fov {

@@ -9,7 +9,7 @@ use utils::{channel::Channel, log, sync::Mutex};
 use crate::{
     config::{
         AntiAfk, CONFIG_PATH, Config, DEFAULT_CONFIG_NAME, LOOP_DURATION, SLEEP_DURATION,
-        WALK_DURATION_MIN_SECS, parse_config,
+        parse_config,
     },
     cs2::CS2,
     data::Data,
@@ -76,6 +76,7 @@ impl GameManager {
     pub fn run(&mut self) {
         self.send_game_message(Message::GameStatus(GameStatus::NotStarted));
         let mut previous_status = GameStatus::NotStarted;
+        let mut next_data_tick = Instant::now();
         loop {
             let start = Instant::now();
             while let Ok(message) = self.channel.try_receive() {
@@ -98,10 +99,15 @@ impl GameManager {
                     previous_status = GameStatus::Working;
                 }
                 self.game.run(&self.config, &mut self.mouse);
-                let mut data = self.data.lock();
-                self.game.data(&self.config, &mut data);
+                let now = Instant::now();
+                if now >= next_data_tick {
+                    let mut data = self.data.lock();
+                    self.game.data(&self.config, &mut data);
+                    next_data_tick = now + data_loop_duration(&self.config);
+                }
             } else {
                 *self.data.lock() = Data::default();
+                next_data_tick = Instant::now();
             }
 
             if is_valid {
@@ -150,9 +156,6 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
 
         let interval_min = cfg.interval_min.max(1.0) as u64;
         let interval_max = cfg.interval_max.max(cfg.interval_min).max(1.0) as u64;
-        let walk_bot = cfg.walk_bot;
-        let walk_duration_min_ms = (cfg.walk_duration_min.max(WALK_DURATION_MIN_SECS) * 1000.0) as u64;
-        let walk_duration_max_ms = (cfg.walk_duration_max.max(cfg.walk_duration_min).max(WALK_DURATION_MIN_SECS) * 1000.0) as u64;
         drop(cfg);
 
         if last_action.elapsed() >= Duration::from_secs(interval_min) {
@@ -169,33 +172,6 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
                 Err(err) => log::warn!("anti-afk: failed to run xdotool: {err}"),
             }
 
-            if walk_bot {
-                const WASD: [&str; 4] = ["w", "a", "s", "d"];
-                let key = WASD[lcg_rand(&mut rng_state, 4) as usize];
-                let hold_range = (walk_duration_max_ms.saturating_sub(walk_duration_min_ms) + 1).max(1);
-                let hold_ms = walk_duration_min_ms + lcg_rand(&mut rng_state, hold_range);
-
-                match std::process::Command::new("xdotool")
-                    .args(["keydown", "--clearmodifiers", key])
-                    .spawn()
-                {
-                    Ok(mut c) => {
-                        let _ = c.wait();
-                    }
-                    Err(err) => log::warn!("anti-afk walk-bot: keydown failed: {err}"),
-                }
-                sleep(Duration::from_millis(hold_ms));
-                match std::process::Command::new("xdotool")
-                    .args(["keyup", "--clearmodifiers", key])
-                    .spawn()
-                {
-                    Ok(mut c) => {
-                        let _ = c.wait();
-                    }
-                    Err(err) => log::warn!("anti-afk walk-bot: keyup failed: {err}"),
-                }
-            }
-
             let sleep_secs = interval_min
                 + lcg_rand(&mut rng_state, (interval_max - interval_min + 1).max(1));
             last_action = Instant::now();
@@ -210,4 +186,9 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
 fn lcg_rand(state: &mut u64, max: u64) -> u64 {
     *state = state.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
     (*state >> 33) % max
+}
+
+fn data_loop_duration(config: &Config) -> Duration {
+    let hz = config.hud.data_refresh_rate.clamp(20, 240);
+    Duration::from_micros(1_000_000 / hz)
 }

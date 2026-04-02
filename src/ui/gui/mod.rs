@@ -1,4 +1,4 @@
-use egui::{Align, Ui};
+use egui::Ui;
 use utils::log;
 
 use crate::{
@@ -24,6 +24,7 @@ pub enum Tab {
     Hud,
     Grenades,
     Misc,
+    ServerPicker,
     Config,
 }
 
@@ -45,30 +46,41 @@ impl App {
 
     fn gui(&mut self, ui: &mut Ui) {
         ui.ctx().set_pixels_per_point(self.display_scale);
-        egui::Panel::left("sidebar")
+
+        egui::Panel::top("topbar")
             .resizable(false)
             .show_inside(ui, |ui| {
-                ui.selectable_value(&mut self.current_tab, Tab::Aimbot, "Aimbot");
-                ui.selectable_value(&mut self.current_tab, Tab::Player, "Player");
-                ui.selectable_value(&mut self.current_tab, Tab::Hud, "Hud");
-                ui.selectable_value(&mut self.current_tab, Tab::Grenades, "Grenades");
-                ui.selectable_value(&mut self.current_tab, Tab::Misc, "Misc");
-                ui.selectable_value(&mut self.current_tab, Tab::Config, "Config");
-
-                ui.with_layout(egui::Layout::bottom_up(Align::Min), |ui| {
-                    if ui.button("Report Issue").clicked() {
-                        let _ = std::process::Command::new("xdg-open")
-                            .arg("https://github.com/keijo0/deadlocked/issues")
-                            .status();
+                ui.horizontal(|ui| {
+                    ui.spacing_mut().button_padding = egui::vec2(5.0, 2.0);
+                    for (tab, label) in [
+                        (Tab::Aimbot, "Aimbot"),
+                        (Tab::Player, "Player"),
+                        (Tab::Hud, "Hud"),
+                        (Tab::Grenades, "Grenades"),
+                        (Tab::Misc, "Misc"),
+                        (Tab::ServerPicker, "Server Picker"),
+                        (Tab::Config, "Config"),
+                    ] {
+                        let selected = self.current_tab == tab;
+                        if ui
+                            .add(egui::Button::new(label).selected(selected).frame(true))
+                            .clicked()
+                        {
+                            self.current_tab = tab;
+                        }
                     }
-
-                    ui.label(egui::RichText::new(format!("{}", self.game_status)).color(
-                        match self.game_status {
-                            GameStatus::Working => Colors::GREEN,
-                            GameStatus::NotStarted => Colors::YELLOW,
-                        },
-                    ));
                 });
+            });
+
+        egui::Panel::bottom("status_bar")
+            .resizable(false)
+            .show_inside(ui, |ui| {
+                ui.label(egui::RichText::new(format!("{}", self.game_status)).color(
+                    match self.game_status {
+                        GameStatus::Working => Colors::GREEN,
+                        GameStatus::NotStarted => Colors::YELLOW,
+                    },
+                ));
             });
 
         egui::CentralPanel::default().show_inside(ui, |ui| match self.current_tab {
@@ -77,6 +89,7 @@ impl App {
             Tab::Hud => self.hud_settings(ui),
             Tab::Grenades => self.grenade_settings(ui),
             Tab::Misc => self.misc_settings(ui),
+            Tab::ServerPicker => self.server_picker_settings(ui),
             Tab::Config => self.config_settings(ui),
         });
     }
