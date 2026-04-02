@@ -124,7 +124,12 @@ impl CS2 {
         let schema = Schema::new(&self.process, offsets.library.schema)?;
         let client = schema.get_library(cs2::CLIENT_LIB)?;
 
-        offsets.controller.steam_id = client.get("CBasePlayerController", "m_steamID")?;
+        // m_steamID may appear on different controller classes depending on CS2 version.
+        // Try CBasePlayerController first (most common), then the CS-specific controller.
+        offsets.controller.steam_id = client
+            .get_opt("CBasePlayerController", "m_steamID")
+            .or_else(|| client.get_opt("CCSPlayerController", "m_steamID"))
+            .unwrap_or(0);
         offsets.controller.name = client.get("CBasePlayerController", "m_iszPlayerName")?;
         offsets.controller.pawn = client.get("CBasePlayerController", "m_hPawn")?;
         offsets.controller.owner_entity = client.get("C_BaseEntity", "m_hOwnerEntity")?;
