@@ -35,15 +35,12 @@ mod offsets;
 mod schema;
 mod target;
 
-<<<<<<< HEAD
 /// CS2 runs at 64 ticks per second.
 pub const CS2_TICK_RATE: f32 = 64.0;
 
 const WORLD_SCAN_INTERVAL: Duration = Duration::from_millis(50);
 const BVH_CHECK_INTERVAL: Duration = Duration::from_secs(1);
-=======
 const OFFSET_REFRESH_INTERVAL: Duration = Duration::from_secs(60);
->>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
 
 #[derive(Debug)]
 pub struct CS2 {
@@ -62,15 +59,10 @@ pub struct CS2 {
     esp: EspToggle,
     weapon: Weapon,
     planted_c4: Option<PlantedC4>,
-<<<<<<< HEAD
     next_world_scan: Instant,
     next_bvh_check: Instant,
-=======
-    last_cache: Instant,
     last_offset_update: Instant,
-=======
     pending_offsets: Option<Receiver<Option<Offsets>>>,
->>>>>>> cc35e08 (fix: run offset refresh on background thread to prevent game freeze)
     bhop_space_pressed: bool,
 }
 
@@ -354,17 +346,10 @@ impl CS2 {
             esp: EspToggle::default(),
             weapon: Weapon::default(),
             planted_c4: None,
-<<<<<<< HEAD
             next_world_scan: Instant::now(),
             next_bvh_check: Instant::now(),
-=======
-            last_cache: Instant::now(),
             last_offset_update: Instant::now(),
-<<<<<<< HEAD
->>>>>>> 57549fc (auto updating offsets: periodic refresh every 60s while game is running)
-=======
             pending_offsets: None,
->>>>>>> cc35e08 (fix: run offset refresh on background thread to prevent game freeze)
             bhop_space_pressed: false,
         }
     }

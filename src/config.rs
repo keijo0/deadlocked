@@ -85,6 +85,7 @@ pub struct AimbotConfig {
     pub backtrack_ms: u32,
     pub humanization: bool,
     pub humanization_amount: f32,
+    pub humanization_speed: f32,
 }
 
 impl Default for AimbotConfig {
@@ -114,6 +115,7 @@ impl Default for AimbotConfig {
             backtrack_ms: 187,
             humanization: true,
             humanization_amount: 1.11,
+            humanization_speed: 1.0,
         }
     }
 }
