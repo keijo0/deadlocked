@@ -207,7 +207,7 @@ impl CS2 {
 
         let humanization_active = config.humanization && config.humanization_amount > 0.0;
         let speed_multiplier = if humanization_active {
-            config.humanization_speed.max(0.1)
+            config.humanization_speed.max(crate::config::MIN_HUMANIZATION_SPEED)
         } else {
             1.0
         };

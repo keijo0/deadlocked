@@ -12,6 +12,8 @@ use crate::{
     },
 };
 
+const MIN_HUMANIZATION_SPEED: f64 = crate::config::MIN_HUMANIZATION_SPEED as f64;
+
 #[derive(PartialEq)]
 pub enum AimbotTab {
     Global,
@@ -178,7 +180,7 @@ impl App {
             ui,
             "Humanization Speed",
             DragValue::new(&mut self.weapon_config().aimbot.humanization_speed)
-                .range(0.1..=3.0)
+                .range(MIN_HUMANIZATION_SPEED..=3.0)
                 .speed(0.01)
                 .max_decimals(2)
                 .suffix("x"),
@@ -188,75 +190,77 @@ impl App {
 
         ui.separator();
 
-        ui.label("Bones");
-        ui.horizontal_wrapped(|ui| {
-            ui.spacing_mut().item_spacing = egui::vec2(3.0, 3.0);
+        ui.group(|ui| {
+            ui.label("Bones");
+            ui.horizontal_wrapped(|ui| {
+                ui.spacing_mut().item_spacing = egui::vec2(3.0, 3.0);
 
-            // Single bones
-            for bone in [Bones::Head, Bones::Neck, Bones::Hip] {
-                let text = format!("{:?}", bone);
-                let index = self
-                    .weapon_config()
-                    .aimbot
-                    .bones
-                    .iter()
-                    .position(|b| *b == bone);
-                if ui.selectable_label(index.is_some(), text).clicked() {
-                    if let Some(index) = index {
-                        self.weapon_config().aimbot.bones.remove(index);
-                    } else {
-                        self.weapon_config().aimbot.bones.push(bone);
-                    }
-                    self.send_config();
-                }
-            }
-
-            // Spine (all four segments as one toggle)
-            {
-                let spine_bones = [Bones::Spine1, Bones::Spine2, Bones::Spine3, Bones::Spine4];
-                let selected = spine_bones
-                    .iter()
-                    .any(|b| self.weapon_config().aimbot.bones.contains(b));
-                if ui.selectable_label(selected, "Spine").clicked() {
-                    if selected {
-                        self.weapon_config()
-                            .aimbot
-                            .bones
-                            .retain(|b| !spine_bones.contains(b));
-                    } else {
-                        for b in spine_bones {
-                            self.weapon_config().aimbot.bones.push(b);
+                // Single bones
+                for bone in [Bones::Head, Bones::Neck, Bones::Hip] {
+                    let text = format!("{:?}", bone);
+                    let index = self
+                        .weapon_config()
+                        .aimbot
+                        .bones
+                        .iter()
+                        .position(|b| *b == bone);
+                    if ui.selectable_label(index.is_some(), text).clicked() {
+                        if let Some(index) = index {
+                            self.weapon_config().aimbot.bones.remove(index);
+                        } else {
+                            self.weapon_config().aimbot.bones.push(bone);
                         }
+                        self.send_config();
                     }
-                    self.send_config();
                 }
-            }
 
-            // Merged L/R bone pairs
-            for (label, left, right) in [
-                ("Shoulder", Bones::LeftShoulder, Bones::RightShoulder),
-                ("Elbow", Bones::LeftElbow, Bones::RightElbow),
-                ("Hand", Bones::LeftHand, Bones::RightHand),
-                ("Knee", Bones::LeftKnee, Bones::RightKnee),
-                ("Foot", Bones::LeftFoot, Bones::RightFoot),
-                ("Hip", Bones::LeftHip, Bones::RightHip),
-            ] {
-                let has_left = self.weapon_config().aimbot.bones.contains(&left);
-                let has_right = self.weapon_config().aimbot.bones.contains(&right);
-                let selected = has_left || has_right;
-                if ui.selectable_label(selected, label).clicked() {
-                    if selected {
-                        self.weapon_config()
-                            .aimbot
-                            .bones
-                            .retain(|b| *b != left && *b != right);
-                    } else {
-                        self.weapon_config().aimbot.bones.push(left);
-                        self.weapon_config().aimbot.bones.push(right);
+                // Spine (all four segments as one toggle)
+                {
+                    let spine_bones = [Bones::Spine1, Bones::Spine2, Bones::Spine3, Bones::Spine4];
+                    let selected = spine_bones
+                        .iter()
+                        .any(|b| self.weapon_config().aimbot.bones.contains(b));
+                    if ui.selectable_label(selected, "Spine").clicked() {
+                        if selected {
+                            self.weapon_config()
+                                .aimbot
+                                .bones
+                                .retain(|b| !spine_bones.contains(b));
+                        } else {
+                            for b in spine_bones {
+                                self.weapon_config().aimbot.bones.push(b);
+                            }
+                        }
+                        self.send_config();
                     }
-                    self.send_config();
                 }
-            }
+
+                // Merged L/R bone pairs
+                for (label, left, right) in [
+                    ("Shoulder", Bones::LeftShoulder, Bones::RightShoulder),
+                    ("Elbow", Bones::LeftElbow, Bones::RightElbow),
+                    ("Hand", Bones::LeftHand, Bones::RightHand),
+                    ("Knee", Bones::LeftKnee, Bones::RightKnee),
+                    ("Foot", Bones::LeftFoot, Bones::RightFoot),
+                    ("Hip", Bones::LeftHip, Bones::RightHip),
+                ] {
+                    let has_left = self.weapon_config().aimbot.bones.contains(&left);
+                    let has_right = self.weapon_config().aimbot.bones.contains(&right);
+                    let selected = has_left || has_right;
+                    if ui.selectable_label(selected, label).clicked() {
+                        if selected {
+                            self.weapon_config()
+                                .aimbot
+                                .bones
+                                .retain(|b| *b != left && *b != right);
+                        } else {
+                            self.weapon_config().aimbot.bones.push(left);
+                            self.weapon_config().aimbot.bones.push(right);
+                        }
+                        self.send_config();
+                    }
+                }
+            });
         });
     }
 

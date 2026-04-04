@@ -21,6 +21,7 @@ use crate::{
 pub const LOOP_DURATION: Duration = Duration::from_micros(15_625);
 pub const SLEEP_DURATION: Duration = Duration::from_secs(5);
 pub const DEFAULT_CONFIG_NAME: &str = "deadlocked.toml";
+pub const MIN_HUMANIZATION_SPEED: f32 = 0.1;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
