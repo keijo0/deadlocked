@@ -21,6 +21,7 @@ use crate::{
 pub const LOOP_DURATION: Duration = Duration::from_micros(15_625);
 pub const SLEEP_DURATION: Duration = Duration::from_secs(5);
 pub const DEFAULT_CONFIG_NAME: &str = "deadlocked.toml";
+pub const MIN_HUMANIZATION_SPEED: f32 = 0.1;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(default)]
@@ -85,6 +86,7 @@ pub struct AimbotConfig {
     pub backtrack_ms: u32,
     pub humanization: bool,
     pub humanization_amount: f32,
+    pub humanization_speed: f32,
 }
 
 impl Default for AimbotConfig {
@@ -114,6 +116,7 @@ impl Default for AimbotConfig {
             backtrack_ms: 187,
             humanization: true,
             humanization_amount: 1.11,
+            humanization_speed: 1.0,
         }
     }
 }

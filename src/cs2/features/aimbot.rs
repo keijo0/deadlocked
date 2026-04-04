@@ -205,10 +205,17 @@ impl CS2 {
 
         let sensitivity = self.get_sensitivity() * local_player.fov_multiplier(self);
 
+        let humanization_active = config.humanization && config.humanization_amount > 0.0;
+        let speed_multiplier = if humanization_active {
+            config.humanization_speed.max(crate::config::MIN_HUMANIZATION_SPEED)
+        } else {
+            1.0
+        };
+
         let mouse_angles = vec2(
             aim_angles.y / sensitivity * 50.0,
             -aim_angles.x / sensitivity * 50.0,
-        ) / (config.smooth + 1.0).clamp(1.0, 20.0);
+        ) * speed_multiplier / (config.smooth + 1.0).clamp(1.0, 20.0);
 
         log::debug!(
             "aimbot mouse movement: {:.2}/{:.2}",

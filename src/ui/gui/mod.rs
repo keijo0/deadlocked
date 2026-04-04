@@ -46,12 +46,14 @@ impl App {
 
     fn gui(&mut self, ui: &mut Ui) {
         ui.ctx().set_pixels_per_point(self.display_scale);
+        ui.spacing_mut().item_spacing = egui::vec2(4.0, 3.0);
 
         egui::Panel::top("topbar")
             .resizable(false)
             .show_inside(ui, |ui| {
                 ui.horizontal(|ui| {
-                    ui.spacing_mut().button_padding = egui::vec2(5.0, 2.0);
+                    ui.spacing_mut().button_padding = egui::vec2(4.0, 1.0);
+                    ui.spacing_mut().item_spacing.x = 3.0;
                     for (tab, label) in [
                         (Tab::Aimbot, "Aimbot"),
                         (Tab::Player, "Player"),
