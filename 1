@@ -1,0 +1,495 @@
+warning: unused import: `GameStatus`
+ --> src/ui/gui/mod.rs:5:15
+  |
+5 |     message::{GameStatus, Message},
+  |               ^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unnecessary `unsafe` block
+   --> src/ui/imgui_backend/renderer.rs:427:25
+    |
+263 |         unsafe {
+    |         ------ because it's nested under this `unsafe` block
+...
+279 |                 offset_of!(DrawVert, pos) as i32,
+    |                 ------------------------- in this macro invocation
+...
+427 |         let field_ptr = unsafe { std::ptr::addr_of!((*base_ptr).$field) };
+    |                         ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: `#[warn(unused_unsafe)]` (part of `#[warn(unused)]`) on by default
+    = note: this warning originates in the macro `offset_of` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unnecessary `unsafe` block
+   --> src/ui/imgui_backend/renderer.rs:427:25
+    |
+263 |         unsafe {
+    |         ------ because it's nested under this `unsafe` block
+...
+289 |                 offset_of!(DrawVert, uv) as i32,
+    |                 ------------------------ in this macro invocation
+...
+427 |         let field_ptr = unsafe { std::ptr::addr_of!((*base_ptr).$field) };
+    |                         ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: this warning originates in the macro `offset_of` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unnecessary `unsafe` block
+   --> src/ui/imgui_backend/renderer.rs:427:25
+    |
+263 |         unsafe {
+    |         ------ because it's nested under this `unsafe` block
+...
+299 |                 offset_of!(DrawVert, col) as i32,
+    |                 ------------------------- in this macro invocation
+...
+427 |         let field_ptr = unsafe { std::ptr::addr_of!((*base_ptr).$field) };
+    |                         ^^^^^^ unnecessary `unsafe` block
+    |
+    = note: this warning originates in the macro `offset_of` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: function `write_app_state` is never used
+   --> src/config.rs:573:8
+    |
+573 | pub fn write_app_state(state: &AppState) {
+    |        ^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `GRENADES` is never used
+  --> src/constants.rs:21:15
+   |
+21 |     pub const GRENADES: &[Weapon] = &[
+   |               ^^^^^^^^
+
+warning: method `last_frame_time` is never used
+  --> src/performance/gpu_optimizations.rs:74:12
+   |
+37 | impl FrameTimer {
+   | --------------- method in this implementation
+...
+74 |     pub fn last_frame_time(&self) -> Duration {
+   |            ^^^^^^^^^^^^^^^
+
+warning: associated items `with_ttl` and `clear` are never used
+  --> src/performance/memory_cache.rs:44:12
+   |
+34 | impl MemoryCache {
+   | ---------------- associated items in this implementation
+...
+44 |     pub fn with_ttl(ttl: Duration) -> Self {
+   |            ^^^^^^^^
+...
+81 |     pub fn clear(&mut self) {
+   |            ^^^^^
+
+warning: field `address` is never read
+  --> src/performance/parallel_reader.rs:26:9
+   |
+24 | pub struct ReadResult {
+   |            ---------- field in this struct
+25 |     /// Address that was read (mirrors the corresponding [`ReadRequest`]).
+26 |     pub address: u64,
+   |         ^^^^^^^
+   |
+   = note: `ReadResult` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: multiple variants are never constructed
+  --> src/server_picker.rs:7:5
+   |
+ 6 | pub enum Continent {
+   |          --------- variants in this enum
+ 7 |     Africa,
+   |     ^^^^^^
+ 8 |     Asia,
+   |     ^^^^
+ 9 |     Europe,
+   |     ^^^^^^
+10 |     MiddleEast,
+   |     ^^^^^^^^^^
+11 |     NorthAmerica,
+   |     ^^^^^^^^^^^^
+12 |     Oceania,
+   |     ^^^^^^^
+13 |     SouthAmerica,
+   |     ^^^^^^^^^^^^
+14 |     Unknown,
+   |     ^^^^^^^
+   |
+   = note: `Continent` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: method `as_str` is never used
+  --> src/server_picker.rs:18:12
+   |
+17 | impl Continent {
+   | -------------- method in this implementation
+18 |     pub fn as_str(self) -> &'static str {
+   |            ^^^^^^
+
+warning: function `continent_from_name` is never used
+  --> src/server_picker.rs:41:4
+   |
+41 | fn continent_from_name(name: &str) -> Continent {
+   |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `continent_from_description` is never used
+  --> src/server_picker.rs:83:4
+   |
+83 | fn continent_from_description(desc: &str) -> Continent {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `description`, `relay_ips`, and `continent` are never read
+   --> src/server_picker.rs:233:9
+    |
+231 | pub struct ServerRegion {
+    |            ------------ fields in this struct
+232 |     pub name: String,
+233 |     pub description: String,
+    |         ^^^^^^^^^^^
+234 |     pub relay_ips: Vec<String>,
+    |         ^^^^^^^^^
+235 |     pub blocked: bool,
+236 |     pub continent: Continent,
+    |         ^^^^^^^^^
+    |
+    = note: `ServerRegion` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `fetch_servers_async` is never used
+   --> src/server_picker.rs:248:8
+    |
+248 | pub fn fetch_servers_async(out: FetchResult) {
+    |        ^^^^^^^^^^^^^^^^^^^
+
+warning: function `fetch_servers` is never used
+   --> src/server_picker.rs:255:4
+    |
+255 | fn fetch_servers() -> Result<Vec<ServerRegion>, String> {
+    |    ^^^^^^^^^^^^^
+
+warning: function `block_region` is never used
+   --> src/server_picker.rs:375:8
+    |
+375 | pub fn block_region(relay_ips: &[String]) {
+    |        ^^^^^^^^^^^^
+
+warning: function `unblock_region` is never used
+   --> src/server_picker.rs:391:8
+    |
+391 | pub fn unblock_region(relay_ips: &[String]) {
+    |        ^^^^^^^^^^^^^^
+
+warning: function `run_iptables` is never used
+   --> src/server_picker.rs:398:4
+    |
+398 | fn run_iptables(args: &[&str], ip: &str, action: &str) {
+    |    ^^^^^^^^^^^^
+
+warning: function `find_binary` is never used
+   --> src/server_picker.rs:440:4
+    |
+440 | fn find_binary(candidates: &[&str]) -> Option<std::path::PathBuf> {
+    |    ^^^^^^^^^^^
+
+warning: function `which_in_path` is never used
+   --> src/server_picker.rs:458:4
+    |
+458 | fn which_in_path(name: &str) -> bool {
+    |    ^^^^^^^^^^^^^
+
+warning: multiple fields are never read
+  --> src/ui/app.rs:45:9
+   |
+34 | pub struct App {
+   |            --- fields in this struct
+...
+45 |     pub ui_scale: f32,
+   |         ^^^^^^^^
+...
+52 |     pub new_grenade: Grenade,
+   |         ^^^^^^^^^^^
+53 |     pub current_grenade: Option<(String, usize)>,
+   |         ^^^^^^^^^^^^^^^
+...
+57 |     pub available_configs: Vec<PathBuf>,
+   |         ^^^^^^^^^^^^^^^^^
+58 |     pub new_config_name: String,
+   |         ^^^^^^^^^^^^^^^
+59 |
+60 |     pub current_tab: Tab,
+   |         ^^^^^^^^^^^
+61 |     pub aimbot_tab: AimbotTab,
+   |         ^^^^^^^^^^
+62 |     pub aimbot_weapon: Weapon,
+   |         ^^^^^^^^^^^^^
+...
+73 |     pub server_picker_loading: bool,
+   |         ^^^^^^^^^^^^^^^^^^^^^
+74 |     pub server_picker_error: Option<String>,
+   |         ^^^^^^^^^^^^^^^^^^^
+75 |     pub server_picker_result: crate::server_picker::FetchResult,
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `DragRange` is never constructed
+ --> src/ui/drag_range.rs:4:12
+  |
+4 | pub struct DragRange<'a, T: Numeric> {
+  |            ^^^^^^^^^
+
+warning: associated function `new` is never used
+  --> src/ui/drag_range.rs:10:12
+   |
+ 9 | impl<'a, T: Numeric> DragRange<'a, T> {
+   | ------------------------------------- associated function in this implementation
+10 |     pub fn new(range: &'a mut RangeInclusive<T>, clamp: RangeInclusive<T>) -> Self {
+   |            ^^^
+
+warning: function `write_grenades` is never used
+  --> src/ui/grenades.rs:56:8
+   |
+56 | pub fn write_grenades(grenades: &GrenadeList) {
+   |        ^^^^^^^^^^^^^^
+
+warning: variants `Player`, `Hud`, `Misc`, `Grenades`, and `Config` are never constructed
+  --> src/ui/gui/mod.rs:22:5
+   |
+20 | pub enum Tab {
+   |          --- variants in this enum
+21 |     Aimbot,
+22 |     Player,
+   |     ^^^^^^
+23 |     Hud,
+   |     ^^^
+24 |     Misc,
+   |     ^^^^
+25 |     Grenades,
+   |     ^^^^^^^^
+26 |     Config,
+   |     ^^^^^^
+   |
+   = note: `Tab` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: method `weapon_config` is never used
+  --> src/ui/gui/mod.rs:45:8
+   |
+29 | impl App {
+   | -------- method in this implementation
+...
+45 |     fn weapon_config(&mut self) -> &mut WeaponConfig {
+   |        ^^^^^^^^^^^^^
+
+warning: variant `Weapon` is never constructed
+  --> src/ui/gui/aimbot.rs:18:5
+   |
+16 | pub enum AimbotTab {
+   |          --------- variant in this enum
+17 |     Global,
+18 |     Weapon,
+   |     ^^^^^^
+
+warning: methods `aimbot_settings`, `aimbot_left`, and `aimbot_right` are never used
+   --> src/ui/gui/aimbot.rs:22:12
+    |
+ 21 | impl App {
+    | -------- methods in this implementation
+ 22 |     pub fn aimbot_settings(&mut self, ui: &mut Ui) {
+    |            ^^^^^^^^^^^^^^^
+...
+ 50 |     fn aimbot_left(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^
+...
+254 |     fn aimbot_right(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^^
+
+warning: method `antiafk_settings` is never used
+ --> src/ui/gui/antiafk.rs:6:12
+  |
+5 | impl App {
+  | -------- method in this implementation
+6 |     pub fn antiafk_settings(&mut self, ui: &mut Ui) {
+  |            ^^^^^^^^^^^^^^^^
+
+warning: methods `config_settings` and `config_list` are never used
+   --> src/ui/gui/config.rs:13:12
+    |
+ 12 | impl App {
+    | -------- methods in this implementation
+ 13 |     pub fn config_settings(&mut self, ui: &mut Ui) {
+    |            ^^^^^^^^^^^^^^^
+...
+110 |     fn config_list(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^
+
+warning: methods `grenade_settings`, `grenade_list`, `record_grenade`, and `edit_grenade` are never used
+   --> src/ui/gui/grenade.rs:13:12
+    |
+ 12 | impl App {
+    | -------- methods in this implementation
+ 13 |     pub fn grenade_settings(&mut self, ui: &mut Ui) {
+    |            ^^^^^^^^^^^^^^^^
+...
+ 31 |     fn grenade_list(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^^
+...
+ 71 |     fn record_grenade(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^^^^
+...
+122 |     fn edit_grenade(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^^
+
+warning: function `scroll` is never used
+ --> src/ui/gui/helpers.rs:7:8
+  |
+7 | pub fn scroll(ui: &mut Ui, id: &str, add_content: impl FnOnce(&mut Ui)) {
+  |        ^^^^^^
+
+warning: function `checkbox` is never used
+  --> src/ui/gui/helpers.rs:14:8
+   |
+14 | pub fn checkbox(ui: &mut Ui, label: &str, value: &mut bool) -> bool {
+   |        ^^^^^^^^
+
+warning: function `checkbox_hover` is never used
+  --> src/ui/gui/helpers.rs:18:8
+   |
+18 | pub fn checkbox_hover(ui: &mut Ui, label: &str, hover_text: &str, value: &mut bool) -> bool {
+   |        ^^^^^^^^^^^^^^
+
+warning: function `drag` is never used
+  --> src/ui/gui/helpers.rs:24:8
+   |
+24 | pub fn drag(ui: &mut Ui, label: &str, drag: DragValue) -> bool {
+   |        ^^^^
+
+warning: function `combo_box` is never used
+  --> src/ui/gui/helpers.rs:34:8
+   |
+34 | pub fn combo_box<T: std::fmt::Debug + strum::IntoEnumIterator + PartialEq>(
+   |        ^^^^^^^^^
+
+warning: function `toggle_buttons` is never used
+  --> src/ui/gui/helpers.rs:61:8
+   |
+61 | pub fn toggle_buttons<T: std::fmt::Debug + strum::IntoEnumIterator + PartialEq>(
+   |        ^^^^^^^^^^^^^^
+
+warning: function `color_picker` is never used
+  --> src/ui/gui/helpers.rs:69:8
+   |
+69 | pub fn color_picker(ui: &mut Ui, label: &str, color: &mut Color32) -> bool {
+   |        ^^^^^^^^^^^^
+
+warning: function `keybind` is never used
+  --> src/ui/gui/helpers.rs:97:8
+   |
+97 | pub fn keybind(ui: &mut Ui, id: &str, label: &str, keycode: &mut KeyCode) -> bool {
+   |        ^^^^^^^
+
+warning: function `keybind_list` is never used
+   --> src/ui/gui/helpers.rs:107:8
+    |
+107 | pub fn keybind_list(ui: &mut Ui, id: &str, label: &str, keycodes: &mut Vec<KeyCode>) -> bool {
+    |        ^^^^^^^^^^^^
+
+warning: struct `Keybind` is never constructed
+   --> src/ui/gui/helpers.rs:138:12
+    |
+138 | pub struct Keybind<'gui> {
+    |            ^^^^^^^
+
+warning: associated function `new` is never used
+   --> src/ui/gui/helpers.rs:144:12
+    |
+143 | impl<'gui> Keybind<'gui> {
+    | ------------------------ associated function in this implementation
+144 |     pub fn new(keycode: &'gui mut KeyCode, id: impl Hash) -> Self {
+    |            ^^^
+
+warning: methods `hud_settings`, `hud_left`, and `hud_right` are never used
+   --> src/ui/gui/hud.rs:12:12
+    |
+ 11 | impl App {
+    | -------- methods in this implementation
+ 12 |     pub fn hud_settings(&mut self, ui: &mut Ui) {
+    |            ^^^^^^^^^^^^
+...
+119 |     fn hud_left(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^
+...
+366 |     fn hud_right(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^
+
+warning: methods `player_settings`, `player_left`, and `player_right` are never used
+   --> src/ui/gui/player.rs:9:12
+    |
+  8 | impl App {
+    | -------- methods in this implementation
+  9 |     pub fn player_settings(&mut self, ui: &mut Ui) {
+    |            ^^^^^^^^^^^^^^^
+...
+ 68 |     fn player_left(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^
+...
+102 |     fn player_right(&mut self, ui: &mut Ui) {
+    |        ^^^^^^^^^^^^
+
+warning: method `misc_settings` is never used
+ --> src/ui/gui/misc.rs:8:12
+  |
+7 | impl App {
+  | -------- method in this implementation
+8 |     pub fn misc_settings(&mut self, ui: &mut Ui) {
+  |            ^^^^^^^^^^^^^
+
+warning: methods `poll_server_picker` and `server_picker_settings` are never used
+  --> src/ui/gui/server_picker.rs:10:8
+   |
+ 8 | impl App {
+   | -------- methods in this implementation
+ 9 |     /// Poll the async fetch result and move it into `self.server_regions` if ready.
+10 |     fn poll_server_picker(&mut self) {
+   |        ^^^^^^^^^^^^^^^^^^
+...
+51 |     pub fn server_picker_settings(&mut self, ui: &mut Ui) {
+   |            ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `menu` is never read
+  --> src/ui/imgui_backend/mod.rs:24:9
+   |
+17 | pub struct ImGuiContext {
+   |            ------------ field in this struct
+...
+24 |     pub menu: MainMenu,
+   |         ^^^^
+
+warning: method `destroy` is never used
+  --> src/ui/imgui_backend/mod.rs:94:12
+   |
+36 | impl ImGuiContext {
+   | ----------------- method in this implementation
+...
+94 |     pub fn destroy(&mut self, glow: &Arc<glow::Context>) {
+   |            ^^^^^^^
+
+warning: field `font_texture` is never read
+  --> src/ui/imgui_backend/renderer.rs:86:5
+   |
+82 | pub struct ImGuiRenderer {
+   |            ------------- field in this struct
+...
+86 |     font_texture: GlTexture,
+   |     ^^^^^^^^^^^^
+
+warning: method `destroy` is never used
+   --> src/ui/imgui_backend/renderer.rs:307:12
+    |
+ 93 | impl ImGuiRenderer {
+    | ------------------ method in this implementation
+...
+307 |     pub fn destroy(&mut self, gl: &Arc<glow::Context>) {
+    |            ^^^^^^^
+
+warning: `deadlocked` (bin "deadlocked") generated 51 warnings (run `cargo fix --bin "deadlocked" -p deadlocked` to apply 1 suggestion)
+    Finished `release` profile [optimized] target(s) in 0.08s
+     Running `target/release/deadlocked`
+[imgui_renderer] warning: renderer dropped without destroy() call — leaking GL objects
