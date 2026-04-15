@@ -295,54 +295,6 @@ fn idx_to_draw_mode(idx: usize) -> DrawMode {
     }
 }
 
-fn theme_to_idx(theme: &crate::ui::color::AccentStyle) -> usize {
-    use crate::ui::color::AccentStyle;
-    match theme {
-        AccentStyle::Default => 0,
-        AccentStyle::Ocean => 1,
-        AccentStyle::Sunrise => 2,
-        AccentStyle::Neon => 3,
-        AccentStyle::Retro => 4,
-        AccentStyle::Speclist => 5,
-        AccentStyle::McDonalds => 6,
-        AccentStyle::Pastel => 7,
-        AccentStyle::GreenPink => 8,
-        AccentStyle::YellowPurple => 9,
-        AccentStyle::Winter => 10,
-        AccentStyle::SoftCoral => 11,
-        AccentStyle::Fanta => 12,
-        AccentStyle::NightBlue => 13,
-        AccentStyle::NightAmber => 14,
-        AccentStyle::NightGray => 15,
-        AccentStyle::NightTerminal => 16,
-        AccentStyle::Skeet => 17,
-    }
-}
-
-fn idx_to_theme(idx: usize) -> crate::ui::color::AccentStyle {
-    use crate::ui::color::AccentStyle;
-    match idx {
-        0 => AccentStyle::Default,
-        1 => AccentStyle::Ocean,
-        2 => AccentStyle::Sunrise,
-        3 => AccentStyle::Neon,
-        4 => AccentStyle::Retro,
-        5 => AccentStyle::Speclist,
-        6 => AccentStyle::McDonalds,
-        7 => AccentStyle::Pastel,
-        8 => AccentStyle::GreenPink,
-        9 => AccentStyle::YellowPurple,
-        10 => AccentStyle::Winter,
-        11 => AccentStyle::SoftCoral,
-        12 => AccentStyle::Fanta,
-        13 => AccentStyle::NightBlue,
-        14 => AccentStyle::NightAmber,
-        15 => AccentStyle::NightGray,
-        16 => AccentStyle::NightTerminal,
-        17 => AccentStyle::Skeet,
-        _ => AccentStyle::Default,
-    }
-}
 
 impl Default for EspPanel {
     fn default() -> Self {

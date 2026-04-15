@@ -172,8 +172,9 @@ impl App {
             self.text(
                 painter,
                 &player.name,
-                pos2(tr.x + corner_size, tr.y + offset),
-                Align2::LEFT_TOP,
+                //pos2(tr.x + corner_size, tr.y),
+                pos2(center_x, tr.y),
+                Align2::CENTER_BOTTOM,
                 Some(text_color),
             );
             offset += font_size;
@@ -183,7 +184,8 @@ impl App {
             self.text(
                 painter,
                 player.health.to_string(),
-                pos2(tr.x + corner_size, tr.y + offset),
+                //pos2(tr.x + corner_size, tr.y),
+                pos2(tr.x + corner_size, tr.y),
                 Align2::LEFT_TOP,
                 Some(Self::alpha(health_color, alpha)),
             );
@@ -195,26 +197,27 @@ impl App {
                 painter,
                 player.armor.to_string(),
                 pos2(tr.x + corner_size, tr.y + offset),
-                Align2::LEFT_TOP,
+                Align2::LEFT_BOTTOM,
                 Some(Self::alpha(Color32::from_rgb(100, 149, 237), alpha)),
             );
         }
 
+        let mut weapon_y = bl.y;
         if self.config.player.weapon_icon {
             self.text(
                 painter,
                 player.weapon.to_string(),
-                pos2(bl.x + half_width, bl.y),
+                pos2(bl.x + half_width, weapon_y),
                 Align2::CENTER_TOP,
                 Some(text_color),
             );
+            weapon_y += font_size;
         }
-
         if self.config.player.tags {
             self.text_with_font(
                 painter,
                 player.weapon.to_icon(),
-                pos2(bl.x + half_width, bl.y + font_size),
+                pos2(bl.x + half_width, weapon_y),
                 Align2::CENTER_TOP,
                 Some(text_color),
                 icon_font,

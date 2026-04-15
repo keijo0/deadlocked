@@ -3,7 +3,7 @@ use rand::RngExt;
 use utils::log;
 
 use crate::{
-    config::{AimbotConfig, Config, KeyMode},
+    config::{AimbotConfig, Config, KeyMode, safe_limits},
     cs2::{
         CS2,
         entity::{player::Player, weapon_class::WeaponClass},
@@ -20,7 +20,18 @@ pub struct Aimbot {
 impl CS2 {
     pub fn aimbot(&mut self, config: &Config, mouse: &mut Mouse) {
         let hotkeys = config.aim.aimbot_hotkeys.as_slice();
-        let config = self.aimbot_config(config);
+        let mut owned;
+        let config = if config.parental_lock {
+            owned = self.aimbot_config(config).clone();
+            owned.fov           = owned.fov.min(safe_limits::FOV_MAX);
+            owned.fov_at_min_distance = owned.fov_at_min_distance.min(safe_limits::FOV_MAX);
+            owned.fov_at_max_distance = owned.fov_at_max_distance.min(safe_limits::FOV_MAX);
+            owned.smooth        = owned.smooth.max(safe_limits::SMOOTH_MIN);
+            owned.start_bullet  = owned.start_bullet.max(safe_limits::START_BULLET);
+            &owned
+        } else {
+            self.aimbot_config(config)
+        };
 
         if !config.enabled {
             return;

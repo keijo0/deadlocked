@@ -213,12 +213,12 @@ impl ColorScheme {
                 complement:    Color32::from_rgb(255, 210, 140),  // warm light peach
             },
             AccentStyle::NightBlue => Self {
-                backdrop:      Color32::from_rgb(8,   12,  20),   // very dark blue
-                base:          Color32::from_rgb(12,  18,  30),   // dark blue surface
-                highlight:     Color32::from_rgb(18,  26,  42),   // subtle blue highlight
+                backdrop:      Color32::from_rgb(20,   20,  20),   // very dark blue
+                base:          Color32::from_rgb(0,  0,  0),   // dark blue surface
+                highlight:     Color32::from_rgb(8,  26,  42),   // subtle blue highlight
                 subtext:       Color32::from_rgb(120, 140, 160),  // muted blue-gray text
-                accent:        Color32::from_rgb(100, 150, 200),  // soft blue accent
-                accent_bright: Color32::from_rgb(130, 180, 230),  // brighter blue accent
+                accent:        Color32::from_rgb(0, 0, 0),  // soft blue accent
+                accent_bright: Color32::from_rgb(13, 18, 23),  // brighter blue accent
                 complement:    Color32::from_rgb(180, 200, 220),  // light blue complement
             },
             AccentStyle::NightAmber => Self {

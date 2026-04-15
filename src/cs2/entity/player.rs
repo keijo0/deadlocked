@@ -79,13 +79,6 @@ impl Player {
         Some(entity)
     }
 
-    pub fn get_client_entity_from_handle(_process: &crate::os::process::Process, handle: u64) -> Option<u64> {
-        // For now, let's use a simpler approach that doesn't require the full CS2 context
-        // We'll need to modify this to work with the actual entity interface
-        // For testing purposes, let's return None and implement a working version later
-        log::debug!("get_client_entity_from_handle called with handle: {handle} - needs proper implementation");
-        None
-    }
 
     pub fn no_flash(&self, cs2: &CS2, flash_alpha: f32) {
         let flash_alpha = flash_alpha.clamp(0.0, 255.0);

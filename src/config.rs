@@ -30,6 +30,15 @@ pub struct Config {
     pub hud: HudConfig,
     pub misc: UnsafeConfig,
     pub accent_style: AccentStyle,
+    pub parental_lock: bool,
+}
+
+/// Hard caps enforced when `parental_lock` is enabled.
+pub mod safe_limits {
+    pub const FOV_MAX:        f32 = 2.5;
+    pub const SMOOTH_MIN:     f32 = 8.0;
+    pub const START_BULLET:   i32 = 1;
+    pub const DELAY_MIN:      u64 = 80;
 }
 
 impl Default for Config {
@@ -40,6 +49,7 @@ impl Default for Config {
             hud: HudConfig::default(),
             misc: UnsafeConfig::default(),
             accent_style: AccentStyle::Default,
+            parental_lock: true,
         }
     }
 }

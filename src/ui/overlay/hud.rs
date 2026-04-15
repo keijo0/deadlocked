@@ -5,7 +5,7 @@ use crate::{
     cs2::entity::weapon_class::WeaponClass,
     data::{Data, PenetrationCrosshairState},
     math::world_to_screen,
-    ui::{app::App, color::{AccentStyle, ColorScheme, Colors}},
+    ui::{app::App, color::{ColorScheme, Colors}},
 };
 
 /// Draw a 2px gradient accent line across the top of a panel.
@@ -78,10 +78,10 @@ impl App {
             .map(|e| e.name.as_str())
             .collect();
         let text = if local_spectators.is_empty() {
-            "Spectators:".to_string()
+            "".to_string()
         } else {
-            let names = local_spectators.join("\n  ");
-            format!("Spectators:\n  {names}")
+            let names = local_spectators.join("\n");
+            format!("{names}")
         };
         let x = if self.config.hud.spectator_list_x >= 0.0 {
             self.config.hud.spectator_list_x

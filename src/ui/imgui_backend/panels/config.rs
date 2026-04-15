@@ -152,6 +152,22 @@ impl ConfigPanel {
 
         ui.separator();
 
+        // ── Parental Lock ─────────────────────────────────────────────────
+        let lock_label = if config.parental_lock {
+            "[LOCKED] Parental Lock ON"
+        } else {
+            "Parental Lock"
+        };
+        if ui.checkbox(lock_label, &mut config.parental_lock) {
+            changed = true;
+        }
+        if config.parental_lock {
+            ui.text_colored([1.0, 0.85, 0.2, 1.0], "  FOV capped 2.5 | Smooth min 8 | Start bullet >= 1");
+            ui.text_colored([1.0, 0.85, 0.2, 1.0], "  Delay min 80ms | Autowall OFF | Magnet OFF");
+        }
+
+        ui.separator();
+
         // ── Config list ───────────────────────────────────────────────────
         let configs: Vec<std::path::PathBuf> = self.available_configs.clone();
         let mut clicked = None;

@@ -2,7 +2,6 @@
 use std::sync::Arc;
 use imgui::Key;
 use strum::IntoEnumIterator as _;
-use utils::log;
 
 use crate::{
     config::{Config, KeyMode, WeaponConfig},
@@ -33,6 +32,11 @@ impl AimbotPanel {
     /// Render the panel. Returns `true` when any setting changed.
     pub fn render(&mut self, ui: &imgui::Ui, config: &mut Config, data: &Arc<utils::sync::Mutex<Data>>) -> bool {
         let mut changed = false;
+
+        if config.parental_lock {
+            ui.text_colored([1.0, 0.85, 0.2, 1.0], "[PARENTAL LOCK] Values are capped to safe limits");
+            ui.separator();
+        }
 
         // ── Weapon selector row ───────────────────────────────────────────
         changed |= ui.checkbox("Per-Weapon Override", &mut self.weapon_tab);
@@ -101,6 +105,7 @@ impl AimbotPanel {
                 }
 
                 {
+                    let locked = config.parental_lock;
                     let wcfg = Self::wcfg(config, self.weapon_tab, &self.current_weapon);
 
                     let modes = ["Hold", "Toggle"];
@@ -111,12 +116,16 @@ impl AimbotPanel {
                     }
 
                     let mut fov = wcfg.aimbot.fov;
-                    if ui.slider_config("FOV", 0.1_f32, 360.0_f32)
+                    if ui.slider_config("FOV", 0.1_f32, 10.0_f32)
                         .display_format("%.1f°")
                         .build(&mut fov)
                     {
                         wcfg.aimbot.fov = fov;
                         changed = true;
+                    }
+                    if locked && wcfg.aimbot.fov > crate::config::safe_limits::FOV_MAX {
+                        ui.same_line();
+                        ui.text_colored([1.0, 0.5, 0.1, 1.0], format!("-> {:.1}", crate::config::safe_limits::FOV_MAX));
                     }
 
                     let mut smooth = wcfg.aimbot.smooth;
@@ -127,6 +136,10 @@ impl AimbotPanel {
                         wcfg.aimbot.smooth = smooth;
                         changed = true;
                     }
+                    if locked && wcfg.aimbot.smooth < crate::config::safe_limits::SMOOTH_MIN {
+                        ui.same_line();
+                        ui.text_colored([1.0, 0.5, 0.1, 1.0], format!("-> {:.1}", crate::config::safe_limits::SMOOTH_MIN));
+                    }
 
                     let mut start_bullet = wcfg.aimbot.start_bullet;
                     if ui.slider_config("Start Bullet", 0_i32, 10_i32)
@@ -134,6 +147,10 @@ impl AimbotPanel {
                     {
                         wcfg.aimbot.start_bullet = start_bullet;
                         changed = true;
+                    }
+                    if locked && wcfg.aimbot.start_bullet < crate::config::safe_limits::START_BULLET {
+                        ui.same_line();
+                        ui.text_colored([1.0, 0.5, 0.1, 1.0], format!("-> {}", crate::config::safe_limits::START_BULLET));
                     }
 
                     if ui.checkbox("Visibility Check", &mut wcfg.aimbot.visibility_check) {
@@ -403,7 +420,7 @@ impl AimbotPanel {
                             changed = true;
                         }
                         let mut fov = wcfg.triggerbot.magnet_fov;
-                        if ui.slider_config("  FOV", 2.0_f32, 25.0_f32)
+                        if ui.slider_config("  FOV", 1.0_f32, 2.0_f32)
                             .display_format("%.1f")
                             .build(&mut fov)
                         {
@@ -433,7 +450,7 @@ impl AimbotPanel {
                 ui.separator();
                 {
                     let wcfg = Self::wcfg(config, self.weapon_tab, &self.current_weapon);
-                    if ui.checkbox("Advanced Magnet (Ragebot)", &mut wcfg.triggerbot.advanced_magnet.enabled) {
+                    if ui.checkbox("Advanced Magnet", &mut wcfg.triggerbot.advanced_magnet.enabled) {
                         changed = true;
                     }
                     if wcfg.triggerbot.advanced_magnet.enabled {

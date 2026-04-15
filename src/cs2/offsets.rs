@@ -80,6 +80,7 @@ pub struct GameSceneNodeOffsets {
 }
 
 #[derive(Debug, Default)]
+#[allow(dead_code)]
 pub struct ModelStateOffsets {
     pub skeleton_instance: u64, // CSkeletonInstance (m_skeletonInstance)
 }
@@ -174,6 +175,7 @@ pub struct Offsets {
     pub controller: PlayerControllerOffsets,
     pub pawn: PawnOffsets,
     pub game_scene_node: GameSceneNodeOffsets,
+    #[allow(dead_code)]
     pub model_state: ModelStateOffsets,
     pub skeleton: SkeletonInstanceOffsets,
     pub molotov: MolotovOffsets,

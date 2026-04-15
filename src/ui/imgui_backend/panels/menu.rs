@@ -68,8 +68,8 @@ impl MainMenu {
         // Draw status indicator at the current (top-left) cursor position.
         let header_y = ui.cursor_pos()[1];
         let (status_text, status_color) = match game_status {
-            GameStatus::Working    => ("bo$$hook420", [0.2, 0.9, 0.2, 1.0f32]),
-            GameStatus::NotStarted => ("bo$$hook420", [0.9, 0.2, 0.2, 1.0f32]),
+            GameStatus::Working    => ("HAHAHAHHAHAHAHAHAHAHHAHAHAHAHAHAHAHAHHAHAHAHAHAH niggerhook", [0.2, 0.9, 0.2, 1.0f32]),
+            GameStatus::NotStarted => ("you know whats hotter than a femboy?", [0.9, 0.2, 0.2, 1.0f32]),
         };
         ui.text_colored(status_color, status_text);
 
@@ -102,7 +102,7 @@ impl MainMenu {
                 changed |= misc.render(ui, config);
                 tab.end();
             }
-            if let Some(tab) = ui.tab_item("Grenades") {
+            if let Some(tab) = ui.tab_item("Nades") {
                 ui.separator();
                 grenades.render(ui, data);
                 tab.end();

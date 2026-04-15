@@ -4,7 +4,7 @@ use glam::Vec2;
 use rand::rng;
 
 use crate::{
-    config::{Config, KeyMode},
+    config::{Config, KeyMode, safe_limits},
     cs2::{
         CS2,
         bones::Bones,
@@ -106,7 +106,7 @@ impl CS2 {
             }
         }
 
-        let autowall_on = config.aim.autowall_enabled && match autowall_mode {
+        let autowall_on = !config.parental_lock && config.aim.autowall_enabled && match autowall_mode {
             KeyMode::Hold => self.input.is_key_pressed(autowall_hotkey),
             KeyMode::Toggle => self.trigger.autowall_active,
         };
@@ -207,13 +207,23 @@ impl CS2 {
 
         // When magnet is active only shoot if the crosshair landed on the enemy
         // naturally — magnet pulls aim there, the crosshair entity check confirms it.
-        if tb.magnet_enabled && !found_via_crosshair {
+        if tb.magnet_enabled && !config.parental_lock && !found_via_crosshair {
             return;
         }
 
-        // Shot scheduling
-        let mean = (*tb.delay.start() + *tb.delay.end()) as f32 / 2.0;
-        let std_dev = (*tb.delay.end() - *tb.delay.start()) as f32 / 2.0;
+        // Shot scheduling — enforce minimum delay under parental lock
+        let delay_start = if config.parental_lock {
+            tb.delay.start().max(&safe_limits::DELAY_MIN)
+        } else {
+            tb.delay.start()
+        };
+        let delay_end = if config.parental_lock {
+            tb.delay.end().max(&safe_limits::DELAY_MIN)
+        } else {
+            tb.delay.end()
+        };
+        let mean = (*delay_start + *delay_end) as f32 / 2.0;
+        let std_dev = (*delay_end - *delay_start) as f32 / 2.0;
 
         let normal = rand_distr::Normal::new(mean, std_dev).unwrap();
         use rand_distr::Distribution as _;
