@@ -438,10 +438,6 @@ impl App {
             }
         }
 
-        if self.config.hud.keybind_ping {
-            let ping = data.ping.max(0);
-            entries.push((format!("Ping: {}ms", ping), "[info]".into()));
-        }
 
         entries
     }
@@ -1085,10 +1081,11 @@ impl App {
             format!("{year}-{month:02}-{day:02} {hours:02}:{minutes:02}")
         };
 
+        let ping_str = format!("{}ms", data.ping.max(0));
         let display_text = if !self.watermark_text.is_empty() {
-            format!("bosshook420 | {} | {}", datetime_str, self.watermark_text)
+            format!("bosshook420 | {} | {} | {}", datetime_str, ping_str, self.watermark_text)
         } else {
-            format!("bosshook420 | {}", datetime_str)
+            format!("bosshook420 | {} | {}", datetime_str, ping_str)
         };
 
         let scheme = ColorScheme::for_style(&self.config.accent_style);
@@ -1117,34 +1114,35 @@ impl App {
             10.0
         };
 
-        let [br, bg, bb, _] = scheme.base.to_srgba_unmultiplied();
+        // Background — same highlight color as spectator list header
+        let [hr, hg, hb, _] = scheme.highlight.to_srgba_unmultiplied();
         painter.rect(
             egui::Rect::from_min_size(
                 pos2(panel_x, panel_y),
                 egui::vec2(panel_width, row_height),
             ),
             egui::CornerRadius::same(2),
-            Color32::from_rgba_unmultiplied(br, bg, bb, 210),
-            Stroke::new(1.0, scheme.accent),
+            Color32::from_rgba_unmultiplied(hr, hg, hb, 220),
+            Stroke::new(1.0, scheme.subtext),
             egui::StrokeKind::Middle,
         );
 
-        // Accent left bar
-        painter.rect_filled(
-            egui::Rect::from_min_size(
-                pos2(panel_x, panel_y),
-                egui::vec2(3.0 * scale, row_height),
-            ),
-            egui::CornerRadius { nw: 2, ne: 0, sw: 2, se: 0 },
+        // Gradient accent line across the top
+        draw_gradient_accent_line(
+            painter,
+            panel_x, panel_y,
+            panel_width, 2.0,
             scheme.accent,
+            scheme.accent_bright,
+            scheme.complement,
         );
 
         self.text_with_font(
             painter,
             &display_text,
-            pos2(panel_x + 3.0 * scale + padding, panel_y + row_height / 2.0),
+            pos2(panel_x + padding, panel_y + row_height / 2.0),
             Align2::LEFT_CENTER,
-            Some(self.config.hud.watermark_color),
+            Some(scheme.accent),
             FontId::proportional(font_size),
         );
     }

@@ -9,6 +9,7 @@ use crate::{
 pub struct Input {
     previous_state: DynamicBitSet,
     current_state: DynamicBitSet,
+    any_key_down: bool,
 }
 
 impl Input {
@@ -18,6 +19,7 @@ impl Input {
         Self {
             previous_state: DynamicBitSet::new(),
             current_state: DynamicBitSet::new(),
+            any_key_down: false,
         }
     }
 
@@ -27,12 +29,18 @@ impl Input {
             Self::MAX_KEY / 8,
         );
 
+        self.any_key_down = state.iter().any(|&b| b != 0);
         std::mem::swap(&mut self.previous_state, &mut self.current_state);
         self.current_state = DynamicBitSet::from(state);
     }
 
     pub fn is_key_pressed(&self, key: KeyCode) -> bool {
         self.current_state.get(key.usize()).unwrap_or(false)
+    }
+
+    /// Returns `true` if any key or button is currently held down.
+    pub fn any_pressed(&self) -> bool {
+        self.any_key_down
     }
 
     #[allow(dead_code)]

@@ -64,7 +64,7 @@ impl CS2 {
         let strict_occlusion = aimbot_config.smoke_wall_check;
         let is_custom_mode = self.is_custom_game_mode();
 
-        let mut best_fov = 3.0;
+        let mut best_fov = 30.0;
         let eye_position = local_player.eye_position(self);
 
         if self.target.player.is_none() {
@@ -118,7 +118,7 @@ impl CS2 {
         };
 
         // update target angle
-        let mut smallest_fov = 3.0;
+        let mut smallest_fov = 30.0;
         let mut found_bone = false;
         for bone in Bones::iter() {
             let bone_position = target.bone_position(self, bone.u64());

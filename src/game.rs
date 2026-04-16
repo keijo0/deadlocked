@@ -1,7 +1,7 @@
 use std::{
-    sync::Arc,
+    sync::{Arc, atomic::{AtomicU64, Ordering}},
     thread::{self, sleep},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use utils::{channel::Channel, log, sync::Mutex};
@@ -31,6 +31,7 @@ pub struct GameManager {
     mouse: Mouse,
     game: CS2,
     antiafk_config: Arc<Mutex<AntiAfk>>,
+    last_input_secs: Arc<AtomicU64>,
 }
 
 impl GameManager {
@@ -44,6 +45,8 @@ impl GameManager {
             }
         };
 
+        let last_input_secs = Arc::new(AtomicU64::new(0));
+
         let mut game = Self {
             channel,
             data,
@@ -51,6 +54,7 @@ impl GameManager {
             mouse,
             game: CS2::new(),
             antiafk_config: Arc::new(Mutex::new(AntiAfk::default())),
+            last_input_secs: last_input_secs.clone(),
         };
 
         let config_path = CONFIG_PATH.join(DEFAULT_CONFIG_NAME);
@@ -61,7 +65,7 @@ impl GameManager {
 
         let antiafk_config = game.antiafk_config.clone();
         thread::spawn(move || {
-            run_antiafk_loop(antiafk_config);
+            run_antiafk_loop(antiafk_config, last_input_secs);
         });
 
         game
@@ -97,6 +101,13 @@ impl GameManager {
                 if previous_status == GameStatus::NotStarted {
                     self.send_game_message(Message::GameStatus(GameStatus::Working));
                     previous_status = GameStatus::Working;
+                }
+                if self.game.any_input_pressed() {
+                    let now_secs = SystemTime::now()
+                        .duration_since(UNIX_EPOCH)
+                        .map(|d| d.as_secs())
+                        .unwrap_or(0);
+                    self.last_input_secs.store(now_secs, Ordering::Relaxed);
                 }
                 self.game.run(&self.config, &mut self.mouse);
                 let now = Instant::now();
@@ -136,7 +147,7 @@ impl GameManager {
     }
 }
 
-fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
+fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>, last_input_secs: Arc<AtomicU64>) {
     let mut last_action = Instant::now();
     // Seed with current time for non-deterministic output
     let mut rng_state: u64 = std::time::SystemTime::now()
@@ -158,18 +169,38 @@ fn run_antiafk_loop(config: Arc<Mutex<AntiAfk>>) {
         let interval_max = cfg.interval_max.max(cfg.interval_min).max(1.0) as u64;
         drop(cfg);
 
+        // Skip if user was active in the last interval_min seconds
+        let now_secs = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        let last_input = last_input_secs.load(Ordering::Relaxed);
+        let secs_idle = now_secs.saturating_sub(last_input);
+        if secs_idle < interval_min {
+            last_action = Instant::now();
+            sleep(Duration::from_millis(500));
+            continue;
+        }
+
         if last_action.elapsed() >= Duration::from_secs(interval_min) {
             let dx = lcg_rand(&mut rng_state, 11) as i32 - 5;
             let dy = lcg_rand(&mut rng_state, 11) as i32 - 5;
-
             match std::process::Command::new("xdotool")
                 .args(["mousemove_relative", "--", &dx.to_string(), &dy.to_string()])
                 .spawn()
             {
-                Ok(mut child) => {
-                    let _ = child.wait();
-                }
-                Err(err) => log::warn!("anti-afk: failed to run xdotool: {err}"),
+                Ok(mut child) => { let _ = child.wait(); }
+                Err(err) => log::warn!("anti-afk: failed mouse move: {err}"),
+            }
+
+            const WASD: &[&str] = &["w", "a", "s", "d"];
+            let key = WASD[lcg_rand(&mut rng_state, WASD.len() as u64) as usize];
+            match std::process::Command::new("xdotool")
+                .args(["key", key])
+                .spawn()
+            {
+                Ok(mut child) => { let _ = child.wait(); }
+                Err(err) => log::warn!("anti-afk: failed key press: {err}"),
             }
 
             let sleep_secs = interval_min

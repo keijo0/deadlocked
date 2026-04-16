@@ -216,7 +216,6 @@ impl HudPanel {
                         ("  Backtrack",        &mut h.keybind_backtrack as *mut bool),
                         ("  ESP",              &mut h.keybind_esp as *mut bool),
                         ("  Server Picker",    &mut h.keybind_server_picker as *mut bool),
-                        ("  Ping",             &mut h.keybind_ping as *mut bool),
                     ] {
                         if ui.checkbox(label, unsafe { &mut *val }) {
                             changed = true;

@@ -72,7 +72,7 @@ impl EspPanel {
         changed |= ui.checkbox("Armor Text", &mut p.armor_text);
         changed |= ui.checkbox("Player Name", &mut p.player_name);
         changed |= ui.checkbox("Weapon Name", &mut p.weapon_icon);
-        changed |= ui.checkbox("Show Tags", &mut p.tags);
+        changed |= ui.checkbox("Weapon Icons", &mut p.tags);
 
         ui.separator();
 

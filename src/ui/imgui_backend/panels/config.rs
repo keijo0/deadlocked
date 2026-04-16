@@ -3,7 +3,7 @@ use strum::IntoEnumIterator as _;
 
 use crate::{
     config::{
-        AppState, BASE_PATH, CONFIG_PATH, available_configs, delete_config, parse_config,
+        AppState, BASE_PATH, CONFIG_PATH, available_configs, parse_config,
         read_app_state, write_app_state, write_config, Config, DEFAULT_CONFIG_NAME,
     },
     ui::color::AccentStyle,
@@ -152,18 +152,9 @@ impl ConfigPanel {
 
         ui.separator();
 
-        // ── Parental Lock ─────────────────────────────────────────────────
-        let lock_label = if config.parental_lock {
-            "[LOCKED] Parental Lock ON"
-        } else {
-            "Parental Lock"
-        };
-        if ui.checkbox(lock_label, &mut config.parental_lock) {
-            changed = true;
-        }
+        // ── Parental Lock (read-only indicator) ──────────────────────────
         if config.parental_lock {
-            ui.text_colored([1.0, 0.85, 0.2, 1.0], "  FOV capped 2.5 | Smooth min 8 | Start bullet >= 1");
-            ui.text_colored([1.0, 0.85, 0.2, 1.0], "  Delay min 80ms | Autowall OFF | Magnet OFF");
+            ui.text_colored([1.0, 0.85, 0.2, 1.0], "[PARENTAL LOCK]");
         }
 
         ui.separator();
@@ -171,7 +162,6 @@ impl ConfigPanel {
         // ── Config list ───────────────────────────────────────────────────
         let configs: Vec<std::path::PathBuf> = self.available_configs.clone();
         let mut clicked = None;
-        let mut to_delete = None;
 
         for cfg_path in &configs {
             let label = cfg_path
@@ -183,27 +173,12 @@ impl ConfigPanel {
             if ui.selectable_config(label).selected(selected).build() {
                 clicked = Some(cfg_path.clone());
             }
-            ui.same_line();
-            let del_label = format!("X##{}", label);
-            if ui.small_button(&del_label) {
-                to_delete = Some(cfg_path.clone());
-            }
         }
 
         if let Some(path) = clicked {
             *config = parse_config(&path);
             self.current_config = path;
             changed = true;
-        }
-
-        if let Some(path) = to_delete {
-            delete_config(&path);
-            self.available_configs = available_configs();
-            if !self.available_configs.is_empty() {
-                self.current_config = self.available_configs[0].clone();
-                *config = parse_config(&self.current_config);
-                changed = true;
-            }
         }
 
         changed

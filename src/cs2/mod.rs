@@ -73,6 +73,12 @@ pub struct CS2 {
     advanced_magnet: crate::cs2::features::advanced_magnet::AdvancedMagnet,
 }
 
+impl CS2 {
+    pub fn any_input_pressed(&self) -> bool {
+        self.input.any_pressed()
+    }
+}
+
 impl Game for CS2 {
     fn is_valid(&self) -> bool {
         self.is_valid && self.process.is_valid()
