@@ -248,7 +248,7 @@ impl Default for TriggerbotConfig {
     fn default() -> Self {
         Self {
             enable_override: false,
-            enabled: false,
+            enabled: true,
             delay: 100..=200,
             shot_duration: 200,
             mode: KeyMode::Hold,
@@ -646,6 +646,7 @@ pub fn write_config(config: &Config, path: &Path) {
     let _ = std::fs::write(path, out);
 }
 
+#[allow(dead_code)]
 pub fn delete_config(path: &Path) {
     if !path.exists() {
         return;

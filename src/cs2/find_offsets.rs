@@ -28,8 +28,17 @@ impl CS2 {
         };
         offsets.interface.resource = resource_offset;
 
-        offsets.interface.entity =
-            process.read::<u64>(offsets.interface.resource + 0x50) + 0x10;
+        // Entity system lives at GameResourceServiceClientV0 + 0x50.
+        // The entity list (bucket pointer array) is at entity_system + 0x10.
+        let entity_system: u64 = process.read(offsets.interface.resource + 0x50);
+        let is_valid_ptr = |p: u64| p > 0x10000 && p >> 48 == 0;
+        // Try offsets 0x10 first (canonical), then neighbours as fallback.
+        let entity_list_off = [0x10u64, 0x08, 0x18, 0x20]
+            .iter()
+            .find(|&&off| is_valid_ptr(process.read::<u64>(entity_system + off)))
+            .copied()
+            .unwrap_or(0x10);
+        offsets.interface.entity = entity_system + entity_list_off;
 
         let Some(cvar_address) = process
             .get_interface_offset(offsets.library.tier0, "VEngineCvar0")
@@ -48,10 +57,11 @@ impl CS2 {
 
         // Each tuple: (pattern, rel32_byte_offset, instruction_size)
         let local_player_candidates: &[(&str, u64, u64)] = &[
-            ("48 8B 05 ? ? ? ? 48 85 C0 74", 3, 7),    // MOV RAX,[RIP+x]; TEST RAX,RAX; JZ
-            ("48 8B 05 ? ? ? ? 41 89 BE",    3, 7),    // a2x Apr-2026 pattern
-            ("48 83 3D ? ? ? ? 00 0F 95 C0 C3", 3, 8), // CMP [RIP+x],0; SETNZ AL; RET
-            ("48 8B 05 ? ? ? ? 48 85 C0 0F 84", 3, 7), // MOV + long JZ
+            ("48 83 3D ? ? ? ? 00 0F 95 C0 C3", 3, 8), // original deadlocked: CMP [RIP+x],0; SETNZ AL; RET
+            ("48 8B 05 ? ? ? ? 41 89 BE",       3, 7), // a2x Apr-2026: MOV RAX,[localCtrl]; MOV [R14+x],EDI
+            ("48 83 3D ? ? ? ? 00 74 ? 48 8B",  3, 8), // CMP [RIP+x],0; JZ ?; MOV
+            ("48 8B 05 ? ? ? ? 48 85 C0 0F 84", 3, 7), // MOV + long JZ variant
+            ("48 8B 05 ? ? ? ? 48 85 C0 74 ? 8B 81", 3, 7), // MOV + null-check + field access
         ];
         let Some((lp_addr, lp_rel, lp_sz)) = local_player_candidates.iter().find_map(
             |&(pat, rel, sz)| process.scan(pat, offsets.library.client).map(|a| (a, rel, sz)),
@@ -66,32 +76,36 @@ impl CS2 {
                 + 0x14,
         ) as u64;
 
-        let view_matrix_candidates: &[(&str, u64, u64)] = &[
-            ("48 8D 0D ? ? ? ? 48 C1 E0 06", 3, 7),   // a2x Apr-2026: LEA RCX,[RIP+x]; SHL RAX,6
-            ("C6 83 ? ? 00 00 01 4C 8D 05",  10, 4),  // old: MOV byte+LEA R8,[RIP+x]
+        let view_matrix_candidates: &[&str] = &[
+            "C6 83 ? ? 00 00 01 4C 8D 05",  // original deadlocked: MOV byte;LEA R8,[RIP+x]
+            "48 8D 0D ? ? ? ? 48 C1 E0 06",   // a2x Apr-2026: LEA RCX,[RIP+x]; SHL RAX,6
+            "48 8D 05 ? ? ? ? 48 89 45 ? 48 8D 45", // LEA RAX,[RIP+x]
         ];
-        let Some((vm_addr, vm_rel, vm_sz)) = view_matrix_candidates.iter().find_map(
-            |&(pat, rel, sz)| process.scan(pat, offsets.library.client).map(|a| (a, rel, sz)),
+        let Some(vm_addr) = view_matrix_candidates.iter().find_map(
+            |&pat| process.scan(pat, offsets.library.client),
         ) else {
             log::warn!("could not find view matrix offset");
             return None;
         };
-        offsets.direct.view_matrix = process.get_relative_address(vm_addr, vm_rel, vm_sz);
+        offsets.direct.view_matrix = process.get_relative_address(vm_addr + 0x0A, 0x0, 0x04);
+        log::warn!("[sdl_diag] view_matrix=0x{:X} (scanned_addr=0x{:X})", offsets.direct.view_matrix, vm_addr);
 
-        let Some(sdl_window) = process
+        let Some(sdl_fn) = process
             .get_module_export(offsets.library.sdl, "SDL_GetKeyboardFocus")
         else {
             log::warn!("could not find sdl window offset");
             return None;
         };
-        let sdl_window = process.get_relative_address(sdl_window, 0x02, 0x06);
-        let sdl_window = process.read(sdl_window);
-        offsets.direct.sdl_window = process.get_relative_address(sdl_window, 0x03, 0x07);
+        let step1 = process.get_relative_address(sdl_fn, 0x02, 0x06);
+        let step2: u64 = process.read(step1);
+        offsets.direct.sdl_window = process.get_relative_address(step2, 0x03, 0x07);
+        log::warn!("[sdl_diag] sdl_fn=0x{:X} step1=0x{:X} step2=0x{:X} sdl_window_off=0x{:X}",
+            sdl_fn, step1, step2, offsets.direct.sdl_window);
 
         // xref "lobby_mapveto"
         let gv_candidates: &[(&str, u64, u64)] = &[
+            ("48 8D 05 ? ? ? ? 48 8B 00 8B 48 ? E9",       3, 7), // original deadlocked: LEA RAX,[RIP+x]
             ("48 89 15 ? ? ? ? 48 89 42",                  3, 7), // a2x Apr-2026: MOV [RIP+x],RDX
-            ("48 8D 05 ? ? ? ? 48 8B 00 8B 48 ? E9",       3, 7), // old: LEA RAX,[RIP+x]
         ];
         let Some((gv_addr, gv_rel, gv_sz)) = gv_candidates.iter().find_map(
             |&(pat, rel, sz)| process.scan(pat, offsets.library.client).map(|a| (a, rel, sz)),
@@ -151,7 +165,7 @@ impl CS2 {
         offsets.pawn.eye_angles = client.get("C_CSPlayerPawn", "m_angEyeAngles")?;
         offsets.pawn.velocity = client.get("C_BaseEntity", "m_vecAbsVelocity")?;
         offsets.pawn.flags = client.get("C_BaseEntity", "m_fFlags")?;
-        offsets.pawn.aim_punch_cache = client.get("C_CSPlayerPawn", "m_aimPunchTickFraction")? + 8;
+        offsets.pawn.aim_punch_services = client.get("C_CSPlayerPawn", "m_pAimPunchServices")?;
         offsets.pawn.shots_fired = client.get("C_CSPlayerPawn", "m_iShotsFired")?;
         offsets.pawn.view_angles = client.get("C_BasePlayerPawn", "v_angle")?;
         offsets.pawn.spotted_state = client.get("C_CSPlayerPawn", "m_entitySpottedState")?;

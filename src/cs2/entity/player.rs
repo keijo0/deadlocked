@@ -33,7 +33,7 @@ impl Player {
     }
 
     pub fn local_player(cs2: &CS2) -> Option<Self> {
-        let controller = cs2.process.read(cs2.offsets.direct.local_player);
+        let controller: u64 = cs2.process.read(cs2.offsets.direct.local_player);
         if controller == 0 {
             return None;
         }
@@ -89,11 +89,9 @@ impl Player {
     }
 
     fn get_entity(cs2: &CS2, handle: i32) -> Option<u64> {
-        // upper bits = something irrelevant
         let index = handle as u64 & 0x7FFF;
         let bucket_index = index >> 9;
         let index_in_bucket = index & 0x1FF;
-        // what the fuck is this doing?
         let bucket_ptr: u64 = cs2
             .process
             .read(cs2.offsets.interface.entity + 8 * bucket_index);
@@ -101,7 +99,6 @@ impl Player {
             return None;
         }
 
-        // bit-fuckery, why is this needed exactly?
         let entity = cs2
             .process
             .read(bucket_ptr + cs2.offsets.entity_identity.size as u64 * index_in_bucket);
@@ -188,7 +185,10 @@ impl Player {
         let handle: i32 = cs2
             .process
             .read(weapon_services + cs2.offsets.weapon_services.active_weapon);
-        let index = (handle as u64) & 0xFFF;
+        if handle == -1 {
+            return None;
+        }
+        let index = (handle as u64) & 0x7FFF;
         Self::get_client_entity(cs2, index)
     }
 
@@ -380,21 +380,14 @@ impl Player {
     }
 
     pub fn aim_punch(&self, cs2: &CS2) -> Vec2 {
-        let length: u64 = cs2
+        let services: u64 = cs2
             .process
-            .read(self.pawn + cs2.offsets.pawn.aim_punch_cache);
-        if length < 1 {
+            .read(self.pawn + cs2.offsets.pawn.aim_punch_services);
+        if services == 0 {
             return Vec2::ZERO;
         }
-
-        let data_address: u64 = cs2
-            .process
-            .read(self.pawn + cs2.offsets.pawn.aim_punch_cache + 0x08);
-        if data_address > u64::MAX - 50000 {
-            return Vec2::ZERO;
-        }
-
-        cs2.process.read(data_address + (length - 1) * 12)
+        // m_predictableBaseAngle: QAngle at offset 0x50 — read first two floats (pitch, yaw)
+        cs2.process.read(services + 0x50)
     }
 
     pub fn has_defuser(&self, cs2: &CS2) -> bool {

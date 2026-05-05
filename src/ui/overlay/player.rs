@@ -1,5 +1,6 @@
 use egui::{Align2, Color32, FontId, Painter, Stroke, pos2};
 use glam::vec3;
+use utils::log;
 
 use crate::{
     config::{BoxMode, DrawMode},
@@ -11,6 +12,17 @@ use crate::{
 
 impl App {
     pub fn draw_player(&self, painter: &Painter, player: &PlayerData, data: &Data) {
+        {
+            use std::sync::atomic::{AtomicU8, Ordering};
+            static DP: AtomicU8 = AtomicU8::new(0);
+            if DP.swap(1, Ordering::Relaxed) == 0 {
+                let mid = (player.position + player.head) / 2.0;
+                let top = mid + glam::vec3(0.0, 0.0, (player.head.z - player.position.z + 24.0) / 2.0);
+                let s = crate::math::world_to_screen(&top, data);
+                log::warn!("[draw_diag] pos={:?} head={:?} win={}x{} screen={:?}",
+                    player.position, player.head, data.window_size.x, data.window_size.y, s);
+            }
+        }
         if self.config.player.visible_only && !player.visible {
             return;
         }

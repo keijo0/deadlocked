@@ -70,6 +70,15 @@ pub fn world_to_screen(position: &Vec3, data: &crate::data::Data) -> Option<egui
         + vm.w_axis.z * position.z
         + vm.w_axis.w;
 
+    {
+        use std::sync::atomic::{AtomicU8, Ordering};
+        static WS: AtomicU8 = AtomicU8::new(0);
+        if WS.swap(1, Ordering::Relaxed) == 0 {
+            utils::log::warn!("[w2s_diag] pos={:?} w={} win={}x{} vm_w={:?}",
+                position, w, data.window_size.x, data.window_size.y, vm.w_axis);
+        }
+    }
+
     if w < 0.0001 {
         return None;
     }

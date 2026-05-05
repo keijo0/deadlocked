@@ -1,5 +1,6 @@
 use egui::{Align2, Color32, Painter, Pos2, Shape, Stroke, Ui, pos2};
 use glam::{Vec3, vec3};
+use utils::log;
 
 use crate::{
     config::{AimbotConfig, TriggerbotConfig},
@@ -39,6 +40,17 @@ impl App {
         self.update_trails();
         self.poll_media_info();
         self.poll_watermark_info();
+        // If SDL window detection failed, use the egui screen rect as fallback.
+        {
+            let screen = ui.ctx().screen_rect();
+            if screen.width() > 100.0 && screen.height() > 100.0 {
+                let mut data = self.data.lock();
+                if data.window_size.x < 100.0 || data.window_size.y < 100.0 {
+                    data.window_size = glam::Vec2::new(screen.width(), screen.height());
+                    data.window_position = glam::Vec2::ZERO;
+                }
+            }
+        }
         let (window_position, window_size) = {
             let data = self.data.lock();
             (data.window_position, data.window_size)
@@ -47,6 +59,14 @@ impl App {
         let data = &self.data.lock();
         self.overlay_debug(&painter, data);
 
+        {
+            use std::sync::atomic::{AtomicU8, Ordering};
+            static OV: AtomicU8 = AtomicU8::new(0);
+            if OV.swap(1, Ordering::Relaxed) == 0 {
+                log::warn!("[ov_diag] esp_active={} players={} win={}x{}",
+                    data.esp_active, data.players.len(), data.window_size.x, data.window_size.y);
+            }
+        }
         for player in &data.players {
             if data.esp_active {
                 self.draw_player(&painter, player, data);

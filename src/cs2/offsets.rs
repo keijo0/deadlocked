@@ -22,7 +22,6 @@ pub struct DirectOffsets {
     pub button_state: u64,
     pub view_matrix: u64,
     pub sdl_window: u64,
-    pub planted_c4: u64,
     pub global_vars: u64,
 }
 
@@ -55,7 +54,7 @@ pub struct PawnOffsets {
     pub eye_angles: u64,          // Vec3 (m_angEyeAngles)
     pub velocity: u64,            // Vec3 (m_vecAbsVelocity)
     pub flags: u64,               // i32 (m_fFlags)
-    pub aim_punch_cache: u64,     // Vector<Vec3> (m_aimPunchCache)
+    pub aim_punch_services: u64,  // CCSPlayer_AimPunchServices* (m_pAimPunchServices)
     pub shots_fired: u64,         // i32 (m_iShotsFired)
     pub view_angles: u64,         // Vec2 (v_angle)
     pub spotted_state: u64,       // SpottedState (m_entitySpottedState)

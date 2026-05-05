@@ -229,6 +229,26 @@ impl Game for CS2 {
         data.entities.clear();
 
         let sdl_window = self.process.read::<u64>(self.offsets.direct.sdl_window);
+        {
+            use std::sync::atomic::{AtomicU8, Ordering};
+            static SD: AtomicU8 = AtomicU8::new(0);
+            if SD.swap(1, Ordering::Relaxed) == 0 {
+                // Dump SDL chain: try several offsets to find position/size
+                let r10: u64 = self.process.read(self.offsets.direct.sdl_window);
+                let r08: u32 = self.process.read(self.offsets.direct.sdl_window.wrapping_sub(8) as u64);
+                log::warn!("[sdl_rt] off=0x{:X} ptr=0x{:X}", self.offsets.direct.sdl_window, r10);
+                if r10 != 0 {
+                    let v08: u64 = self.process.read(r10 + 0x08);
+                    let v10: u64 = self.process.read(r10 + 0x10);
+                    let v18: u64 = self.process.read(r10 + 0x18);
+                    let v20: u64 = self.process.read(r10 + 0x20);
+                    let v28: u64 = self.process.read(r10 + 0x28);
+                    log::warn!("[sdl_rt] ptr+8=0x{:X} +10=0x{:X} +18=0x{:X} +20=0x{:X} +28=0x{:X}",
+                        v08, v10, v18, v20, v28);
+                }
+                drop(r08);
+            }
+        }
         if sdl_window == 0 {
             data.window_position = Vec2::ZERO;
             data.window_size = Vec2::ONE;
@@ -246,6 +266,17 @@ impl Game for CS2 {
             return;
         };
         let local_team = local_player.team(self);
+        {
+            use std::sync::atomic::{AtomicU8, Ordering};
+            static D2: AtomicU8 = AtomicU8::new(0);
+            if D2.swap(1, Ordering::Relaxed) == 0 {
+                let vm: Mat4 = self.process.read(self.offsets.direct.view_matrix);
+                log::warn!("[d2] team={} cached={} vm=({:.3},{:.3},{:.3},{:.3}) win={}x{}",
+                    local_team, self.players.len(),
+                    vm.x_axis.x, vm.x_axis.y, vm.x_axis.z, vm.x_axis.w,
+                    data.window_size.x, data.window_size.y);
+            }
+        }
         if local_team != TEAM_T && local_team != TEAM_CT {
             data.weapon = Weapon::default();
             data.in_game = false;
@@ -381,6 +412,14 @@ impl Game for CS2 {
             }
         };
         data.esp_active = self.esp_enabled(config);
+        {
+            use std::sync::atomic::{AtomicU8, Ordering};
+            static ESP: AtomicU8 = AtomicU8::new(0);
+            if ESP.swap(1, Ordering::Relaxed) == 0 {
+                log::warn!("[esp_diag] player_enabled={} esp_active={} esp_enabled={}",
+                    config.player.enabled, self.esp.active, data.esp_active);
+            }
+        }
 
         data.view_matrix = self.process.read::<Mat4>(self.offsets.direct.view_matrix);
         data.view_angles = local_player.view_angles(self);
